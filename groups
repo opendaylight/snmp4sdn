@@ -1,4 +1,6 @@
 # UUID                                  	Group Name
 #
 bd35bc91487fb189854f84972d327c52b4e37c1d	Non-Interactive snmp4sdn users
+global:Anonymous-Users                  	Anonymous Users
+global:Registered-Users                 	Registered Users
 ldap:cn=gerrit-snmp4sdn-committers,ou=Groups,dc=opendaylight,dc=org	ldap/gerrit-snmp4sdn-committers
