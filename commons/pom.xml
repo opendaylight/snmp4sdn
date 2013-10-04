@@ -149,4 +149,9 @@
     </pluginManagement>
   </build>
 
+  <modules>
+    <module>checkstyle</module>
+    <module>parent</module>
+    <module>snmp4sdn</module>
+  </modules>
 </project>

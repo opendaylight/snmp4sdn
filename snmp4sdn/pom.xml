@@ -3,9 +3,9 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
-    <artifactId>commons</artifactId><!--s4s: old value:commons.snmp4sdn-->
+    <artifactId>commons.snmp4sdn</artifactId><!--s4s: old value:commons-->
     <version>0.0.1-SNAPSHOT</version>
-    <relativePath>../commons</relativePath>
+    <relativePath>../commons/snmp4sdn</relativePath><!--s4s: old value:../commons-->
   </parent>
 
   <!--<groupId>org.opendaylight.snmp4sdn</groupId>--><!--s4s:new add-->
