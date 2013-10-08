@@ -46,4 +46,10 @@
       <url>${sitedeploy}</url>
     </site>
   </distributionManagement>
+
+  <modules>
+    <module>../checkstyle</module>
+    <module>../snmp4sdn</module>
+    <module>../integrationtest</module>
+  </modules>
 </project>
