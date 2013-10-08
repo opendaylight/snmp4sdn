@@ -5,7 +5,7 @@
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.snmp4sdn</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <relativePath>../commons/snmp4sdn</relativePath>
+    <relativePath>../snmp4sdn</relativePath>
   </parent>
   <scm>
     <connection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</connection>

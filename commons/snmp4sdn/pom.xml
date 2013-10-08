@@ -5,7 +5,6 @@
   <prerequisites>
     <maven>3.0</maven>
   </prerequisites>
-  <groupId>org.opendaylight.snmp4sdn</groupId>
   <artifactId>commons.snmp4sdn</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
