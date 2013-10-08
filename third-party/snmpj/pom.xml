@@ -1,7 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.opendaylight.snmp4sdn</groupId>
+  <parent>
+    <groupId>org.opendaylight.snmp4sdn</groupId>
+    <artifactId>commons.snmp4sdn</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <relativePath>../commons/snmp4sdn</relativePath>
+  </parent>
+  
   <artifactId>org.snmpj</artifactId>
   <version>1.4.2-SNAPSHOT</version>
   <name>SNMP Java</name>
