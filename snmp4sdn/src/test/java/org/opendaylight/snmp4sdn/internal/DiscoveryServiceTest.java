@@ -79,7 +79,7 @@ public class DiscoveryServiceTest {
         controller.handleNewConnection(sid);
      }
 
-    @Test
+    //@Test
     public void testDiscoveryService() throws UnknownHostException {
         controller = new Controller();
         controller.init_forTest();
