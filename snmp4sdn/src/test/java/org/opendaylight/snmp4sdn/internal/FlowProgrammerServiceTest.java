@@ -98,7 +98,7 @@ public class FlowProgrammerServiceTest {
         controller.handleNewConnection(sid);
      }
 
-    @Test
+    //@Test    
     public void testReadWriteFlowsBySNMP() throws UnknownHostException {
         System.out.println("----------------testReadWriteFlowsBySNMP Begin...-------------");
 
