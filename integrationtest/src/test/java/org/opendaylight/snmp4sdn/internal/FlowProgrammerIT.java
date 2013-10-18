@@ -47,6 +47,7 @@ import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
+import org.opendaylight.controller.sal.flowprogrammer.IPluginInFlowProgrammerService;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
 import org.opendaylight.controller.sal.reader.FlowOnNode;
@@ -61,7 +62,7 @@ import org.slf4j.LoggerFactory;
 import org.opendaylight.snmp4sdn.core.internal.Controller;
 import org.opendaylight.snmp4sdn.core.internal.SwitchHandler;
 import org.opendaylight.snmp4sdn.internal.DiscoveryService;
-import org.opendaylight.snmp4sdn.eth.util.HexString;
+import org.opendaylight.snmp4sdn.protocol.util.HexString;
 
 
 
@@ -180,16 +181,37 @@ public class FlowProgrammerIT {
         assertNotNull(this.flowprogrammer);//s4s
     }
 
+    public Node createSNMPNode(Long switchId) {
+        try {
+            return new Node("SNMP", switchId);
+        } catch (ConstructionException e1) {
+            log.error("",e1);
+            return null;
+        }
+    }
+
+    public NodeConnector createNodeConnector(Object portId, Node node) {
+        if (node.getType().equals("SNMP")) {
+            try {
+                return new NodeConnector("SNMP",
+                        (Short) portId, node);
+            } catch (ConstructionException e1) {
+                log.error("",e1);
+                return null;
+            }
+        }
+        return null;
+    }
+
     @Test
     public void testAddandReadFlow() throws UnknownHostException {
-        assertNotNull(this.hosttracker);
-
         // create a node
         Node node = createSNMPNode(new Long(1000l));//cmeth.  here 1000l: not 10001, is 1000L
         NodeConnector iport = createNodeConnector( (short) 1, node);
         NodeConnector oport = createNodeConnector( (short) 30, node);//cmeth
         byte srcMac[] = { (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01 };
         byte dstMac[] = { (byte) 0x70, (byte) 0x72, (byte) 0xCF, (byte) 0x2B, (byte) 0x95, (byte) 0x24 };//cmeth. in 10 base format = 112.114.207.43.149.36
+        short ethertype = EtherTypes.IPv4.shortValue();
 
         // create a SAL Flow
         Match match = new Match();
@@ -198,11 +220,10 @@ public class FlowProgrammerIT {
         match.setField(MatchType.DL_TYPE, ethertype);
         Assert.assertTrue(match.isIPv4());
         List<Action> actions = new ArrayList<Action>();
-        List<Action> actions = new ArrayList<Action>();
 
         //test AddFlow
         Flow flow = new Flow(match, actions);
-        flowprogrammer.addFlow(node, aFlow);
+        Status st = flowprogrammer.addFlow(node, flow);
         Assert.assertTrue(st.isSuccess());
 
         /* //s4s marked
