@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DiscoveryServiceTest {
+    Controller controller = null;
     protected static final Logger logger = LoggerFactory.getLogger(DiscoveryServiceTest.class);
 
     public static void main(String args[]) {
@@ -65,10 +66,23 @@ public class DiscoveryServiceTest {
         }
     }
 
+    private void addNewSwitch(Node node, SwitchHandler sw, String chassisID, String switchIP){
+        Long sid = HexString.toLong(chassisID);
+
+        node = createSNMPNode(sid);
+
+        sw = new SwitchHandler(controller, "");
+        sw.setId(sid);
+        sw.start();
+
+        controller.getCmethUtil().addEntry(sid, switchIP);
+        controller.handleNewConnection(sid);
+     }
+
     @Test
     public void testDiscoveryService() throws UnknownHostException {
-        Controller controller = new Controller();
-        controller.init();
+        controller = new Controller();
+        controller.init_forTest();
         controller.start();
 
         Node node[] = new Node[5];
@@ -79,18 +93,27 @@ public class DiscoveryServiceTest {
         node[2] = NodeCreator.createESNode(HexString.toLong("90:94:E4:23:0B:00"));
         node[3] = NodeCreator.createESNode(HexString.toLong("90:94:E4:23:0B:20"));
         node[4] = NodeCreator.createESNode(HexString.toLong("90:94:E4:23:0A:E0"));*/
+
+
+        /*//replace this part by addNewSwitch()
         node[0] = createSNMPNode(HexString.toLong("00:00:00:00:00:01"));
         node[1] = createSNMPNode(HexString.toLong("00:00:00:00:00:02"));
         node[2] = createSNMPNode(HexString.toLong("00:00:00:00:00:03"));
         node[3] = createSNMPNode(HexString.toLong("00:00:00:00:00:04"));
         node[4] = createSNMPNode(HexString.toLong("00:00:00:00:00:05"));
         for(int i = 0; i < 5; i++){
-            sw[i] = new SwitchHandler(controller, null, "");
+            sw[i] = new SwitchHandler(controller, "");
             sw[i].setId((Long)(node[i].getID()));
             sw[i].start();
 
             controller.addSwitch(sw[i]);
-        }
+        }*/
+        addNewSwitch(node[0], sw[0], "00:00:00:00:00:01", "10.217.0.31");
+        addNewSwitch(node[1], sw[1], "00:00:00:00:00:02", "10.217.0.32");
+        addNewSwitch(node[2], sw[2], "00:00:00:00:00:03", "10.217.0.33");
+        addNewSwitch(node[3], sw[3], "00:00:00:00:00:04", "10.217.0.34");
+        addNewSwitch(node[4], sw[4], "00:00:00:00:00:05", "10.217.0.35");
+
 
         DiscoveryService ds = new DiscoveryService();
         ds.setController(controller);
