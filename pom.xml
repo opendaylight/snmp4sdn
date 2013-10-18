@@ -29,6 +29,5 @@
     <module>snmp4sdn</module>
     <!--<module>integrationtest</module> //no need to add. run by eclipse junit test-->
     <module>third-party/snmpj</module>
-    <module>model</module>
   </modules>
 </project>
