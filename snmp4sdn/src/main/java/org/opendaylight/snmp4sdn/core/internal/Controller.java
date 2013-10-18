@@ -34,6 +34,8 @@ import org.opendaylight.snmp4sdn.core.IController;
 import org.opendaylight.snmp4sdn.core.IMessageListener;
 import org.opendaylight.snmp4sdn.core.ISwitch;
 import org.opendaylight.snmp4sdn.core.ISwitchStateListener;
+import org.opendaylight.snmp4sdn.internal.SNMPListener;
+import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
 import org.opendaylight.snmp4sdn.protocol.SNMPMessage;
 import org.opendaylight.snmp4sdn.protocol.SNMPType;
 import org.openflow.util.HexString;
@@ -45,7 +47,8 @@ import org.slf4j.LoggerFactory;
 public class Controller implements IController, CommandProvider {
     private static final Logger logger = LoggerFactory
             .getLogger(Controller.class);
-    private ControllerIO controllerIO;
+    //private ControllerIO controllerIO;//s4s: is replaced by snmpListener
+    private SNMPListener snmpListener;//s4s:to replace controllerIO
     private Thread switchEventThread;
     private ConcurrentHashMap<Long, ISwitch> switches;
     private BlockingQueue<SwitchEvent> switchEvents;
@@ -55,6 +58,7 @@ public class Controller implements IController, CommandProvider {
     private ISwitchStateListener switchStateListener;
     private AtomicInteger switchInstanceNumber;
     private final int MAXQUEUESIZE = 50000;
+    public CmethUtil cmethUtil;//s4s add
 
     /*
      * this thread monitors the switchEvents queue for new incoming events from
@@ -63,7 +67,7 @@ public class Controller implements IController, CommandProvider {
     private class EventHandler implements Runnable {
         @Override
         public void run() {
-
+            System.out.println("EventHandler start running");
             while (true) {
                 try {
                     SwitchEvent ev = switchEvents.take();
@@ -71,6 +75,7 @@ public class Controller implements IController, CommandProvider {
                     ISwitch sw = ev.getSwitch();
                     switch (eType) {
                     case SWITCH_ADD:
+                        System.out.println("enter Controller.EventHandler.SWITCH_ADD...");
                         Long sid = sw.getId();
                         ISwitch existingSwitch = switches.get(sid);
                         if (existingSwitch != null) {
@@ -88,16 +93,23 @@ public class Controller implements IController, CommandProvider {
                         disconnectSwitch(sw);
                         break;
                     case SWITCH_MESSAGE:
+                        System.out.println("1");
                         SNMPMessage msg = ev.getMsg();
+                        System.out.println("2");
                         if (msg != null) {
+                            System.out.println("3");
                             IMessageListener listener = messageListeners
                                     .get(msg.getType());
+                                    System.out.println("4");
                             if (listener != null) {
+                                System.out.println("5");
                                 listener.receive(sw, msg);
                             }
+                            System.out.println("6");
                         }
                         break;
                     default:
+                        System.out.println("Unknown switch event");
                         logger.error("Unknown switch event {}", eType.ordinal());
                     }
                 } catch (InterruptedException e) {
@@ -121,6 +133,15 @@ public class Controller implements IController, CommandProvider {
         this.messageListeners = new ConcurrentHashMap<SNMPType, IMessageListener>();
         this.switchStateListener = null;
         this.switchInstanceNumber = new AtomicInteger(0);
+        registerWithOSGIConsole();//s4s. in unit test, doesn't need. but need it when system test
+    }
+    public void init_forTest() {//s4s. same content as init(), but the last line is canceled
+        logger.debug("Initializing!");
+        this.switches = new ConcurrentHashMap<Long, ISwitch>();
+        this.switchEvents = new LinkedBlockingQueue<SwitchEvent>(MAXQUEUESIZE);
+        this.messageListeners = new ConcurrentHashMap<SNMPType, IMessageListener>();
+        this.switchStateListener = null;
+        this.switchInstanceNumber = new AtomicInteger(0);
         //registerWithOSGIConsole();//s4s. in unit test, doesn't need. but need it when system test
     }
 
@@ -131,6 +152,7 @@ public class Controller implements IController, CommandProvider {
      */
     public void start() {
         logger.debug("Starting!");
+        System.out.println("Starting!");
         /*
          * start a thread to handle event coming from the switch
          */
@@ -144,6 +166,10 @@ public class Controller implements IController, CommandProvider {
         } catch (IOException ex) {
             logger.error("Caught exception while starting:", ex);
         }*///s4s. ControllerIO.java shows it just in charge of holding the socket. We don't need socket
+        //s4s
+        cmethUtil = new CmethUtil();
+        snmpListener = new SNMPListener(this, cmethUtil);
+        snmpListener.start();
     }
 
     /**
@@ -160,11 +186,11 @@ public class Controller implements IController, CommandProvider {
             it.remove();
         }
         switchEventThread.interrupt();
-        try {
+        /*try {
             controllerIO.shutDown();
         } catch (IOException ex) {
             logger.error("Caught exception while stopping:", ex);
-        }
+        }*///s4s: controllerIO is abandonded in s4s
     }
 
     /**
@@ -215,28 +241,30 @@ public class Controller implements IController, CommandProvider {
         }
     }
 
-    public void handleNewConnection(Selector selector,
-            SelectionKey serverSelectionKey) {
-        ServerSocketChannel ssc = (ServerSocketChannel) serverSelectionKey
-                .channel();
-        SocketChannel sc = null;
-        try {
-            sc = ssc.accept();
+    public void handleNewConnection(/*Selector selector,//s4s:OF's need
+            SelectionKey serverSelectionKey*/Long sid) {//s4s: in OF, this function is called in ControllerIO, now in s4s it is called in SNMPListener
+        //ServerSocketChannel ssc = (ServerSocketChannel) serverSelectionKey.channel();//s4s:OF's need
+        //SocketChannel sc = null;//s4s:OF's need
+        //try {//s4s: OF's
+            //sc = ssc.accept();//s4s:OF's need
             // create new switch
             int i = this.switchInstanceNumber.addAndGet(1);
             String instanceName = "SwitchHandler-" + i;
-            SwitchHandler switchHandler = new SwitchHandler(this, sc,
+            SwitchHandler switchHandler = new SwitchHandler(this, /*sc,*///s4s:OF's need
                     instanceName);
+            switchHandler.setId(sid);
             switchHandler.start();
-            if (sc.isConnected()) {
+            /*if (sc.isConnected()) {
                 logger.info("Switch:{} is connected to the Controller",
                         sc.socket().getRemoteSocketAddress()
                         .toString().split("/")[1]);
-            }
+            }*///s4s:OF's 
+            logger.info("Switch:{} is connected to the Controller");
 
-        } catch (IOException e) {
+            takeSwitchEventAdd(switchHandler);//s4s: in OF, this function is called in SwitchHandler, now we put it here directly
+        /*} catch (IOException e) {
             return;
-        }
+        }*///s4s: OF's
     }
 
     private void disconnectSwitch(ISwitch sw) {
@@ -290,10 +318,14 @@ public class Controller implements IController, CommandProvider {
     }
 
     public void takeSwitchEventMsg(ISwitch sw, SNMPMessage msg) {
+        System.out.println("a");
         if (messageListeners.get(msg.getType()) != null) {
+            System.out.println("b");
             SwitchEvent ev = new SwitchEvent(
                     SwitchEvent.SwitchEventType.SWITCH_MESSAGE, sw, msg);
+            System.out.println("c");
             addSwitchEvent(ev);
+            System.out.println("d");
         }
     }
 
@@ -383,5 +415,9 @@ public class Controller implements IController, CommandProvider {
     public void addSwitch(ISwitch sw){//s4s add. just for convenient for test, actually we don't need this function
         Long sid = sw.getId();
         switches.put(sid, sw);
+    }
+
+    public CmethUtil getCmethUtil(){//s4s add. just for convenient for test, actually we don't need this function
+        return cmethUtil;
     }
 }

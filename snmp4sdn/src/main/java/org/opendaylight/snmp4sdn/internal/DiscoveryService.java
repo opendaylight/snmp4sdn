@@ -37,6 +37,7 @@ import org.opendaylight.snmp4sdn.IInventoryProvider;
 import org.opendaylight.snmp4sdn.IInventoryShimExternalListener;
 import org.opendaylight.snmp4sdn.core.IController;
 import org.opendaylight.snmp4sdn.core.ISwitch;
+import org.opendaylight.snmp4sdn.core.internal.Controller;
 //import org.openflow.protocol.OFPhysicalPort;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -66,6 +67,7 @@ import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
 
 import org.opendaylight.snmp4sdn.internal.SNMPHandler;//snmp4sdn add
+import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
 import org.opendaylight.snmp4sdn.protocol.util.HexString;//snmp4sdn add
 import org.opendaylight.snmp4sdn.internal.util.CmethUtil;//snmp4sdn add
 
@@ -76,6 +78,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         CommandProvider {
     private static Logger logger = LoggerFactory.getLogger(DiscoveryService.class);
     private IController controller = null;
+    private CmethUtil cmethUtil = null;
     private IDiscoveryListener discoveryListener = null;
     private IInventoryProvider inventoryProvider = null;
     private IDataPacketMux iDataPacketMux = null;
@@ -1375,6 +1378,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
 
     void setController(IController s) {
         this.controller = s;
+        cmethUtil = ((Controller)controller).cmethUtil;//s4s add
     }
 
     void unsetController(IController s) {
@@ -1645,7 +1649,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         Map<Long, ISwitch> switches = controller.getSwitches();
         for(ISwitch sw : switches.values()){
             Long switchID = sw.getId();
-            SNMPHandler snmp = new SNMPHandler();
+            SNMPHandler snmp = new SNMPHandler(cmethUtil);
             String localChassis = snmp.getLLDPChassis(switchID);
             if(localChassis == null) continue;//this switch is not in the switches' ip list
             switches_ID2Chassis.put(switchID, localChassis);
@@ -1695,7 +1699,8 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
             Long localSwitchID = entryS.getKey();
             String localChassis = switches_ID2Chassis.get(localSwitchID);
             Map<Short, String> localPortIDs = entryS.getValue();
-            System.out.println("processing local switch (id: ip = " + CmethUtil.getIpAddr(localSwitchID) + ", chassis: " + localChassis + ", number of ports which connect another remote switch: " + localPortIDs.size() + ")");
+            String localIP = cmethUtil.getIpAddr(localSwitchID);
+            System.out.println("processing local switch (id: ip = " + localIP + ", chassis: " + localChassis + ", number of ports which connect another remote switch: " + localPortIDs.size() + ")");
             for(Map.Entry<Short, String> entryP : localPortIDs.entrySet()){
                 Short localPortNum = entryP.getKey();
                 String remoteChassis = entryP.getValue();
@@ -1704,13 +1709,14 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
                 if(remotePortIDs == null)
                     continue;
                 String localPortID = localPortIDsOnSwitches.get(localSwitchID).get(localPortNum);
-                System.out.println("\tchecking local port (num: " + localPortNum + ", id: " +localPortID + ", remote switch's chassis: " + remoteChassis + "), so look into this remote switch (ip: " + CmethUtil.getIpAddr(remoteSwitchID) + ")");
+                String remoteIP = cmethUtil.getIpAddr(remoteSwitchID);
+                System.out.println("\tchecking local port (num: " + localPortNum + ", id: " +localPortID + ", remote switch's chassis: " + remoteChassis + "), so look into this remote switch (ip: " + remoteIP + ")");
                 for(Map.Entry<Short, String> entryR : remotePortIDs.entrySet()){
                     //System.out.println("...compare with remote port of id: " + entryR.getValue());
                     if(entryR.getValue().compareToIgnoreCase(localPortID) == 0){
                         Short remotePortNum = entryR.getKey();
 
-                        System.out.println("\t\tAdd edge: local (ip " + CmethUtil.getIpAddr(localSwitchID) + ", port " + localPortNum + ") --> remote (ip " + CmethUtil.getIpAddr(remoteSwitchID) + ", port " + remotePortNum +")");
+                        System.out.println("\t\tAdd edge: local (ip " + localIP + ", port " + localPortNum + ") --> remote (ip " + remoteIP + ", port " + remotePortNum +")");
                         myAddEdge(localSwitchID, localPortNum, remoteSwitchID, remotePortNum);
 
                         break;
@@ -1736,7 +1742,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
             //create dest node and nodeconnector
             Node destNode = new Node("SNMP", destSwitchID);
             NodeConnector destNodeConnector = NodeConnectorCreator.createNodeConnector(
-                                                                    "SNMP", srcPortNum, srcNode);
+                                                                    "SNMP", destPortNum, destNode);
             if (srcNodeConnector != null) {
                 srcNode = srcNodeConnector.getNode();
             }

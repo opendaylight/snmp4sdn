@@ -22,6 +22,7 @@ import java.nio.channels.SocketChannel;
 import java.util.List;
 
 import org.opendaylight.snmp4sdn.core.IMessageReadWrite;
+import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
 import org.openflow.protocol.OFMessage;
 import org.openflow.protocol.factory.BasicFactory;
 import org.slf4j.Logger;
@@ -48,8 +49,9 @@ public class MessageReadWriteService implements IMessageReadWrite {
     private ByteBuffer inBuffer;
     private ByteBuffer outBuffer;
     private BasicFactory factory;
+    private CmethUtil cmethUtil;//s4s add
 
-    public MessageReadWriteService(SocketChannel socket, Selector selector)
+    public MessageReadWriteService(SocketChannel socket, Selector selector, CmethUtil cmethUtil)
             throws ClosedChannelException {
         this.socket = socket;
         this.selector = selector;
@@ -58,6 +60,7 @@ public class MessageReadWriteService implements IMessageReadWrite {
         this.outBuffer = ByteBuffer.allocateDirect(bufferSize);
         /*this.clientSelectionKey = this.socket.register(this.selector,
                 SelectionKey.OP_READ);*///s4s. we don't need socket
+        this.cmethUtil = cmethUtil;
     }
 
     /**
@@ -99,7 +102,7 @@ public class MessageReadWriteService implements IMessageReadWrite {
         }*/
         if(msg.getType() == SNMPType.FLOW_MOD){
             SNMPFlowMod msgMod = (SNMPFlowMod)msg;
-            new SNMPHandler().sendBySNMP(msgMod.getFlow(), msgMod.getCommand(), msg.getTargetSwitchID());
+            new SNMPHandler(cmethUtil).sendBySNMP(msgMod.getFlow(), msgMod.getCommand(), msg.getTargetSwitchID());
         }
         else{
             System.out.println("This SNMPMessage type doens't support (or not yet done): SNMPType " + msg.getType());

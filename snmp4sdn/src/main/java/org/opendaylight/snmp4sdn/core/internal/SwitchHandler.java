@@ -42,6 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.opendaylight.snmp4sdn.core.IController;
 import org.opendaylight.snmp4sdn.core.ISwitch;
 import org.opendaylight.snmp4sdn.core.IMessageReadWrite;
+import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
 import org.openflow.protocol.OFBarrierReply;
 import org.openflow.protocol.OFBarrierRequest;
 import org.openflow.protocol.OFEchoReply;
@@ -70,6 +71,7 @@ import org.opendaylight.snmp4sdn.protocol.SNMPMessage;
 import org.openflow.protocol.OFMessage;
 import org.opendaylight.snmp4sdn.protocol.SNMPFlowMod;
 import org.opendaylight.snmp4sdn.protocol.SNMPPortStatus;
+import org.opendaylight.snmp4sdn.protocol.SNMPPhysicalPort.SNMPPortFeatures;
 
 
 public class SwitchHandler implements ISwitch {
@@ -82,6 +84,7 @@ public class SwitchHandler implements ISwitch {
     private String instanceName;
     private ISwitch thisISwitch;
     private IController core;
+    private CmethUtil cmethUtil;
     private Long sid;
     private Integer buffers;
     private Integer capabilities;
@@ -123,7 +126,7 @@ public class SwitchHandler implements ISwitch {
         }
     }
 
-    public SwitchHandler(Controller core, SocketChannel sc, String name) {
+    public SwitchHandler(Controller core, /*SocketChannel sc,*/ String name) {//s4s: OF needs to use sc (socket)
         this.instanceName = name;
         this.thisISwitch = this;
         this.sid = (long) 0;
@@ -132,7 +135,8 @@ public class SwitchHandler implements ISwitch {
         this.tables = (byte) 0;
         this.actions = (int) 0;
         this.core = core;
-        this.socket = sc;
+        this.cmethUtil = core.cmethUtil;//s4s add
+        //this.socket = sc;
         this.factory = new BasicFactory();
         this.connectedDate = new Date();
         this.lastMsgReceivedTimeStamp = connectedDate.getTime();
@@ -568,12 +572,13 @@ public class SwitchHandler implements ISwitch {
         */
     }
 
-    private void updatePhysicalPort(SNMPPhysicalPort port) {
+    //private void updatePhysicalPort(SNMPPhysicalPort port) {//s4s: in OF's code, this function is one of a sequence of steps, but in s4s the steps are much easier so this function is called directly by the SNMPListener, so this function is changed to be "public"
+    public void updatePhysicalPort(SNMPPhysicalPort port) {
         Short portNumber = port.getPortNumber();
         physicalPorts.put(portNumber, port);
         portBandwidth
-                .put(portNumber,
-                        port.getCurrentFeatures()
+                .put(portNumber, SNMPPortFeatures.SNMPPPF_10MB_FD.getValue()
+                        /*port.getCurrentFeatures()
                                 & (OFPortFeatures.OFPPF_10MB_FD.getValue()
                                         | OFPortFeatures.OFPPF_10MB_HD
                                                 .getValue()
@@ -585,10 +590,11 @@ public class SwitchHandler implements ISwitch {
                                                 .getValue()
                                         | OFPortFeatures.OFPPF_1GB_HD
                                                 .getValue() | OFPortFeatures.OFPPF_10GB_FD
-                                            .getValue()));
+                                            .getValue())*/);//s4s: s4s's code is not yet written here...use "SNMPPortFeatures.SNMPPPF_10MB_FD" temperarily
     }
 
-    private void deletePhysicalPort(SNMPPhysicalPort port) {
+    //private void deletePhysicalPort(SNMPPhysicalPort port) {//s4s: in OF's code, this function is one of a sequence of steps, but in s4s the steps are much easier so this function is called directly by the SNMPListener, so this function is changed to be "public"
+    public void deletePhysicalPort(SNMPPhysicalPort port) {
         Short portNumber = port.getPortNumber();
         physicalPorts.remove(portNumber);
         portBandwidth.remove(portNumber);
@@ -604,8 +610,8 @@ public class SwitchHandler implements ISwitch {
         try {
             return ("Switch:"
                     + socket.socket().getRemoteSocketAddress().toString().split("/")[1]
-                    + " SWID:" + (isOperational() ? HexString
-                    .toHexString(this.sid) : "unknown"));
+                    + " SWID:" + (isOperational() ? /*HexString
+                    .toHexString(this.sid)*/this.sid : "unknown"));
         } catch (Exception e) {
             return (isOperational() ? HexString.toHexString(this.sid)
                     : "unknown");
@@ -858,7 +864,7 @@ public class SwitchHandler implements ISwitch {
         return ((str != null) && (str.trim().equalsIgnoreCase("true"))) ? new SecureMessageReadWriteService(
                 socket, selector) : new MessageReadWriteService(socket,
                 selector);*///s4s. can ethernet switch support secure channel?
-        return new MessageReadWriteService(socket, selector);//s4s add
+        return new MessageReadWriteService(socket, selector, cmethUtil);//s4s add
     }
 
     /**

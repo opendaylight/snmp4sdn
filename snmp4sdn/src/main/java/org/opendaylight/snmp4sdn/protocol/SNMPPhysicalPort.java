@@ -18,6 +18,12 @@ public class SNMPPhysicalPort implements Cloneable, Serializable {
     public static int MINIMUM_LENGTH = 48;
     public static int SNMPP_ETH_ALEN = 6;
 
+    public SNMPPhysicalPort(short portNumber){//s4s: OF doen't have this function, we write it here for convinience assigning the values of the data such as port number
+        this.portNumber = portNumber;
+    }
+    public SNMPPhysicalPort(){
+    }
+
     public enum SNMPPortConfig {
         SNMPPPC_PORT_DOWN    (1 << 0),
         SNMPPPC_NO_STP       (1 << 1),

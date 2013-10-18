@@ -38,6 +38,7 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.NodeTable;
 import org.opendaylight.controller.sal.core.UpdateType;
+import org.opendaylight.snmp4sdn.core.internal.Controller;
 import org.opendaylight.controller.sal.flowprogrammer.Flow;
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchType;
@@ -52,6 +53,7 @@ import org.opendaylight.controller.sal.utils.NodeTableCreator;
 import org.openflow.protocol.statistics.OFTableStatistics;
 
 import org.opendaylight.snmp4sdn.internal.SNMPHandler;//s4s add
+import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
 
 /**
  * Read Service shim layer which is in charge of filtering the flow statistics
@@ -68,9 +70,11 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
     private IOFStatisticsManager statsMgr = null;
     private Map<String, Set<NodeConnector>> containerToNc;
     private Map<String, Set<NodeTable>> containerToNt;
+    private CmethUtil cmethUtil = null;//s4s add
 
     public void setController(IController core) {
         this.controller = core;
+        this.cmethUtil = ((Controller)core).cmethUtil;//s4s add
     }
 
     public void unsetController(IController core) {
@@ -151,7 +155,7 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
 
         return (filteredList == null || filteredList.isEmpty()) ? null
                 : filteredList.get(0);*///OF's code
-        return (new SNMPHandler().readFlowRequest(flow, node));//s4s add
+        return (new SNMPHandler(cmethUtil)).readFlowRequest(flow, node);//s4s add
     }
 
     @Override
@@ -172,7 +176,7 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
                 node, flowOnNodeList);
 
         return (filteredList == null) ? null : filteredList;*///OF's code
-        return (new SNMPHandler().readAllFlowRequest(node));//s4s add
+        return (new SNMPHandler(cmethUtil)).readAllFlowRequest(node);//s4s add
     }
 
     @Override
