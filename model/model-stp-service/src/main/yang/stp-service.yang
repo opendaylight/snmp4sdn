@@ -1,0 +1,51 @@
+module snmp4sdn-stp {
+    namespace "urn:opendaylight:snmp4sdn:config:stp";
+    prefix cstp;
+    
+    import opendaylight-inventory {prefix inv;}
+    
+    revision "2013-10-15" {
+        description "Initial revision of STP model";
+    }
+    
+    rpc enable-stp-global {
+	    input {
+	        leaf node {
+	            type inv:node-ref;
+	        }    
+	    }
+	}
+	
+	rpc enable-stp-port {
+	    input {
+	        leaf node {
+	            type inv:node-ref;
+	        }
+	        
+	        leaf node-connector {
+	            type inv:node-connector-ref;
+	        }    
+	    }
+	}
+	
+    rpc disable-stp-global {
+	    input {
+	        leaf node {
+	            type inv:node-ref;
+	        }    
+	    }
+	}
+    
+    rpc disable-stp-port {
+	    input {
+	        leaf node {
+	            type inv:node-ref;
+	        }
+	        
+	        leaf node-connector {
+	            type inv:node-connector-ref;
+	        }    
+	    }
+	}
+}
+    

@@ -1,0 +1,40 @@
+module example {
+    namespace "urn:opendaylight:example";
+    prefix ex;
+
+    import yang-ext {prefix ext;}    
+    import ietf-inet-types {prefix inet;}
+    import opendaylight-inventory {prefix inv;}
+    import opendaylight-port-types {prefix port;}
+    import opendaylight-flow-types {prefix types;}
+    
+    revision "2013-10-15" {
+        description "Initial revision of Inventory model";
+    }
+
+    grouping feature {
+        leaf support-state {
+            type inv:support-type;
+        }
+    }
+    
+    grouping table {
+
+
+    }
+
+    grouping flow-node {
+        container tables {
+            uses feature;
+            list table {
+                uses table;
+            }
+        }
+    }
+
+    augment "/inv:nodes" {
+        ext:augment-identifier "flow-capable-node";
+        uses flow-node;
+    }
+    
+}
