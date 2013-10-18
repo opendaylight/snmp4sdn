@@ -14,6 +14,7 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+
   <scm>
     <connection>scm:git:https://git.opendaylight.org/gerrit/p/snmp4sdn.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</developerConnection>
