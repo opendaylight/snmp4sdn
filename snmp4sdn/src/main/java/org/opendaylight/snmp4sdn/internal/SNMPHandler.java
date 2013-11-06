@@ -306,7 +306,6 @@ public class SNMPHandler{
         //Use snmp to write to switch fwd table...
 
         String community = "private";
-        //Long sw_macAddr = (Long) node.getID();//move to this function's input parameter...
         try{
             //1. open snmp communication interface
             String switchIP = cmethUtil.getIpAddr(sw_macAddr);

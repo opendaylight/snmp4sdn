@@ -93,19 +93,13 @@ public class Controller implements IController, CommandProvider {
                         disconnectSwitch(sw);
                         break;
                     case SWITCH_MESSAGE:
-                        System.out.println("1");
                         SNMPMessage msg = ev.getMsg();
-                        System.out.println("2");
                         if (msg != null) {
-                            System.out.println("3");
                             IMessageListener listener = messageListeners
                                     .get(msg.getType());
-                                    System.out.println("4");
                             if (listener != null) {
-                                System.out.println("5");
                                 listener.receive(sw, msg);
                             }
-                            System.out.println("6");
                         }
                         break;
                     default:
@@ -318,14 +312,10 @@ public class Controller implements IController, CommandProvider {
     }
 
     public void takeSwitchEventMsg(ISwitch sw, SNMPMessage msg) {
-        System.out.println("a");
         if (messageListeners.get(msg.getType()) != null) {
-            System.out.println("b");
             SwitchEvent ev = new SwitchEvent(
                     SwitchEvent.SwitchEventType.SWITCH_MESSAGE, sw, msg);
-            System.out.println("c");
             addSwitchEvent(ev);
-            System.out.println("d");
         }
     }
 

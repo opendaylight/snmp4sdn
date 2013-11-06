@@ -948,9 +948,7 @@ public class SwitchHandler implements ISwitch {
         Boolean status = false;
         Future<Object> submit = executor.submit(worker);
         try {
-            System.out.println("aaaaaaaaaaa");
             result = submit.get(responseTimerValue, TimeUnit.MILLISECONDS);
-            System.out.println("0000000000");
             messageWaitingDone.remove(xid);
             if (result == null) {
                 // if result is null, then it means the switch can handle this
