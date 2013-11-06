@@ -152,7 +152,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             // Set the protocolPluginType property which will be used
             // by SAL
-            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), Node.NodeIDType.OPENFLOW);
+            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), /*Node.NodeIDType.OPENFLOW*/"SNMP");
             c.setInterface(IPluginInDataPacketService.class.getName(), props);
             // Hook the services coming in from SAL, as optional in
             // case SAL is not yet there, could happen
@@ -176,7 +176,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             // Set the protocolPluginType property which will be used
             // by SAL
-            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), Node.NodeIDType.OPENFLOW);
+            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), /*Node.NodeIDType.OPENFLOW*/"SNMP");
             c.setInterface(IPluginInReadService.class.getName(), props);
             c.add(createServiceDependency()
                     .setService(IPluginReadServiceFilter.class)
@@ -189,7 +189,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             // Set the protocolPluginType property which will be used
             // by SAL
-            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), Node.NodeIDType.OPENFLOW);
+            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), /*Node.NodeIDType.OPENFLOW*/"SNMP");
             c.setInterface(IFlowProgrammerNotifier.class.getName(), props);
 
             c.add(createContainerServiceDependency(containerName)
@@ -242,7 +242,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             // Set the protocolPluginType property which will be used
             // by SAL
-            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), Node.NodeIDType.OPENFLOW);
+            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), /*Node.NodeIDType.OPENFLOW*/"SNMP");
             c.setInterface(
                     new String[] {
                             IPluginInFlowProgrammerService.class.getName(),/* IMessageListener.class.getName(),*/
