@@ -105,7 +105,7 @@ public class SNMPListener implements SNMPv2TrapListener, Runnable{
             String chassisID = (new SNMPHandler(cmethUtil)).getLLDPChassis(switchIP);
             chassisID = chassisID.replaceAll(" ", ":");
             Long sid = HexString.toLong(chassisID);
-            cmethUtil.addEntry(sid, switchIP);
+            //cmethUtil.addEntry(sid, switchIP);
             ((Controller)controller).handleNewConnection(sid);
         }
         else if(trapOID.compareTo(linkDownOID) == 0)

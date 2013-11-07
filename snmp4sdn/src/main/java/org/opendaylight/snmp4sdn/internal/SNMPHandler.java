@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Industrial Industrial Technology Research Institute of Taiwan and others.  All rights reserved.
+ * Copyright (c) 2013 Industrial Technology Research Institute of Taiwan and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -305,11 +305,11 @@ public class SNMPHandler{
 
         //Use snmp to write to switch fwd table...
 
-        String community = "private";
         try{
             //1. open snmp communication interface
             String switchIP = cmethUtil.getIpAddr(sw_macAddr);
             InetAddress sw_ipAddr = InetAddress.getByName(switchIP);
+            String community = cmethUtil.getSnmpCommunity(sw_macAddr);
             SNMPv1CommunicationInterface comInterface = createSNMPv1CommInterface(0, sw_ipAddr, community);
 
             //System.out.println("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
@@ -362,11 +362,9 @@ public class SNMPHandler{
         Map<String, Integer> table =  new HashMap<String, Integer>();
 
         try{
-            String portBaseOid = portGetOID;
-            portBaseOid = portBaseOid.substring(0, portBaseOid.length() - 1);
-            System.out.println("to retieve oid " + portBaseOid + "'s value...");
+            System.out.println("to retieve oid " + portGetOID + "'s value...");
 
-            SNMPVarBindList tableVars = comInterface.retrieveMIBTable(portBaseOid);
+            SNMPVarBindList tableVars = comInterface.retrieveMIBTable(portGetOID);
             System.out.println("Number of table entries: " + tableVars.size());
             for(int i = 0; i < tableVars.size(); i++){
                 SNMPSequence pair = (SNMPSequence)(tableVars.getSNMPObjectAt(i));
@@ -374,9 +372,11 @@ public class SNMPHandler{
                 SNMPInteger value = (SNMPInteger)pair.getSNMPObjectAt(1);
                 int valueInt = ((BigInteger)value.getValue()).intValue();
                 String snmpOIDstr = snmpOID.toString();
-                String macOID = snmpOIDstr.substring(portBaseOid.length() + 2);
-                table.put(macOID, new Integer(valueInt));
-                System.out.println("Retrieved OID: " + snmpOID +" (the mac:" + macOID +"), value " + value.getClass().getName() + ":" + valueInt);
+                String vlanmacOID = snmpOIDstr.substring(portGetOID.length() + 1);
+                String vlanOID = vlanmacOID.substring(0, vlanmacOID.indexOf("."));
+                String macOID = vlanmacOID.substring(vlanmacOID.indexOf(".") + 1);
+                table.put(vlanmacOID, new Integer(valueInt));
+                System.out.println("Retrieved OID: " + snmpOID +" (the vlan:" + vlanOID + ", mac:" + macOID +"), value " + value.getClass().getName() + ":" + valueInt);
             }
             return table;
 
@@ -401,7 +401,6 @@ public class SNMPHandler{
 
         //Use snmp to read switch fwd table...
 
-        String community = "public";
         Long sw_macAddr = (Long) node.getID();
         InetAddress sw_ipAddr = null;
 
@@ -416,6 +415,7 @@ public class SNMPHandler{
         }
         if(sw_ipAddr == null) return null;
 
+        String community = cmethUtil.getSnmpCommunity(sw_macAddr);
         SNMPv1CommunicationInterface comInterface = createSNMPv1CommInterface(0, sw_ipAddr, community);
         //System.out.println("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
 
@@ -437,7 +437,6 @@ public class SNMPHandler{
 
         //Use snmp to read switch fwd table...
 
-        String community = "public";
         Long sw_macAddr = (Long) node.getID();
         InetAddress sw_ipAddr = null;
 
@@ -452,6 +451,7 @@ public class SNMPHandler{
         }
         if(sw_ipAddr == null) return null;
 
+        String community = cmethUtil.getSnmpCommunity(sw_macAddr);
         SNMPv1CommunicationInterface comInterface = createSNMPv1CommInterface(0, sw_ipAddr, community);
         //System.out.println("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
 
@@ -530,7 +530,6 @@ public class SNMPHandler{
 
         //Use snmp to read switch fwd table...
 
-        String community = "public";
         InetAddress sw_ipAddr = null;
 
         //1. open snmp communication interface
@@ -544,6 +543,7 @@ public class SNMPHandler{
         }
         if(sw_ipAddr == null) return null;
 
+        String community = cmethUtil.getSnmpCommunity(sw_macAddr);
         SNMPv1CommunicationInterface comInterface = createSNMPv1CommInterface(0, sw_ipAddr, community);
         //System.out.println("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
 
@@ -553,12 +553,12 @@ public class SNMPHandler{
     }
 
     public String getLLDPChassis(Long sw_macAddr){//return a hex-string, e.g. 70 72 CF 2A 80 E9 (just a chassis id, not mac address!)
-        System.out.println("enter SNMPHandler.getLLDPChassis()...");
+        System.out.println("enter SNMPHandler.getLLDPChassis(" + HexString.toHexString(sw_macAddr) + ")...");
         try{
             String switchIP = cmethUtil.getIpAddr(sw_macAddr);
             InetAddress sw_ipAddr = InetAddress.getByName(switchIP);
             
-            String community = "public";
+            String community = cmethUtil.getSnmpCommunity(sw_macAddr);
             SNMPv1CommunicationInterface comInterface = createSNMPv1CommInterface(0, sw_ipAddr, community);
             //System.out.println("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
 
@@ -586,7 +586,7 @@ public class SNMPHandler{
             InetAddress swIpAddr = InetAddress.getByName(sw_ipAddr);
             if(swIpAddr == null) return null;
 
-            String community = "public";
+            String community = cmethUtil.getSnmpCommunity(cmethUtil.getSID(sw_ipAddr));
             SNMPv1CommunicationInterface comInterface = createSNMPv1CommInterface(0, swIpAddr, community);
             //System.out.println("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
 
@@ -613,7 +613,6 @@ public class SNMPHandler{
 
         //Use snmp to read switch fwd table...
 
-        String community = "public";
         InetAddress sw_ipAddr = null;
 
         //1. open snmp communication interface
@@ -627,6 +626,7 @@ public class SNMPHandler{
         }
         if(sw_ipAddr == null) return null;
 
+        String community = cmethUtil.getSnmpCommunity(sw_macAddr);
         SNMPv1CommunicationInterface comInterface = createSNMPv1CommInterface(0, sw_ipAddr, community);
         //System.out.println("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
 
@@ -682,7 +682,6 @@ public class SNMPHandler{
 
         //Use snmp to read switch fwd table...
 
-        String community = "public";
         InetAddress sw_ipAddr = null;
 
         //1. open snmp communication interface
@@ -696,6 +695,7 @@ public class SNMPHandler{
         }
         if(sw_ipAddr == null) return null;
 
+        String community = cmethUtil.getSnmpCommunity(sw_macAddr);
         SNMPv1CommunicationInterface comInterface = createSNMPv1CommInterface(0, sw_ipAddr, community);
         //System.out.println("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
 

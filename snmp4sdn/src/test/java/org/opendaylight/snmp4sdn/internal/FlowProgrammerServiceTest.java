@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Industrial Industrial Technology Research Institute of Taiwan and others.  All rights reserved.
+ * Copyright (c) 2013 Industrial Technology Research Institute of Taiwan and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -94,11 +94,11 @@ public class FlowProgrammerServiceTest {
         sw.setId(sid);
         sw.start();
 
-        controller.getCmethUtil().addEntry(sid, switchIP);
+        //controller.getCmethUtil().addEntry(sid, switchIP);
         controller.handleNewConnection(sid);
      }
 
-    //@Test    
+    @Test
     public void testReadWriteFlowsBySNMP() throws UnknownHostException {
         System.out.println("----------------testReadWriteFlowsBySNMP Begin...-------------");
 
@@ -115,7 +115,7 @@ public class FlowProgrammerServiceTest {
         controller.addSwitch(sw);*/
         
         node = createSNMPNode(HexString.toLong("00:00:00:00:00:01"));
-        addNewSwitch(node, sw, (Long)(node.getID()), "10.217.0.31");
+        addNewSwitch(node, sw, (Long)(node.getID()), "10.216.0.31");
         NodeConnector iport = createNodeConnector( (short) 1, node);
         NodeConnector oport = createNodeConnector( (short) 30, node);//s4s
         byte srcMac[] = { (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
@@ -178,7 +178,7 @@ public class FlowProgrammerServiceTest {
         System.out.println("----------------call modifyFlow() II done----------------");
 
         System.out.println("----------------call removeFlow()----------------");
-        fps.removeFlow(node, bFlow);
+        //fps.removeFlow(node, bFlow);
         System.out.println("----------------call removeFlow() done----------------");
 
 
@@ -190,8 +190,8 @@ public class FlowProgrammerServiceTest {
         System.out.println("------------call readFlow()-----------------");
         FlowOnNode flown = rs.readFlow(node, aFlow, false);
         System.out.println("flown:" + flown.toString());
-        System.out.println("------------call readAllFlow()-----------------");
 
+        System.out.println("------------call readAllFlow()-----------------");
         List<FlowOnNode> flowns = rs.readAllFlow(node, false);
         System.out.println("------------call readAllFlow()-----------------");
         for(int i = 0; i < flowns.size(); i++){
