@@ -89,12 +89,11 @@ public class FlowProgrammerServiceTest {
         }
     }
 
-    private void addNewSwitch(Node node, SwitchHandler sw, Long sid, String switchIP){
+    private void addNewSwitch(Node node, SwitchHandler sw, Long sid){
         sw = new SwitchHandler(controller, "");
         sw.setId(sid);
         sw.start();
 
-        //controller.getCmethUtil().addEntry(sid, switchIP);
         controller.handleNewConnection(sid);
      }
 
@@ -115,7 +114,7 @@ public class FlowProgrammerServiceTest {
         controller.addSwitch(sw);*/
         
         node = createSNMPNode(HexString.toLong("00:00:00:00:00:01"));
-        addNewSwitch(node, sw, (Long)(node.getID()), "10.216.0.31");
+        addNewSwitch(node, sw, (Long)(node.getID()));
         NodeConnector iport = createNodeConnector( (short) 1, node);
         NodeConnector oport = createNodeConnector( (short) 30, node);//s4s
         byte srcMac[] = { (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,

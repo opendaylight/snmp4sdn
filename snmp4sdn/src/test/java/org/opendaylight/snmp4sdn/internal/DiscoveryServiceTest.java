@@ -66,7 +66,7 @@ public class DiscoveryServiceTest {
         }
     }
 
-    private void addNewSwitch(Node node, SwitchHandler sw, String chassisID, String switchIP){
+    private void addNewSwitch(Node node, SwitchHandler sw, String chassisID){
         Long sid = HexString.toLong(chassisID);
 
         node = createSNMPNode(sid);
@@ -75,7 +75,6 @@ public class DiscoveryServiceTest {
         sw.setId(sid);
         sw.start();
 
-        //controller.getCmethUtil().addEntry(sid, switchIP);
         controller.handleNewConnection(sid);
      }
 
@@ -108,10 +107,10 @@ public class DiscoveryServiceTest {
 
             controller.addSwitch(sw[i]);
         }*/
-        addNewSwitch(node[0], sw[0], "00:00:00:00:00:01", "10.217.0.31");
-        addNewSwitch(node[1], sw[1], "00:00:00:00:00:02", "10.217.0.32");
-        addNewSwitch(node[2], sw[2], "00:00:00:00:00:03", "10.217.0.33");
-        addNewSwitch(node[3], sw[3], "00:00:00:00:00:04", "10.217.0.34");
+        addNewSwitch(node[0], sw[0], "00:00:00:00:00:01");
+        addNewSwitch(node[1], sw[1], "00:00:00:00:00:02");
+        addNewSwitch(node[2], sw[2], "00:00:00:00:00:03");
+        addNewSwitch(node[3], sw[3], "00:00:00:00:00:04");
 
 
         DiscoveryService ds = new DiscoveryService();
