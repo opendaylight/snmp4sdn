@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Industrial Industrial Technology Research Institute of Taiwan and others.  All rights reserved.
+ * Copyright (c) 2013 Industrial Technology Research Institute of Taiwan and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -75,7 +75,7 @@ public class DiscoveryServiceTest {
         sw.setId(sid);
         sw.start();
 
-        controller.getCmethUtil().addEntry(sid, switchIP);
+        //controller.getCmethUtil().addEntry(sid, switchIP);
         controller.handleNewConnection(sid);
      }
 
@@ -112,7 +112,6 @@ public class DiscoveryServiceTest {
         addNewSwitch(node[1], sw[1], "00:00:00:00:00:02", "10.217.0.32");
         addNewSwitch(node[2], sw[2], "00:00:00:00:00:03", "10.217.0.33");
         addNewSwitch(node[3], sw[3], "00:00:00:00:00:04", "10.217.0.34");
-        addNewSwitch(node[4], sw[4], "00:00:00:00:00:05", "10.217.0.35");
 
 
         DiscoveryService ds = new DiscoveryService();
