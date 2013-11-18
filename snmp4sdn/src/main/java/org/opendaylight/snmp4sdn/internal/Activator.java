@@ -64,7 +64,7 @@ public class Activator extends ComponentActivatorAbstractBase {
      */
     public void init() {
         Node.NodeIDType.registerIDType("SNMP", Long.class);
-        NodeConnector.NodeConnectorIDType.registerIDType("SNMP", Long.class, "SNMP");
+        NodeConnector.NodeConnectorIDType.registerIDType("SNMP", Short.class, "SNMP");
     }
 
     /**

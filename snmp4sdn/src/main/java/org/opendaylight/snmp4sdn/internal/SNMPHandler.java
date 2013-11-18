@@ -432,6 +432,7 @@ public class SNMPHandler{
         return new FlowOnNode(flown);
     }
 
+    //return value: 1. null -- switch not found  2. an empty List<FlowOnNode> -- switch found and has no entries
     public List<FlowOnNode>  readAllFlowRequest(Node node){
         System.out.println("enter SNMPHandler.readAllFlowRequest()");
 
@@ -458,6 +459,7 @@ public class SNMPHandler{
         //2. now can set fwd table entry
         //System.out.println("going to read fwd table entry...");
         Map<String, Integer> entries = readAllFwdTableEntry(comInterface);
+        if(entries == null) return null;
         return forwardingTableEntriesToFlows(entries, node);
     }
 

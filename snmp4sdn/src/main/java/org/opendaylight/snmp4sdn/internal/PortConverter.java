@@ -12,6 +12,7 @@ This code reused the code base of OpenFlow plugin contributed by Cisco Systems, 
 
 package org.opendaylight.snmp4sdn.internal;
 
+import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
@@ -57,7 +58,8 @@ public abstract class PortConverter {
                         NodeConnector.SPECIALNODECONNECTORID, node);
             }
         }
-        return NodeConnectorCreator.createNodeConnector(ofPort, node);
+        //return NodeConnectorCreator.createNodeConnector(ofPort, node);//s4s: OF original -- create OF's
+        return createSnmpNodeConnector(ofPort, node);//s4s -- create SNMP's
     }
 
     /**
@@ -73,5 +75,17 @@ public abstract class PortConverter {
             return OFPort.OFPP_CONTROLLER.getValue();
         }
         return (Short) salPort.getID();
+    }
+
+    private static NodeConnector createSnmpNodeConnector(Object portId, Node node) {
+        if (node.getType().equals("SNMP")) {
+            try {
+                return new NodeConnector("SNMP", (Short) portId, node);
+            } catch (ConstructionException e1) {
+                log.error("",e1);
+                return null;
+            }
+        }
+        return null;
     }
 }

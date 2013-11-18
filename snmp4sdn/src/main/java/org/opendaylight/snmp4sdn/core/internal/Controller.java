@@ -180,6 +180,7 @@ public class Controller implements IController, CommandProvider {
             it.remove();
         }
         switchEventThread.interrupt();
+        snmpListener.stopListening();
         /*try {
             controllerIO.shutDown();
         } catch (IOException ex) {

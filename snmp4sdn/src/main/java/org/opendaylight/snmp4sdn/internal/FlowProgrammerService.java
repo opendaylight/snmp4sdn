@@ -174,30 +174,34 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
 
     @Override
     public Status modifyFlow(Node node, Flow oldFlow, Flow newFlow) {
+        System.out.println("enter FlowProgrammerService.modifyFlow()");
         return modifyFlowInternal(node, oldFlow, newFlow, 0);
         //return my_modifyFlow(node, flow, 3); //s4s. modType 3 is type of 3, means "learned"
     }
 
     @Override
     public Status removeFlow(Node node, Flow flow) {
+        System.out.println("enter FlowProgrammerService.removeFlow()");
         return removeFlowInternal(node, flow, 0);
         //return my_modifyFlow(node, flow, 2); //s4s. modType 2 is type of 2, means "invalid(delete)"
     }
 
     @Override
     public Status addFlowAsync(Node node, Flow flow, long rid) {
+        System.out.println("enter FlowProgrammerService.addFlowAsync()");
         return addFlowInternal(node, flow, rid);//s4s
         //return new Status(StatusCode.SUCCESS);
     }
 
     @Override
-    public Status modifyFlowAsync(Node node, Flow oldFlow, Flow newFlow,
-            long rid) {
+    public Status modifyFlowAsync(Node node, Flow oldFlow, Flow newFlow, long rid) {
+        System.out.println("enter FlowProgrammerService.modifyFlowAsync()");
         return modifyFlowInternal(node, oldFlow, newFlow, rid);
     }
 
     @Override
     public Status removeFlowAsync(Node node, Flow flow, long rid) {
+        System.out.println("enter FlowProgrammerService.removeFlowAsync()");
         return removeFlowInternal(node, flow, rid);
     }
 
@@ -381,7 +385,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
 
     @Override
     public Status removeAllFlows(Node node) {
-        return new Status(StatusCode.SUCCESS);
+        return new Status(StatusCode.FORBIDDEN);
     }
 
     private String errorString(String phase, String action, String cause) {

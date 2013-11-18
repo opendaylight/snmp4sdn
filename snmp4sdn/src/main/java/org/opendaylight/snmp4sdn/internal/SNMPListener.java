@@ -72,6 +72,7 @@ public class SNMPListener implements SNMPv2TrapListener, Runnable{
     public void stopListening(){
         try{
             trapReceiverInterface.stopReceiving();
+            trapReceiverInterface.removev2TrapListener(this);
         }
         catch (Exception e)
         {
@@ -134,6 +135,8 @@ public class SNMPListener implements SNMPv2TrapListener, Runnable{
             ISwitch sw = controller.getSwitch(sid);
             ((SwitchHandler)sw).updatePhysicalPort(new SNMPPhysicalPort(port));
             SNMPPortStatus portStatus = new SNMPPortStatus();
+            SNMPPhysicalPort phyPort = new SNMPPhysicalPort(port);
+            portStatus.setDesc(phyPort);
             portStatus.setReason((byte)SNMPPortReason.SNMPPPR_ADD.ordinal());
             ((Controller)controller).takeSwitchEventMsg(sw, portStatus);
         }
