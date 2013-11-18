@@ -28,6 +28,8 @@ import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.IPProtocols;
 import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.opendaylight.controller.sal.utils.NodeCreator;
+import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +42,7 @@ import org.opendaylight.snmp4sdn.protocol.util.HexString;
 public class FlowProgrammerServiceTest {
     Controller controller = null;
     protected static final Logger logger = LoggerFactory.getLogger(FlowProgrammerServiceTest.class);
+    long switchNum = 1;
 
     public static void main(String args[]) {
         new FlowProgrammerServiceTest();
@@ -98,39 +101,224 @@ public class FlowProgrammerServiceTest {
      }
 
     //@Test
-    public void testReadWriteFlowsBySNMP() throws UnknownHostException {
-        System.out.println("----------------testReadWriteFlowsBySNMP Begin...-------------");
+    public void test_addFlow() throws Exception {
+        System.out.println("----- test_addFlow() Begin -----");
 
+        /*
+         *Create a testing network (this section is copied to all other @Test functions)***
+        */
+            //controller:
         controller = new Controller();
         controller.init_forTest();
         controller.start();
-
-        //Node node = createSNMPNode(new Long(1l));//s4s.  here 1l: not 11, is 1L
+            //node:
         Node node = null;
-
+        node = createSNMPNode(switchNum++);
+            //switch:
         SwitchHandler sw = new SwitchHandler(controller, "");
-        /*//replace this part by addNewSwitch()sw.setId((Long)(node.getID()));
-        sw.start();
-        controller.addSwitch(sw);*/
-        
-        node = createSNMPNode(HexString.toLong("00:00:00:00:00:01"));
         addNewSwitch(node, sw, (Long)(node.getID()));
+            //port:
         NodeConnector iport = createNodeConnector( (short) 1, node);
         NodeConnector oport = createNodeConnector( (short) 30, node);//s4s
-        byte srcMac[] = { (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
-                (byte) 0x00, (byte) 0x01 };
+            //layer 2:
+        byte srcMac[] = { (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01 };
         byte dstMac[] = { (byte) 0x70, (byte) 0x72, (byte) 0xCF, (byte) 0x2B, (byte) 0x95, (byte) 0x24 };//s4s. in 10 base format = 112.114.207.43.149.36
         short ethertype = EtherTypes.IPv4.shortValue();
         short vlan = (short) 1;
 
+        /*
+          *end of Create a testing network
+        */
+
+        /*
+         * Create a SAL Flow aFlow
+         */
+        Match match = new Match();
+        match.setField(MatchType.DL_SRC, srcMac);
+        match.setField(MatchType.DL_DST, dstMac);
+        match.setField(MatchType.DL_VLAN, vlan);
+        match.setField(MatchType.DL_TYPE, ethertype);
+        Assert.assertTrue(match.isIPv4());
+
+        List<Action> actions = new ArrayList<Action>();
+        actions.add(new Output(oport));
+        Flow aFlow = new Flow(match, actions);
+
+        /*
+         * Create a Flow Programmer Service
+         */
+        FlowProgrammerService fps = new FlowProgrammerService();
+        fps.setController(controller);
+
+        Status status = fps.addFlow(node, aFlow);
+        System.out.println("----- test_addFlow() result: " + status.getCode().toString() + " -----");        
+        Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
+        controller.stop();
+    }
+
+    //@Test
+    public void test_modifyFlow() throws Exception {
+        System.out.println("----- test_modifyFlow() Begin: addFlow(aFlow) and then modifyFlow(aFlow, bFlow) -----");
+
+        /*
+         *Create a testing network (this section is copied to all other @Test functions)***
+        */
+            //controller:
+        controller = new Controller();
+        controller.init_forTest();
+        controller.start();
+            //node:
+        Node node = null;
+        node = createSNMPNode(switchNum++);
+            //switch:
+        SwitchHandler sw = new SwitchHandler(controller, "");
+        addNewSwitch(node, sw, (Long)(node.getID()));
+            //port:
+        NodeConnector iport = createNodeConnector( (short) 1, node);
+        NodeConnector oport = createNodeConnector( (short) 30, node);//s4s
+            //layer 2:
+        byte srcMac[] = { (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01 };
+        byte dstMac[] = { (byte) 0x70, (byte) 0x72, (byte) 0xCF, (byte) 0x2B, (byte) 0x95, (byte) 0x24 };//s4s. in 10 base format = 112.114.207.43.149.36
+        short ethertype = EtherTypes.IPv4.shortValue();
+        short vlan = (short) 1;
+
+        /*
+          *end of Create a testing network
+        */
+
+        /*
+         * Create a SAL Flow aFlow
+         */
+        Match match = new Match();
+        match.setField(MatchType.DL_SRC, srcMac);
+        match.setField(MatchType.DL_DST, dstMac);
+        match.setField(MatchType.DL_VLAN, vlan);
+        match.setField(MatchType.DL_TYPE, ethertype);
+        Assert.assertTrue(match.isIPv4());
+
+        List<Action> actions = new ArrayList<Action>();
+        actions.add(new Output(oport));
+        Flow aFlow = new Flow(match, actions);
+
+        List<Action> actions2 = new ArrayList<Action>();
+        NodeConnector oport2 = createNodeConnector((short)29, node);
+        actions2.add(new Output(oport2));
+        Flow bFlow = new Flow(match, actions2);
+
+        /*
+         * Create a Flow Programmer Service
+         */
+        FlowProgrammerService fps = new FlowProgrammerService();
+        fps.setController(controller);
+
+        fps.addFlow(node, aFlow);
+        Status status = fps.modifyFlow(node, aFlow, bFlow);
+        //Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
+
+        if(status.getCode().toString().equals(StatusCode.SUCCESS.toString()))
+            System.out.println("----- test_modifyFlow() result: " + status.getCode().toString() + " -----");
+        else
+            System.out.println("----- test_modifyFlow() result: FAIL(" + status.getCode().toString() + ") -----");
+
+        Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
+        controller.stop();
+    }
+
+    //@Test
+    public void test_removeFlow() throws Exception {
+        System.out.println("----- test_removeFlow() Begin -----");
+
+        /*
+         *Create a testing network (this section is copied to all other @Test functions)***
+        */
+            //controller:
+        controller = new Controller();
+        controller.init_forTest();
+        controller.start();
+            //node:
+        Node node = null;
+        node = createSNMPNode(switchNum++);
+            //switch:
+        SwitchHandler sw = new SwitchHandler(controller, "");
+        addNewSwitch(node, sw, (Long)(node.getID()));
+            //port:
+        NodeConnector iport = createNodeConnector( (short) 1, node);
+        NodeConnector oport = createNodeConnector( (short) 30, node);//s4s
+            //layer 2:
+        byte srcMac[] = { (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01 };
+        byte dstMac[] = { (byte) 0x70, (byte) 0x72, (byte) 0xCF, (byte) 0x2B, (byte) 0x95, (byte) 0x24 };//s4s. in 10 base format = 112.114.207.43.149.36
+        short ethertype = EtherTypes.IPv4.shortValue();
+        short vlan = (short) 1;
+
+        /*
+          *end of Create a testing network
+        */
+
+        /*
+         * Create a SAL Flow aFlow
+         */
+        Match match = new Match();
+        match.setField(MatchType.DL_SRC, srcMac);
+        match.setField(MatchType.DL_DST, dstMac);
+        match.setField(MatchType.DL_VLAN, vlan);
+        match.setField(MatchType.DL_TYPE, ethertype);
+        Assert.assertTrue(match.isIPv4());
+
+        List<Action> actions = new ArrayList<Action>();
+        actions.add(new Output(oport));
+        Flow aFlow = new Flow(match, actions);
+
+        /*
+         * Create a Flow Programmer Service
+         */
+        FlowProgrammerService fps = new FlowProgrammerService();
+        fps.setController(controller);
+
+        Status status = fps.removeFlow(node, aFlow);
+        System.out.println("----- test_removeFlow() result: " + status.getCode().toString() + " -----");        
+        Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
+        controller.stop();
+    }
+
+
+    //@Test //this test covers all the unit tests
+    public void testReadWriteFlowsBySNMP() throws Exception {
+        System.out.println("----- testReadWriteFlowsBySNMP() Begin -----");
+
+        /*
+         *Create a testing network (this section is copied to all other @Test functions)***
+        */
+            //controller:
+        controller = new Controller();
+        controller.init_forTest();
+        controller.start();
+            //node:
+        Node node = null;
+        node = createSNMPNode(switchNum++);
+            //switch:
+        SwitchHandler sw = new SwitchHandler(controller, "");
+        addNewSwitch(node, sw, (Long)(node.getID()));
+            //port:
+        NodeConnector iport = createNodeConnector( (short) 1, node);
+        NodeConnector oport = createNodeConnector( (short) 30, node);//s4s
+            //layer 2:
+        byte srcMac[] = { (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x01 };
+        byte dstMac[] = { (byte) 0x70, (byte) 0x72, (byte) 0xCF, (byte) 0x2B, (byte) 0x95, (byte) 0x24 };//s4s. in 10 base format = 112.114.207.43.149.36
+        short ethertype = EtherTypes.IPv4.shortValue();
+        short vlan = (short) 1;
+            //layer 3:
         InetAddress srcIP = InetAddress.getByName("172.28.30.50");
         InetAddress dstIP = InetAddress.getByName("171.71.9.52");
         InetAddress ipMask = InetAddress.getByName("255.255.255.0");
+            //other:
         byte vlanPr = 3;
         Byte tos = 4;
         byte proto = IPProtocols.TCP.byteValue();
         short src = (short) 55000;
         short dst = 80;
+        /*
+          *end of Create a testing network
+        */
 
         /*
          * Create a SAL Flow aFlow
@@ -161,6 +349,9 @@ public class FlowProgrammerServiceTest {
         actions2.add(new Output(oport2));
         Flow bFlow = new Flow(match, actions2);
 
+        /*
+         * Create a Flow Programmer Service
+         */
         FlowProgrammerService fps = new FlowProgrammerService();
         fps.setController(controller);
 
@@ -197,5 +388,6 @@ public class FlowProgrammerServiceTest {
             System.out.println((FlowOnNode)flowns.get(i));
         }
         System.out.println("------------call readAllFlow() done-----------------");
+        controller.stop();
     }
 }

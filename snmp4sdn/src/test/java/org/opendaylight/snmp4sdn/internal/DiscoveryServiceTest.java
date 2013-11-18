@@ -87,35 +87,13 @@ public class DiscoveryServiceTest {
         Node node[] = new Node[5];
         SwitchHandler sw[] =new SwitchHandler[5];
 
-        /*node[0] = NodeCreator.createESNode(HexString.toLong("70:72:CF:2A:87:41"));
-        node[1] = NodeCreator.createESNode(HexString.toLong("90:94:E4:23:13:E0"));
-        node[2] = NodeCreator.createESNode(HexString.toLong("90:94:E4:23:0B:00"));
-        node[3] = NodeCreator.createESNode(HexString.toLong("90:94:E4:23:0B:20"));
-        node[4] = NodeCreator.createESNode(HexString.toLong("90:94:E4:23:0A:E0"));*/
-
-
-        /*//replace this part by addNewSwitch()
-        node[0] = createSNMPNode(HexString.toLong("00:00:00:00:00:01"));
-        node[1] = createSNMPNode(HexString.toLong("00:00:00:00:00:02"));
-        node[2] = createSNMPNode(HexString.toLong("00:00:00:00:00:03"));
-        node[3] = createSNMPNode(HexString.toLong("00:00:00:00:00:04"));
-        node[4] = createSNMPNode(HexString.toLong("00:00:00:00:00:05"));
-        for(int i = 0; i < 5; i++){
-            sw[i] = new SwitchHandler(controller, "");
-            sw[i].setId((Long)(node[i].getID()));
-            sw[i].start();
-
-            controller.addSwitch(sw[i]);
-        }*/
         addNewSwitch(node[0], sw[0], "00:00:00:00:00:01");
         addNewSwitch(node[1], sw[1], "00:00:00:00:00:02");
         addNewSwitch(node[2], sw[2], "00:00:00:00:00:03");
         addNewSwitch(node[3], sw[3], "00:00:00:00:00:04");
 
-
         DiscoveryService ds = new DiscoveryService();
         ds.setController(controller);
         ds.doEthSwDiscovery();
-
     }
 }
