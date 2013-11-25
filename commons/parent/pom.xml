@@ -47,9 +47,11 @@
     </site>
   </distributionManagement>
 
-  <modules>
+<!--  <modules>
     <module>../checkstyle</module>
     <module>../snmp4sdn</module>
     <module>../integrationtest</module>
-  </modules>
+</modules>
+-->  
+
 </project>

@@ -25,8 +25,8 @@
     <!--<module>commons/checkstyle</module>-->
     <!--<module>commons/parent</module>-->
     <!--<module>commons</module>-->
-    <module>commons/snmp4sdn</module>
-    <module>snmp4sdn</module>
+<!--    <module>commons/snmp4sdn</module>
+-->    <module>snmp4sdn</module>
     <!--<module>integrationtest</module> //no need to add. run by eclipse junit test-->
     <module>third-party/snmpj</module>
     <module>third-party/expect4j</module>

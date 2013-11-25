@@ -5,7 +5,7 @@
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.snmp4sdn</artifactId><!--s4s: old value:commons-->
     <version>0.0.1-SNAPSHOT</version>
-    <relativePath>../commons/snmp4sdn</relativePath><!--s4s: old value:../commons-->
+    <relativePath>../commons/snmp4sdn</relativePath><!--s4s: old value:../commons/opendaylight-->
   </parent>
 
   <!--<groupId>org.opendaylight.snmp4sdn</groupId>--><!--s4s:new add-->
