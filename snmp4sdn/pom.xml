@@ -41,8 +41,7 @@
               org.osgi.framework,
               javax.net.ssl,
               java.math,<!--cmeth-->
-              java.net<!--cmeth-->,
-              org.expect4j<!-- if place "org.expect4j" in <Embed-Dependency>, will build error -->
+              java.net<!--cmeth-->
             </Import-Package>
             <Export-Package>
               org.opendaylight.snmp4sdn.internal
@@ -79,11 +78,11 @@
       <artifactId>org.snmpj</artifactId>
       <version>1.4.2-SNAPSHOT</version>
     </dependency>
-    <dependency>
+    <!--<dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>org.expect4j</artifactId>
       <version>1.1-SNAPSHOT</version>
-    </dependency>
+    </dependency>-->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
