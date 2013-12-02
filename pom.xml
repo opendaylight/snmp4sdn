@@ -7,11 +7,11 @@
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.parent</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
     <relativePath>commons/parent</relativePath>
   </parent>
   <artifactId>snmp4sdn_distribution</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <scm>
@@ -25,8 +25,8 @@
     <!--<module>commons/checkstyle</module>-->
     <!--<module>commons/parent</module>-->
     <!--<module>commons</module>-->
-<!--    <module>commons/snmp4sdn</module>
--->    <module>snmp4sdn</module>
+    <!--<module>commons/snmp4sdn</module>-->
+    <module>snmp4sdn</module>
     <!--<module>integrationtest</module> //no need to add. run by eclipse junit test-->
     <module>third-party/snmpj</module>
     <module>third-party/expect4j</module>
