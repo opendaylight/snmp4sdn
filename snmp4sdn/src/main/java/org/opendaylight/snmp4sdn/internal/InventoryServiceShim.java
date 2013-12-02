@@ -184,6 +184,7 @@ public class InventoryServiceShim implements IContainerListener,
 
     protected void handlePortStatusMessage(ISwitch sw, SNMPPortStatus m)
             throws ConstructionException {
+        if(sw == null)System.out.println("in handlePortStatusMessage(), ISwitch sw is null!");
         Node node = new Node("SNMP", sw.getId());
         NodeConnector nodeConnector = PortConverter.toNodeConnector(m.getDesc()
                 .getPortNumber(), node);
@@ -198,6 +199,7 @@ public class InventoryServiceShim implements IContainerListener,
         }
 
         logger.trace("handlePortStatusMessage {} type {}", nodeConnector, type);
+        System.out.println("new port event: [Node " + (Long)(nodeConnector.getNode().getID()) + "(" + nodeConnector.getNode().getType() + ")" + " port " + (Short)(nodeConnector.getID()) + "(" + nodeConnector.getType() + ")" + "] -- InventoryServiceShim.handlePortStatusMessage()");
 
         if (type != null) {
             // get node connector properties
@@ -306,6 +308,7 @@ public class InventoryServiceShim implements IContainerListener,
     private void notifyInventoryShimExternalListener(
             NodeConnector nodeConnector, UpdateType type, Set<Property> props) {
         for (IInventoryShimExternalListener s : this.inventoryShimExternalListeners) {
+            System.out.println("new port event: InventoryServiceShim.notifyInventoryShimExternalListener(), then now call to DiscoveryService.updateNodeConnector()");
             s.updateNodeConnector(nodeConnector, type, props);
         }
     }
@@ -399,7 +402,7 @@ public class InventoryServiceShim implements IContainerListener,
     private void addNode(ISwitch sw) {
         Node node;
         try {
-            node = new Node(NodeIDType.OPENFLOW, sw.getId());
+            node = new Node(/*NodeIDType.OPENFLOW*/"SNMP", sw.getId());
         } catch (ConstructionException e) {
             logger.error("{}", e.getMessage());
             return;
@@ -445,7 +448,7 @@ public class InventoryServiceShim implements IContainerListener,
     private void removeNode(ISwitch sw) {
         Node node;
         try {
-            node = new Node(NodeIDType.OPENFLOW, sw.getId());
+            node = new Node(/*NodeIDType.OPENFLOW*/"SNMP", sw.getId());
         } catch (ConstructionException e) {
             logger.error("{}", e.getMessage());
             return;
@@ -470,7 +473,7 @@ public class InventoryServiceShim implements IContainerListener,
             SNMPDescriptionStatistics descriptionStats) {
         Node node;
         try {
-            node = new Node(NodeIDType.OPENFLOW, switchId);
+            node = new Node(/*NodeIDType.OPENFLOW*/"SNMP", switchId);
         } catch (ConstructionException e) {
             logger.error("{}", e.getMessage());
             return;

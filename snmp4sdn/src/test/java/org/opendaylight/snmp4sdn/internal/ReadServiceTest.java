@@ -51,7 +51,7 @@ public class ReadServiceTest {
     public ReadServiceTest(){
         System.out.println("====== ReadServiceTest begin======");
         Node.NodeIDType.registerIDType("SNMP", Long.class);
-        NodeConnector.NodeConnectorIDType.registerIDType("SNMP", Long.class, "SNMP");
+        NodeConnector.NodeConnectorIDType.registerIDType("SNMP", Short.class, "SNMP");
         /*//need the following when directly execute this program in command line
         try {
             testReadWriteFlowsBySNMP();
@@ -155,12 +155,12 @@ public class ReadServiceTest {
         System.out.println("------------call readFlow()-----------------");
         FlowOnNode flown = rs.readFlow(node, aFlow, false);
         if(flown == null){
-            System.out.println("----- test_readFlow() result: " + StatusCode.NOTFOUND.toString() + " -----");        
+            System.out.println("----- test_readFlow() result: " + StatusCode.NOTFOUND.toString() + " -----");
             Assert.assertTrue(true);
             return;
         }
         System.out.println(flown.toString());
-        System.out.println("----- test_readFlow() result: " + StatusCode.SUCCESS.toString() + " -----");        
+        System.out.println("----- test_readFlow() result: " + StatusCode.SUCCESS.toString() + " -----");
         Assert.assertTrue(true);
     }
 
@@ -217,14 +217,14 @@ public class ReadServiceTest {
 
         List<FlowOnNode> flowns = rs.readAllFlow(node, false);
         if(flowns == null){
-            System.out.println("----- test_readAllFlow() result: " + StatusCode.NOTFOUND.toString() + " -----");        
+            System.out.println("----- test_readAllFlow() result: " + StatusCode.NOTFOUND.toString() + " -----");
             Assert.assertTrue(false);
             return;
         }
         for(int i = 0; i < flowns.size(); i++){
             System.out.println((FlowOnNode)flowns.get(i));
         }
-        System.out.println("----- test_readAllFlow() result: " + StatusCode.SUCCESS.toString() + " -----");        
+        System.out.println("----- test_readAllFlow() result: " + StatusCode.SUCCESS.toString() + " -----");
         Assert.assertTrue(true);
     }
 }

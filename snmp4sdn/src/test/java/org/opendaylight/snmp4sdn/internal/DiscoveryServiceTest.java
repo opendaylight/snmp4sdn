@@ -47,7 +47,7 @@ public class DiscoveryServiceTest {
 
     public DiscoveryServiceTest(){
         Node.NodeIDType.registerIDType("SNMP", Long.class);
-        NodeConnector.NodeConnectorIDType.registerIDType("SNMP", Long.class, "SNMP");
+        NodeConnector.NodeConnectorIDType.registerIDType("SNMP", Short.class, "SNMP");
         /*
         try {
             testDiscoveryService();

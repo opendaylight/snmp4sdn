@@ -183,7 +183,7 @@ public class DataPacketMuxDemux implements IContainerListener,
             Short ofPortID = Short.valueOf(ofPacket.getInPort());
 
             try {
-                Node n = new Node(Node.NodeIDType.OPENFLOW, ofSwitchID);
+                Node n = new Node(/*Node.NodeIDType.OPENFLOW*/"SNMP", ofSwitchID);
                 NodeConnector p = PortConverter.toNodeConnector(ofPortID, n);
                 RawPacket dataPacket = new RawPacket(ofPacket.getPacketData());
                 dataPacket.setIncomingNodeConnector(p);
