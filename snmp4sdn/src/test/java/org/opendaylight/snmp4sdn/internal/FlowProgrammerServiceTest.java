@@ -50,7 +50,7 @@ public class FlowProgrammerServiceTest {
 
     public FlowProgrammerServiceTest(){
         Node.NodeIDType.registerIDType("SNMP", Long.class);
-        NodeConnector.NodeConnectorIDType.registerIDType("SNMP", Long.class, "SNMP");
+        NodeConnector.NodeConnectorIDType.registerIDType("SNMP", Short.class, "SNMP");
         /*//need the following when directly execute this program in command line
         try {
             testReadWriteFlowsBySNMP();
@@ -151,7 +151,7 @@ public class FlowProgrammerServiceTest {
         fps.setController(controller);
 
         Status status = fps.addFlow(node, aFlow);
-        System.out.println("----- test_addFlow() result: " + status.getCode().toString() + " -----");        
+        System.out.println("----- test_addFlow() result: " + status.getCode().toString() + " -----");
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         controller.stop();
     }
@@ -275,13 +275,13 @@ public class FlowProgrammerServiceTest {
         fps.setController(controller);
 
         Status status = fps.removeFlow(node, aFlow);
-        System.out.println("----- test_removeFlow() result: " + status.getCode().toString() + " -----");        
+        System.out.println("----- test_removeFlow() result: " + status.getCode().toString() + " -----");
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         controller.stop();
     }
 
 
-    //@Test //this test covers all the unit tests
+    ////@xTest //this test covers all the unit tests above, but may occur error, not suggest to use this test
     public void testReadWriteFlowsBySNMP() throws Exception {
         System.out.println("----- testReadWriteFlowsBySNMP() Begin -----");
 
