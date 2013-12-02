@@ -15,6 +15,7 @@ package org.opendaylight.snmp4sdn.internal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
 import org.opendaylight.controller.sal.utils.NodeCreator;
@@ -51,7 +52,8 @@ public class PortStatisticsConverter {
         if (this.ofStatsList != null && this.ncStatsList == null) {
             this.ncStatsList = new ArrayList<NodeConnectorStatistics>();
             OFPortStatisticsReply ofPortStat;
-            Node node = NodeCreator.createOFNode(switchId);
+            //Node node = NodeCreator.createOFNode(switchId);
+            Node node = createSnmpNode(switchId);
             for (OFStatistics ofStat : this.ofStatsList) {
                 ofPortStat = (OFPortStatisticsReply) ofStat;
                 NodeConnectorStatistics NCStat = new NodeConnectorStatistics();
@@ -77,6 +79,15 @@ public class PortStatisticsConverter {
         log.trace("OFStatistics: {} NodeConnectorStatistics: {}", ofStatsList,
                 ncStatsList);
         return this.ncStatsList;
+    }
+
+    public static Node createSnmpNode(Long switchId) {
+        try {
+            return new Node("SNMP", switchId);
+        } catch (ConstructionException e1) {
+            log.error("",e1);
+            return null;
+        }
     }
 
 }

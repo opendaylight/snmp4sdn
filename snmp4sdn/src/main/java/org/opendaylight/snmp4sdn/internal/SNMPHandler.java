@@ -216,17 +216,6 @@ public class SNMPHandler{
         return result;
     }
 
-    public static NodeConnector createNodeConnector(Object portId, Node node) {
-        if (node.getType().equals("SNMP")) {
-            try {
-                return new NodeConnector("SNMP", (Short) portId, node);
-            } catch (ConstructionException e1) {
-                return null;
-            }
-        }
-        return null;
-    }
-
     //s4s
     private boolean setFwdTableEntry(SNMPv1CommunicationInterface comInterface, String destMac, short vlan, int port, int type){
         System.out.println("enter setFwdTableEntry()...");
@@ -425,7 +414,7 @@ public class SNMPHandler{
         if(port < 0) return null;
 
         //3. convert the retrieved entry to FlowOnNode
-        NodeConnector oport = createNodeConnector((short)port, node);
+        NodeConnector oport = NodeConnectorCreator.createNodeConnector("SNMP", (short)port, node);
         List<Action> actions = new ArrayList<Action>();
         actions.add(new Output(oport));
         Flow flown = new Flow(flow.getMatch(), actions);
@@ -474,7 +463,7 @@ public class SNMPHandler{
             match.setField(MatchType.DL_VLAN, vlan);
             match.setField(MatchType.DL_DST, madAddrBytes);
             List<Action> actions = new ArrayList<Action>();
-            NodeConnector oport = createNodeConnector(Short.parseShort(entry.getValue().toString()), node);
+            NodeConnector oport = NodeConnectorCreator.createNodeConnector("SNMP", Short.parseShort(entry.getValue().toString()), node);
             actions.add(new Output(oport));
 
             Flow flow = new Flow(match, actions);
@@ -559,7 +548,7 @@ public class SNMPHandler{
         try{
             String switchIP = cmethUtil.getIpAddr(sw_macAddr);
             InetAddress sw_ipAddr = InetAddress.getByName(switchIP);
-            
+
             String community = cmethUtil.getSnmpCommunity(sw_macAddr);
             SNMPv1CommunicationInterface comInterface = createSNMPv1CommInterface(0, sw_ipAddr, community);
             //System.out.println("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
@@ -590,7 +579,7 @@ public class SNMPHandler{
 
             String community = cmethUtil.getSnmpCommunity(cmethUtil.getSID(sw_ipAddr));
             SNMPv1CommunicationInterface comInterface = createSNMPv1CommInterface(0, swIpAddr, community);
-            //System.out.println("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
+            System.out.println("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
 
             SNMPVarBindList newVars = comInterface.getMIBEntry(lldpLocalChassisIdOID);
             SNMPSequence pair = (SNMPSequence)(newVars.getSNMPObjectAt(0));
@@ -599,7 +588,7 @@ public class SNMPHandler{
             byte[] valueBytes = (byte[])value.getValue();
             String valueStr = HexString.toHexString(valueBytes);
 
-            System.out.println("to retieve switch (" + swIpAddr +")'s local chassis (OID: " + lldpLocalChassisIdOID +"), get value:" + valueStr);
+            System.out.println("to retieve switch (" + sw_ipAddr +")'s local chassis (OID: " + lldpLocalChassisIdOID +"), get value:" + valueStr);
             return valueStr;
 
         }
