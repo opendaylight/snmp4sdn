@@ -106,7 +106,9 @@ public class SNMPListener implements SNMPv2TrapListener, Runnable{
             String chassisID = (new SNMPHandler(cmethUtil)).getLLDPChassis(switchIP);
             chassisID = chassisID.replaceAll(" ", ":");
             Long sid = HexString.toLong(chassisID);
+            //TODO:should compare whether getLLDPChassis() == cmethUtil.getSID()
             //cmethUtil.addEntry(sid, switchIP);
+            sid = cmethUtil.getSID(switchIP);
             ((Controller)controller).handleNewConnection(sid);
         }
         else if(trapOID.compareTo(linkDownOID) == 0)
@@ -133,7 +135,8 @@ public class SNMPListener implements SNMPv2TrapListener, Runnable{
             Long sid = cmethUtil.getSID(switchIP);
             System.out.println("Get switch (ip: " + switchIP + ", mac:" + HexString.toHexString(sid) + ")'s link up trap, port number = " + port);
             ISwitch sw = controller.getSwitch(sid);
-            ((SwitchHandler)sw).updatePhysicalPort(new SNMPPhysicalPort(port));
+            if(sw == null)System.out.println("ISwitch sw is null!");
+            //((SwitchHandler)sw).updatePhysicalPort(new SNMPPhysicalPort(port));
             SNMPPortStatus portStatus = new SNMPPortStatus();
             SNMPPhysicalPort phyPort = new SNMPPhysicalPort(port);
             portStatus.setDesc(phyPort);

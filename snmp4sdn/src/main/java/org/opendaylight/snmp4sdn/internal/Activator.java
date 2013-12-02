@@ -1,37 +1,51 @@
 /*
- * Copyright (c) 2013 Industrial Technology Research Institute of Taiwan and others.  All rights reserved.
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-/*
-This code reused the code base of OpenFlow plugin contributed by Cisco Systems, Inc. Their efforts are appreciated.
-*/
-
 package org.opendaylight.snmp4sdn.internal;
+
 
 import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.felix.dm.Component;
-import org.opendaylight.snmp4sdn.IDataPacketListen;
-import org.opendaylight.snmp4sdn.IDataPacketMux;
-import org.opendaylight.snmp4sdn.IDiscoveryListener;
-import org.opendaylight.snmp4sdn.IFlowProgrammerNotifier;
-import org.opendaylight.snmp4sdn.IInventoryProvider;
-import org.opendaylight.snmp4sdn.IInventoryShimExternalListener;
-import org.opendaylight.snmp4sdn.IInventoryShimInternalListener;
-import org.opendaylight.snmp4sdn.IOFStatisticsManager;
-import org.opendaylight.snmp4sdn.IPluginReadServiceFilter;
-import org.opendaylight.snmp4sdn.IRefreshInternalProvider;
-import org.opendaylight.snmp4sdn.IStatisticsListener;
-import org.opendaylight.snmp4sdn.ITopologyServiceShimListener;
-import org.opendaylight.snmp4sdn.core.IController;
-import org.opendaylight.snmp4sdn.core.IMessageListener;
-import org.opendaylight.snmp4sdn.core.internal.Controller;
+/*import org.opendaylight.controller.protocol_plugin.openflow.IDataPacketListen;
+import org.opendaylight.controller.protocol_plugin.openflow.IDataPacketMux;
+import org.opendaylight.controller.protocol_plugin.openflow.IDiscoveryListener;
+import org.opendaylight.controller.protocol_plugin.openflow.IFlowProgrammerNotifier;
+import org.opendaylight.controller.protocol_plugin.openflow.IInventoryProvider;
+import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimExternalListener;
+import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimInternalListener;
+import org.opendaylight.controller.protocol_plugin.openflow.IOFStatisticsManager;
+import org.opendaylight.controller.protocol_plugin.openflow.IPluginReadServiceFilter;
+import org.opendaylight.controller.protocol_plugin.openflow.IRefreshInternalProvider;
+import org.opendaylight.controller.protocol_plugin.openflow.IStatisticsListener;
+import org.opendaylight.controller.protocol_plugin.openflow.ITopologyServiceShimListener;
+import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
+import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
+import org.opendaylight.controller.protocol_plugin.openflow.core.internal.Controller;*/
+    import org.opendaylight.snmp4sdn.IDataPacketListen;
+    import org.opendaylight.snmp4sdn.IDataPacketMux;
+    import org.opendaylight.snmp4sdn.IDiscoveryListener;
+    import org.opendaylight.snmp4sdn.IFlowProgrammerNotifier;
+    import org.opendaylight.snmp4sdn.IInventoryProvider;
+    import org.opendaylight.snmp4sdn.IInventoryShimExternalListener;
+    import org.opendaylight.snmp4sdn.IInventoryShimInternalListener;
+    import org.opendaylight.snmp4sdn.IOFStatisticsManager;
+    import org.opendaylight.snmp4sdn.IPluginReadServiceFilter;
+    import org.opendaylight.snmp4sdn.IRefreshInternalProvider;
+    import org.opendaylight.snmp4sdn.IStatisticsListener;
+    import org.opendaylight.snmp4sdn.ITopologyServiceShimListener;
+    import org.opendaylight.snmp4sdn.core.IController;
+    import org.opendaylight.snmp4sdn.core.IMessageListener;
+    import org.opendaylight.snmp4sdn.core.internal.Controller;
+
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
+import org.opendaylight.controller.sal.core.IContainerAware;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -213,6 +227,7 @@ public class Activator extends ComponentActivatorAbstractBase {
         Object[] res = { Controller.class, OFStatisticsManager.class,
                 FlowProgrammerService.class, ReadServiceFilter.class,
                 DiscoveryService.class, DataPacketMuxDemux.class,
+                InventoryService.class,
                 InventoryServiceShim.class, TopologyServiceShim.class };
         return res;
     }
@@ -245,9 +260,11 @@ public class Activator extends ComponentActivatorAbstractBase {
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), /*Node.NodeIDType.OPENFLOW*/"SNMP");
             c.setInterface(
                     new String[] {
-                            IPluginInFlowProgrammerService.class.getName(),/* IMessageListener.class.getName(),*/
+                            IPluginInFlowProgrammerService.class.getName(),
+                            /*IMessageListener.class.getName(),*/
                             IContainerListener.class.getName(),
-                            IInventoryShimExternalListener.class.getName() },
+                            IInventoryShimExternalListener.class.getName(),
+                            IContainerAware.class.getName()},
                     props);
 
             c.add(createServiceDependency()
@@ -266,8 +283,9 @@ public class Activator extends ComponentActivatorAbstractBase {
         if (imp.equals(ReadServiceFilter.class)) {
 
             c.setInterface(
-                    new String[] { IPluginReadServiceFilter.class.getName(),
-                            IContainerListener.class.getName() }, null);
+                    new String[] { /*IPluginReadServiceFilter.class.getName(),
+                            IContainerListener.class.getName()*/IPluginInReadService.class.getName(), IContainerListener.class.getName(),
+                    IStatisticsListener.class.getName(), IContainerAware.class.getName() }, null);
 
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
@@ -325,7 +343,7 @@ public class Activator extends ComponentActivatorAbstractBase {
         if (imp.equals(DataPacketMuxDemux.class)) {
             c.setInterface(new String[] { IDataPacketMux.class.getName(),
                     IContainerListener.class.getName(),
-                    IInventoryShimExternalListener.class.getName() }, null);
+                    IInventoryShimExternalListener.class.getName(), IContainerAware.class.getName() }, null);
 
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
@@ -343,9 +361,32 @@ public class Activator extends ComponentActivatorAbstractBase {
                             "unsetIDataPacketListen").setRequired(false));
         }
 
+        if (imp.equals(InventoryService.class)) {
+            // export the service
+            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            props.put("scope", "Global");
+
+            c.setInterface(
+                    new String[] { IPluginInInventoryService.class.getName(),
+                            IInventoryShimInternalListener.class.getName(),
+                            IInventoryProvider.class.getName() }, props);
+
+            // Now lets add a service dependency to make sure the
+            // provider of service exists
+            c.add(createServiceDependency()
+                    .setService(IController.class, "(name=Controller)")
+                    .setCallbacks("setController", "unsetController")
+                    .setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(IPluginOutInventoryService.class, "(scope=Global)")
+                    .setCallbacks("setPluginOutInventoryServices",
+                            "unsetPluginOutInventoryServices")
+                    .setRequired(true));
+        }
+
         if (imp.equals(InventoryServiceShim.class)) {
             c.setInterface(new String[] { IContainerListener.class.getName(),
-                    IStatisticsListener.class.getName()}, null);
+                    IStatisticsListener.class.getName(), IContainerAware.class.getName()}, null);
 
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
@@ -367,7 +408,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.setInterface(new String[] { IDiscoveryListener.class.getName(),
                     IContainerListener.class.getName(),
                     IRefreshInternalProvider.class.getName(),
-                    IInventoryShimExternalListener.class.getName() }, null);
+                    IInventoryShimExternalListener.class.getName(), IContainerAware.class.getName() }, null);
           c.add(createServiceDependency()
                     .setService(ITopologyServiceShimListener.class)
                     .setCallbacks("setTopologyServiceShimListener",

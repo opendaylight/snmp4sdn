@@ -68,9 +68,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.opendaylight.snmp4sdn.protocol.SNMPMessage;
+import org.opendaylight.snmp4sdn.protocol.SNMPType;
 import org.openflow.protocol.OFMessage;
 import org.opendaylight.snmp4sdn.protocol.SNMPFlowMod;
 import org.opendaylight.snmp4sdn.protocol.SNMPPortStatus;
+import org.opendaylight.snmp4sdn.protocol.SNMPPortStatus.SNMPPortReason;
 import org.opendaylight.snmp4sdn.protocol.SNMPPhysicalPort.SNMPPortFeatures;
 
 
@@ -364,7 +366,14 @@ public class SwitchHandler implements ISwitch {
         }
     }
 
-    public void handleMessages() {/*//s4s currently dont implement this issue
+    public void handleMessages(SNMPMessage msg) {//s4s: modify OF's handleMessages()
+        SNMPType type = msg.getType();
+        if(type == SNMPType.PORT_STATUS)
+            processPortStatusMsg((SNMPPortStatus) msg);
+        ((Controller) core).takeSwitchEventMsg(thisISwitch, msg);
+    }
+
+    public void handleMessages() {/*//s4s: OF's code, now adopt some as s4s's
         List<OFMessage> msgs = null;
 
         try {
@@ -447,11 +456,11 @@ public class SwitchHandler implements ISwitch {
 
     private void processPortStatusMsg(SNMPPortStatus msg) {
         SNMPPhysicalPort port = msg.getDesc();
-        if (msg.getReason() == (byte) OFPortReason.OFPPR_MODIFY.ordinal()) {
+        if (msg.getReason() == (byte) SNMPPortReason.SNMPPPR_MODIFY.ordinal()) {
             updatePhysicalPort(port);
-        } else if (msg.getReason() == (byte) OFPortReason.OFPPR_ADD.ordinal()) {
+        } else if (msg.getReason() == (byte) SNMPPortReason.SNMPPPR_ADD.ordinal()) {
             updatePhysicalPort(port);
-        } else if (msg.getReason() == (byte) OFPortReason.OFPPR_DELETE
+        } else if (msg.getReason() == (byte) SNMPPortReason.SNMPPPR_DELETE
                 .ordinal()) {
             deletePhysicalPort(port);
         }
@@ -572,8 +581,8 @@ public class SwitchHandler implements ISwitch {
         */
     }
 
-    //private void updatePhysicalPort(SNMPPhysicalPort port) {//s4s: in OF's code, this function is one of a sequence of steps, but in s4s the steps are much easier so this function is called directly by the SNMPListener, so this function is changed to be "public"
-    public void updatePhysicalPort(SNMPPhysicalPort port) {
+    private void updatePhysicalPort(SNMPPhysicalPort port) {
+    //public void updatePhysicalPort(SNMPPhysicalPort port) {//s4s: in OF's code, this function is one of a sequence of steps, but in s4s the steps are much easier so this function is called directly by the SNMPListener, so this function is changed to be "public"
         Short portNumber = port.getPortNumber();
         physicalPorts.put(portNumber, port);
         portBandwidth

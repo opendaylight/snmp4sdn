@@ -142,6 +142,32 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
 
     //private LLDPTLV chassisIdTlv, portIdTlv, ttlTlv, customTlv;//snmp4sdn. OF's need
 
+
+    //s4s add
+    /*LLDP data structure of a switch:
+
+        e.g.
+        for example in below switch, port 1's portID is "pt1", pt1 connects to remote switch whose chassisID is "12:34:56:78:9A:BC" and portID is "prt15"
+
+        table 1: lldpLocalPortIdOID
+            1   pt1
+            2   pt2
+            3   ...
+        table 2: lldpRemoteChassisIdOID
+            1   12:34:56:78:9A:BC
+            2   21:43:65:87:A9:CB
+            3   ...
+        table 3: lldpRemotePortIdOID
+            1   prt15
+            1   prt36
+            1   ...
+    */
+    Map<Long, String> switches_ID2Chassis = new HashMap<Long, String>();
+    Map<String, Long> switches_Chassis2ID = new HashMap<String, Long>();
+    Map<Long, Map<Short, String>> localPortIDsOnSwitches = new HashMap<Long, Map<Short, String>>();
+    Map<Long, Map<Short, String>> portToRemoteChassisOnSwitches = new HashMap<Long, Map<Short, String>>();
+    Map<Long, Map<Short, String>> portToRemotePortIDOnSwitches = new HashMap<Long, Map<Short, String>>();
+
     class DiscoveryTransmit implements Runnable {
         //private final BlockingQueue<NodeConnector> transmitQ;//snmp4sdn. OF's
         private final BlockingQueue<Node> transmitQ;//snmp4sdn
@@ -161,7 +187,11 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
                     RawPacket outPkt = createDiscoveryPacket(nodeConnector);
                     sendDiscoveryPacket(nodeConnector, outPkt);
                     nodeConnector = null;*/
-                    readSwLLDP(node);
+
+                    /*s4s: here should process new switch join in and to figure out the topology.
+                        but currently we don't deal with "a new switch" but we deal with "link up trap -- that is, a new port"
+                    */
+
                 } catch (InterruptedException e1) {
                     logger.warn("DiscoveryTransmit interupted", e1.getMessage());
                     if (shuttingDown) {
@@ -551,14 +581,16 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         transmitQ.add(node);
     }
 
-    /*//snmp4sdn. OF's need
     private void addDiscovery(NodeConnector nodeConnector) {
+        /*//snmp4sdn. OF's need
         if (isTracked(nodeConnector)) {
             return;
         }
 
-        readyListHi.add(nodeConnector);
-    }*/
+        readyListHi.add(nodeConnector);*/
+
+        processLinkUpTrap(nodeConnector);
+    }
 
     private Set<NodeConnector> getRemoveSet(Collection<NodeConnector> c, Node node) {
         Set<NodeConnector> removeSet = new HashSet<NodeConnector>();
@@ -1336,7 +1368,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         switch (type) {
         case ADDED:
             if (enabled) {
-                //addDiscovery(nodeConnector);//TODO: should addDiscovery(nodeConnector) or addDiscovery(node)
+                addDiscovery(nodeConnector);//TODO: should addDiscovery(nodeConnector) or addDiscovery(node)
                 logger.trace("ADDED enabled {}", nodeConnector);
             } else {
                 logger.trace("ADDED disabled {}", nodeConnector);
@@ -1344,7 +1376,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
             break;
         case CHANGED:
             if (enabled) {
-                //addDiscovery(nodeConnector);//TODO: should addDiscovery(nodeConnector) or addDiscovery(node)
+                addDiscovery(nodeConnector);//TODO: should addDiscovery(nodeConnector) or addDiscovery(node)
                 logger.trace("CHANGED enabled {}", nodeConnector);
             } else {
                 //removeDiscovery(nodeConnector);//TODO: should removeDiscovery(nodeConnector) or removeDiscovery(node)
@@ -1352,7 +1384,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
             }
             break;
         case REMOVED:
-            //removeDiscovery(nodeConnector);//TODO: should removeDiscovery(nodeConnector) or removeDiscovery(node)
+            removeDiscovery(nodeConnector);//TODO: should removeDiscovery(nodeConnector) or removeDiscovery(node)
             logger.trace("REMOVED enabled {}", nodeConnector);
             break;
         default:
@@ -1616,9 +1648,48 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         return rv;
     }
 
-    private void processDiscoveryTrap(){//snmp4sdn add: after snmp trap is recevied, the trap is inputted to this function to create an edge
-        //TODO
-        //myAddEdge(1,1,1,1);
+    private void processLinkUpTrap(NodeConnector nodeConnector){//snmp4sdn add: after snmp link up trap is recevied, the trap is inputted to this function to create an edge
+        Node node = nodeConnector.getNode();
+        Long localSwitchID = (Long)(node.getID());
+        Short localPortNum = (Short)(nodeConnector.getID());
+
+        boolean val = readLLDPonOneSwitch(localSwitchID);//read the LLDP data on this port's switch
+        if(val == false){
+            System.out.println("read node " + localSwitchID + "'s LLDP data error! so stop processLinkUpTrap()");
+            return;
+        }
+
+        //now LLDP data on all switches are ready, now can read about this switch's LLDP data and mapping to the remote switch's
+
+        String remoteChassis = portToRemoteChassisOnSwitches.get(localSwitchID).get(localPortNum);
+        if(remoteChassis == null){
+            System.out.println("can't find switch(Node " + localSwitchID + ",port " + localPortNum + ")'s remoteChassis (==> LLDP exchange with the remote port not yet done)");
+            return;
+        }
+
+        String remotePortID = portToRemotePortIDOnSwitches.get(localSwitchID).get(localPortNum);
+        if(remotePortID == null){
+            System.out.println("can't find switch(Node " + localSwitchID + ",port " + localPortNum + ")'s remotePortID");
+            return;
+        }
+
+        Long remoteSwitchID = switches_Chassis2ID.get(remoteChassis);
+        if(remoteSwitchID == null){
+            System.out.println("can't find remote switch(chassis " + remoteChassis + ")'s node ID (==> abnormal, should not happen!)");
+            return;
+        }
+
+        Map<Short, String>remotePortIDs = localPortIDsOnSwitches.get(remoteSwitchID);
+
+        for(Map.Entry<Short, String> entry : remotePortIDs.entrySet()){
+            System.out.println("...compare with remote port of id: " + entry.getValue());
+            if(entry.getValue().compareToIgnoreCase(remotePortID) == 0){
+                Short remotePortNum = entry.getKey();
+                System.out.println("\t\tAdd edge: local (ip " + cmethUtil.getIpAddr(localSwitchID) + ", port " + localPortNum + ") --> remote (ip " + cmethUtil.getIpAddr(remoteSwitchID) + ", port " + remotePortNum +")");
+                myAddEdge(localSwitchID, localPortNum, remoteSwitchID, remotePortNum);
+                break;
+            }
+        }
     }
 
     private void readSwLLDP(Node node){
@@ -1627,37 +1698,16 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
 
     public void doEthSwDiscovery(){//snmp4sdn add
         //TODO: where to call doEthSwDiscovery()
-        Map<Long, String> switches_ID2Chassis = new HashMap<Long, String>();
-        Map<String, Long> switches_Chassis2ID = new HashMap<String, Long>();
-        Map<Long, Map<Short, String>> localPortIDsOnSwitches = new HashMap<Long, Map<Short, String>>();
-        Map<Long, Map<Short, String>> portToRemoteChassisOnSwitches = new HashMap<Long, Map<Short, String>>();
-        Map<Long, Map<Short, String>> portToRemotePortIDOnSwitches = new HashMap<Long, Map<Short, String>>();
-
-        readLLDPonSwitches(switches_ID2Chassis, switches_Chassis2ID, localPortIDsOnSwitches, portToRemoteChassisOnSwitches, portToRemotePortIDOnSwitches);
-        resolvePortPairsAndAddEdges(switches_ID2Chassis, switches_Chassis2ID, localPortIDsOnSwitches, portToRemoteChassisOnSwitches, portToRemotePortIDOnSwitches);
-
+        readLLDPonSwitches();
+        resolvePortPairsAndAddEdges();
     }
 
-    //snmp4sdn add
-    private void readLLDPonSwitches(Map<Long, String> switches_ID2Chassis,
-                                                                Map<String, Long> switches_Chassis2ID,
-                                                                Map<Long, Map<Short, String>> localPortIDsOnSwitches,
-                                                                Map<Long, Map<Short, String>> portToRemoteChassisOnSwitches,
-                                                                Map<Long, Map<Short, String>> portToRemotePortIDOnSwitches){
-        System.out.println("=======================================");
-        System.out.println("============= Read LLDP on switches ===========");
-        Map<Long, ISwitch> switches = controller.getSwitches();
-        for(ISwitch sw : switches.values()){
-            Long switchID = sw.getId();
+    private boolean readLLDPonOneSwitch(Long switchID){
             SNMPHandler snmp = new SNMPHandler(cmethUtil);
             String localChassis = snmp.getLLDPChassis(switchID);
-            if(localChassis == null) continue;//this switch is not in the switches' ip list
+            if(localChassis == null) return false;//this switch is not in the switches' ip list
             switches_ID2Chassis.put(switchID, localChassis);
             switches_Chassis2ID.put(localChassis, switchID);
-            if(localChassis == null){
-                System.out.println("chassis is null");
-                System.exit(0);
-            }
             System.out.println("#############################################################################");
             System.out.println("######### Reading switch (ip: " + HexString.toHexString(switchID) + ")'s, chassis = " + localChassis +" ##############");
 
@@ -1681,17 +1731,27 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
             /*for(Map.Entry<Short, String> entryp: portToRemotePortID.entrySet()){
                 System.out.println("local port: " + entryp.getKey() + " ==> remote port id\"" + entryp.getValue() + "\"");
             }*/
+            return true;
+    }
+
+    //snmp4sdn add
+    private void readLLDPonSwitches(){
+        System.out.println("=======================================");
+        System.out.println("============= Read LLDP on switches ===========");
+        Map<Long, ISwitch> switches = controller.getSwitches();
+        for(ISwitch sw : switches.values()){
+            //this "for loop"'s body, entirely move to readLLDPonOneSwitch()
+            Long switchID = sw.getId();
+            boolean val = readLLDPonOneSwitch(switchID);
+            if(val == false)
+                System.out.println("read node " + switchID + "'s LLDP data error!");
         }
         System.out.println("======== end of   Read LLDP on switches ========");
         System.out.println("====================================");
     }
 
     //snmp4sdn add
-    private void resolvePortPairsAndAddEdges(Map<Long, String> switches_ID2Chassis,
-                                                                Map<String, Long> switches_Chassis2ID,
-                                                                Map<Long, Map<Short, String>> localPortIDsOnSwitches,
-                                                                Map<Long, Map<Short, String>> portToRemoteChassisOnSwitches,
-                                                                Map<Long, Map<Short, String>> portToRemotePortIDOnSwitches){
+    private void resolvePortPairsAndAddEdges(){
         System.out.println("===========================================");
         System.out.println("===== Resolve the port pars, and add edges correspondingly =====");
         System.out.println("number of switches to resolve: " + portToRemoteChassisOnSwitches.size());
