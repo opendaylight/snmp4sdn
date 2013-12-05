@@ -8,6 +8,8 @@
 
 package org.opendaylight.snmp4sdn;
 
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
 
@@ -22,7 +24,7 @@ public interface IConfigService {
      * @param XXX
      *            XXX
      */
-    Status disableSTP(String sw_ipAddr, String username, String password);
+    Status disableSTP(Node node);
 
 
     /**
@@ -31,17 +33,44 @@ public interface IConfigService {
      * @param XXX
      *            XXX
      */
-    Status disableBpduFlooding(String sw_ipAddr, String username, String password);
+    Status disableBpduFlooding(Node node);
 
 
     /**
-     * Disable the function of broadcast flooding on the switch
+     * Disable the function of BPDU flooding when STP is off
+     *
+     * @param XXX
+     *            XXX
+     */
+    Status disableBpduFlooding(Node node, NodeConnector nodeConnector);
+
+    /**
+         * Disable the function of broadcast flooding on the switch
+         *
+         *
+         * @param XXX
+         *            XXX
+         */
+    Status disableBroadcastFlooding(Node node);
+
+    /**
+             * Disable the function of broadcast flooding on the switch
+             *
+             *
+             * @param XXX
+             *            XXX
+             */
+    Status disableBroadcastFlooding(Node node, NodeConnector nodeConnector);
+        
+
+    /**
+     * Disable the function of multicast flooding on the switch
      *
      *
      * @param XXX
      *            XXX
      */
-    Status disableBpduFlooding(String sw_ipAddr, short port, String username, String password);
+    Status disableMulticastFlooding(Node node);
 
 
     /**
@@ -51,17 +80,7 @@ public interface IConfigService {
      * @param XXX
      *            XXX
      */
-    Status disableMulticastFlooding(String sw_ipAddr, String username, String password);
-
-
-    /**
-     * Disable the function of multicast flooding on the switch
-     *
-     *
-     * @param XXX
-     *            XXX
-     */
-    Status disableMulticastFlooding(String sw_ipAddr, short port, String username, String password);
+    Status disableMulticastFlooding(Node node, NodeConnector nodeConnector);
 
 
     /**
@@ -71,7 +90,7 @@ public interface IConfigService {
      * @param XXX
      *            XXX
      */
-    Status disableUnknownFlooding(String sw_ipAddr, String username, String password);
+    Status disableUnknownFlooding(Node node);
 
 
     /**
@@ -81,7 +100,7 @@ public interface IConfigService {
      * @param XXX
      *            XXX
      */
-    Status disableUnknownFlooding(String sw_ipAddr, short port, String username, String password);
+    Status disableUnknownFlooding(Node node, NodeConnector nodeConnector);
 
 
     /**
@@ -90,7 +109,7 @@ public interface IConfigService {
      * @param XXX
      *            XXX
      */
-    Status disableSourceMacCheck(String sw_ipAddr, String username, String password);
+    Status disableSourceMacCheck(Node node);
 
 
     /**
@@ -99,7 +118,7 @@ public interface IConfigService {
      * @param XXX
      *            XXX
      */
-    Status disableSourceMacCheck(String sw_ipAddr, short port, String username, String password);
+    Status disableSourceMacCheck(Node node, NodeConnector nodeConnector);
 
 
     /**
@@ -108,8 +127,8 @@ public interface IConfigService {
      * @param XXX
      *            XXX
      */
-    Status disableSourceLearning(String sw_ipAddr, String username, String password);
-    
+    Status disableSourceLearning(Node node);
+
 
     /**
      * Disable the function of source learning on the switch
@@ -117,6 +136,6 @@ public interface IConfigService {
      * @param XXX
      *            XXX
      */
-    Status disableSourceLearning(String sw_ipAddr, short port, String username, String password);
+    Status disableSourceLearning(Node node, NodeConnector nodeConnector);
 }
 

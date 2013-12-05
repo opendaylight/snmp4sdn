@@ -8,120 +8,64 @@
 
 package org.opendaylight.snmp4sdn.internal;//s4s
 
+import org.opendaylight.snmp4sdn.internal.ExpectHandler;//s4s
+
 import org.opendaylight.controller.sal.utils.Status;//s4s
 import org.opendaylight.controller.sal.utils.StatusCode;//s4s
 
 import org.opendaylight.snmp4sdn.IConfigService;
 
-import org.expect4j.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.Socket;
 import java.net.InetAddress;
 
-public class CLIHandler implements IConfigService{
-    Socket socket;
-    Expect4j expect;
-    long expectTimeout = 2 * 1000; //set Expect4j's default timeout as 2 seconds
-    boolean isLoggedIn = false;
-
-    public static void main(String args[]){
-        new CLIHandler("10.217.0.32", "admin", "password");//("10.215.0.32");
-    }
+public class CLIHandler{
+    ExpectHandler expect;
+    String sw_ipAddr, username, password, prompt = "#";
 
     public CLIHandler(String sw_ipAddr, String username, String password){
+        this.sw_ipAddr = new String(sw_ipAddr);
+        this.username = new String(username);
+        this.password = new String(password);
         try{
-            socket = new Socket(sw_ipAddr, 23);
-            System.out.println("(telnet to switch successfully, then login)");
-            isLoggedIn = loginCLI(sw_ipAddr, username, password);
-            //System.out.println("1:" + expect.getLastState().getBuffer());
+            expect = new ExpectHandler(sw_ipAddr, "UserName:", "PassWord:", username, password);//d-link:UserName,PassWord  Accton:Username, Passwrod
         }catch(Exception e){
-            System.out.println("CLIHandler.CLIHandler() err:" + e);
+            System.out.println("CLIHandler() err:" + e);
         }
     }
 
-    private boolean loginCLI(String sw_ipAddr, String username, String password){
-        try{
-            if(socket.isClosed()){
-                socket = new Socket(sw_ipAddr, 23);
-                System.out.println("(telnet to switch successfully, then login)");
-            }
-            expect = new Expect4j(socket);
-            expect.setDefaultTimeout(expectTimeout);
-
-            System.out.println("expecting--Username:");
-            expect.expect("UserName:");//d-link:UserName  Acctioin:"Username "
-            System.out.println("1:" + expect.getLastState().getBuffer());
-            expect.send(username + "\r\n");
-            System.out.println("expecting--Password:");
-            expect.expect("PassWord:");//d-link:PassWord  Acctioin:"Password "
-            System.out.println("2:" + expect.getLastState().getBuffer());
-            expect.send(password + "\r\n");
-            System.out.println("login().expecting--#");
-            expect.expect("#");
-            if(expect.getLastState().getBuffer().endsWith("#")){
-                System.out.println("(login successfully)");
-                return true;//login successfully
-            }
-        }catch(Exception e){
-            System.out.println("CLIHandler.loginCLI() err:" + e);
-        }
-        return false;//login fail
-    }
-
-    private void loginoutCLI(String sw_ipAddr, String username, String password){
-        try{
-            expect.send("logout\r\n");
-        }catch(Exception e){
-            System.out.println("CLIHandler.loginoutCLI() err:" + e);
-        }
-    }
-
-    private String printACL(String sw_ipAddr, String username, String password){
-        //if(!isLoggedIn) return new Status(StatusCode.INTERNALERROR);
-
+    private String printACL(){
         String str = null;
-        try{
+        /*try{
             expect.send("show access_profile profile_id 1\r\n");
             expect.send("a\r\n");
-            //System.out.println("8:" + expect.getLastState().getBuffer());
             expect.expect("#");
-            System.out.println("3:" + expect.getLastState().getBuffer());
+            System.out.println("3:" + expect.getBuffer());
         }catch(Exception e){
             System.out.println("CLIHandler.printACL() err:" + e);
-        }
+        }*///TODO:expectHandler that can call multiple send() is not ready
         return str;
     }
     
-    public Status reboot(String sw_ipAddr, String username, String password){
-        if(!isLoggedIn) return new Status(StatusCode.INTERNALERROR);
-        
+    public Status reboot(){
         try{
             System.out.println("expecting--reboot(y/n)?");
-            expect.expect("system reboot?(y/n)");
-            expect.send("y\r\n");
-            System.out.println("sent 'y' to the question above");
-            return new Status(StatusCode.SUCCESS);
+            if(expect.execute_2step_end("reboot", "system reboot?(y/n)", "y")){
+                System.out.println("sent 'y' to the question above");
+                return new Status(StatusCode.SUCCESS);
+            }
         }catch(Exception e){
             System.out.println("CLIHandler.reboot() err:" + e);
         }
         return new Status(StatusCode.INTERNALERROR);
     }
 
-    public Status disableSTP(String sw_ipAddr, String username, String password){
-        if(!isLoggedIn) return new Status(StatusCode.INTERNALERROR);
-
+    public Status disableSTP(){
         try{
             System.out.println("disableSTP...");
-            if(socket.isClosed()){
-                loginCLI(sw_ipAddr, username, password);
-                System.out.println("in disableSTP...:not logged in, login again");
-            }
-            expect.send("disable stp\r\n");
-            expect.expect("#");
-            System.out.println("4:" + expect.getLastState().getBuffer());
-            if(expect.getLastState().getBuffer().indexOf("Success") >= 0)
+            if(expect.execute("disable stp", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
             System.out.println("CLIHandler.disableSTP() err:" + e);
@@ -129,19 +73,10 @@ public class CLIHandler implements IConfigService{
         return new Status(StatusCode.INTERNALERROR);
     }
 
-    public Status disableBpduFlooding(String sw_ipAddr, String username, String password){
-        if(!isLoggedIn) return new Status(StatusCode.INTERNALERROR);
-
+    public Status disableBpduFlooding(){
         try{
             System.out.println("disableBpduFlooding()...");
-            if(socket.isClosed()){
-                loginCLI(sw_ipAddr, username, password);
-                System.out.println("in disableBpduFlooding()...:not logged in, login again");
-            }
-            expect.send("config stp fbpdu disable\r\n");
-            expect.expect("#");
-            System.out.println("5:" + expect.getLastState().getBuffer());
-            if(expect.getLastState().getBuffer().indexOf("Success") >= 0)
+            if(expect.execute("config stp fbpdu disable", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
             System.out.println("CLIHandler.disableBpduFlooding() err:" + e);
@@ -149,21 +84,10 @@ public class CLIHandler implements IConfigService{
         return new Status(StatusCode.INTERNALERROR);
     }
 
-    public Status disableBpduFlooding(String sw_ipAddr, short port, String username, String password){
-        if(!isLoggedIn) return new Status(StatusCode.INTERNALERROR);
-
+    public Status disableBpduFlooding(Short port){
         try{
             System.out.println("disableBpduFlooding(port " + port +" )...");
-            if(socket.isClosed()){
-                loginCLI(sw_ipAddr, username, password);
-                System.out.println("in disableBpduFlooding(port " + port +" )...:not logged in, login again");
-            }
-            //expect.send("config stp ports " + port + "-" + port + " fbpdu disable\r\n");
-            String sendStr = new String("config stp ports " + port + "-" + port + " fbpdu disable\r\n");
-            expect.send(sendStr);
-            expect.expect("#");
-            System.out.println("6:" + expect.getLastState().getBuffer());
-            if(expect.getLastState().getBuffer().indexOf("Success") >= 0)
+            if(expect.execute("config stp ports " + port + "-" + port + " fbpdu disable", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
             System.out.println("CLIHandler.disableBpduFlooding(port) err:" + e);
@@ -171,19 +95,10 @@ public class CLIHandler implements IConfigService{
         return new Status(StatusCode.INTERNALERROR);
     }
 
-    public Status disableBroadcastFlooding(String sw_ipAddr, String username, String password){
-        if(!isLoggedIn) return new Status(StatusCode.INTERNALERROR);
-
+    public Status disableBroadcastFlooding(){
         try{
             System.out.println("disableBroadcastFlooding()...");
-            if(socket.isClosed()){
-                loginCLI(sw_ipAddr, username, password);
-                System.out.println("in disableBroadcastFlooding()...:not logged in, login again");
-            }
-            expect.send("config traffic control all broadcast disable\r\n");
-            expect.expect("#");
-            System.out.println("7:" + expect.getLastState().getBuffer());
-            if(expect.getLastState().getBuffer().indexOf("Success") >= 0)
+            if(expect.execute("config traffic control all broadcast disable", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
             System.out.println("CLIHandler.disableBroadcastFlooding() err:" + e);
@@ -191,21 +106,10 @@ public class CLIHandler implements IConfigService{
         return new Status(StatusCode.INTERNALERROR);
     }
 
-    public Status disableBroadcastFlooding(String sw_ipAddr, short port, String username, String password){
-        if(!isLoggedIn) return new Status(StatusCode.INTERNALERROR);
-
+    public Status disableBroadcastFlooding(Short port){
         try{
             System.out.println("disableBroadcastFlooding(port " + port + ")...");
-            if(socket.isClosed()){
-                loginCLI(sw_ipAddr, username, password);
-                System.out.println("in disableBroadcastFlooding(port " + port + ")...:not logged in, login again");
-            }
-            //expect.send("config traffic control " + port + "-" + port + " broadcast disable\r\n");
-            String sendStr = new String("config traffic control " + port + "-" + port + " broadcast disable\r\n");
-            expect.send(sendStr);
-            expect.expect("#");
-            System.out.println("8:" + expect.getLastState().getBuffer());
-            if(expect.getLastState().getBuffer().indexOf("Success") >= 0)
+            if(expect.execute("config traffic control " + port + "-" + port + " broadcast disable", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
             System.out.println("CLIHandler.disableBroadcastFlooding(port) err:" + e);
@@ -213,19 +117,10 @@ public class CLIHandler implements IConfigService{
         return new Status(StatusCode.INTERNALERROR);
     }
 
-    public Status disableMulticastFlooding(String sw_ipAddr, String username, String password){
-        if(!isLoggedIn) return new Status(StatusCode.INTERNALERROR);
-
+    public Status disableMulticastFlooding(){
         try{
             System.out.println("disableMulticastFlooding()...");
-            if(socket.isClosed()){
-                loginCLI(sw_ipAddr, username, password);
-                System.out.println("in disableMulticastFlooding()...:not logged in, login again");
-            }
-            expect.send("config traffic control all multicast disable\r\n");
-            expect.expect("#");
-            System.out.println("9:" + expect.getLastState().getBuffer());
-            if(expect.getLastState().getBuffer().indexOf("Success") >= 0)
+            if(expect.execute("config traffic control all multicast disable", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
             System.out.println("CLIHandler.disableMulticastFlooding() err:" + e);
@@ -233,21 +128,10 @@ public class CLIHandler implements IConfigService{
         return new Status(StatusCode.INTERNALERROR);
     }
 
-    public Status disableMulticastFlooding(String sw_ipAddr, short port, String username, String password){
-        if(!isLoggedIn) return new Status(StatusCode.INTERNALERROR);
-
+    public Status disableMulticastFlooding(Short port){
         try{
             System.out.println("disableMulticastFlooding(port " + port +" )...");
-            if(socket.isClosed()){
-                loginCLI(sw_ipAddr, username, password);
-                System.out.println("in disableMulticastFlooding(port " + port +" )...:not logged in, login again");
-            }
-            //expect.send("config traffic control " + port + "-" + port + " multicast disable\r\n");
-            String sendStr = new String("config traffic control " + port + "-" + port + " multicast disable\r\n");
-            expect.send(sendStr);
-            expect.expect("#");
-            System.out.println("10:" + expect.getLastState().getBuffer());
-            if(expect.getLastState().getBuffer().indexOf("Success") >= 0)
+            if(expect.execute("config traffic control " + port + "-" + port + " multicast disable", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
             System.out.println("CLIHandler disableMulticastFlooding(port) err:" + e);
@@ -255,19 +139,10 @@ public class CLIHandler implements IConfigService{
         return new Status(StatusCode.INTERNALERROR);
     }
 
-    public Status disableUnknownFlooding(String sw_ipAddr, String username, String password){
-        if(!isLoggedIn) return new Status(StatusCode.INTERNALERROR);
-
+    public Status disableUnknownFlooding(){
         try{
             System.out.println("disableUnknownFlooding()...");
-            if(socket.isClosed()){
-                loginCLI(sw_ipAddr, username, password);
-                System.out.println("in disableUnknownFlooding()...:not logged in, login again");
-            }
-            expect.send("config traffic control all unicast enable action drop threshold 0\r\n");
-            expect.expect("#");
-            System.out.println("11:" + expect.getLastState().getBuffer());
-            if(expect.getLastState().getBuffer().indexOf("Success") >= 0)
+            if(expect.execute("config traffic control all unicast enable action drop threshold 0", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
             System.out.println("CLIHandler.disableUnknownFlooding() err:" + e);
@@ -275,21 +150,10 @@ public class CLIHandler implements IConfigService{
         return new Status(StatusCode.INTERNALERROR);
     }
 
-    public Status disableUnknownFlooding(String sw_ipAddr, short port, String username, String password){
-        if(!isLoggedIn) return new Status(StatusCode.INTERNALERROR);
-
+    public Status disableUnknownFlooding(Short port){
         try{
             System.out.println("disableUnknownFlooding(port " + port +" )...");
-            if(socket.isClosed()){
-                loginCLI(sw_ipAddr, username, password);
-                System.out.println("in disableUnknownFlooding(port " + port +" )...:not logged in, login again");
-            }
-            //expect.send("config traffic control " + port + "-" + port + " unicast enable action drop threshold 0\r\n");
-            String sendStr = new String("config traffic control " + port + "-" + port + " unicast enable action drop threshold 0\r\n");
-            expect.send(sendStr);
-            expect.expect("#");
-            System.out.println("12:" + expect.getLastState().getBuffer());
-            if(expect.getLastState().getBuffer().indexOf("Success") >= 0)
+            if(expect.execute("config traffic control " + port + "-" + port + " unicast enable action drop threshold 0", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
             System.out.println("CLIHandler.disableUnknownFlooding(port) err:" + e);
@@ -297,33 +161,20 @@ public class CLIHandler implements IConfigService{
         return new Status(StatusCode.INTERNALERROR);
     }
 
-    public Status disableSourceMacCheck(String sw_ipAddr, String username, String password){
+    public Status disableSourceMacCheck(){
         //no such command in D-Link switch
-        if(!isLoggedIn) return new Status(StatusCode.INTERNALERROR);
-
         return new Status(StatusCode.SUCCESS);
     }
 
-    public Status disableSourceMacCheck(String sw_ipAddr, short port, String username, String password){
+    public Status disableSourceMacCheck(Short port){
         //no such command in D-Link switch
-        if(!isLoggedIn) return new Status(StatusCode.INTERNALERROR);
-
         return new Status(StatusCode.SUCCESS);
     }
 
-    public Status disableSourceLearning(String sw_ipAddr, String username, String password){
-        if(!isLoggedIn) return new Status(StatusCode.INTERNALERROR);
-
+    public Status disableSourceLearning(){
         try{
             System.out.println("disableSourceLearning()...");
-            if(socket.isClosed()){
-                loginCLI(sw_ipAddr, username, password);
-                System.out.println("in disableSourceLearning()...:not logged in, login again");
-            }
-            expect.send("config ports all learning disable\r\n");
-            expect.expect("#");
-            System.out.println("13:" + expect.getLastState().getBuffer());
-            if(expect.getLastState().getBuffer().indexOf("Success") >= 0)
+            if(expect.execute("config ports all learning disable", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
             System.out.println("CLIHandler.disableSourceLearning() err:" + e);
@@ -331,21 +182,10 @@ public class CLIHandler implements IConfigService{
         return new Status(StatusCode.INTERNALERROR);
     }
 
-    public Status disableSourceLearning(String sw_ipAddr, short port, String username, String password){
-        if(!isLoggedIn) return new Status(StatusCode.INTERNALERROR);
-
+    public Status disableSourceLearning(Short port){
         try{
             System.out.println("disableSourceLearning(port " + port +" )...");
-            if(socket.isClosed()){
-                loginCLI(sw_ipAddr, username, password);
-                System.out.println("in disableSourceLearning(port " + port +" )...:not logged in, login again");
-            }
-            //expect.send("config ports " + port + "-" + port + " learning disable\r\n");
-            String sendStr = new String("config ports " + port + "-" + port + " learning disable\r\n");
-            expect.send(sendStr);
-            expect.expect("#");
-            System.out.println("14:" + expect.getLastState().getBuffer());
-            if(expect.getLastState().getBuffer().indexOf("Success") >= 0)
+            if(expect.execute("config ports " + port + "-" + port + " learning disable", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
             System.out.println("CLIHandler.disableSourceLearning(port) err:" + e);

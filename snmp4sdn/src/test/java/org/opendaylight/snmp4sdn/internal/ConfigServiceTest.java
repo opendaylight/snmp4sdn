@@ -41,6 +41,9 @@ import org.slf4j.LoggerFactory;
 
 public class ConfigServiceTest {
     Controller controller = null;
+    ConfigService cfgs = null;
+    Node testNode = null;
+    NodeConnector testPort = null;
     protected static final Logger logger = LoggerFactory.getLogger(DiscoveryServiceTest.class);
 
     String sw_ipAddr = "10.217.0.32";
@@ -54,6 +57,7 @@ public class ConfigServiceTest {
     public ConfigServiceTest(){
         Node.NodeIDType.registerIDType("SNMP", Long.class);
         NodeConnector.NodeConnectorIDType.registerIDType("SNMP", Short.class, "SNMP");
+        createNetworkAndService();
         /*
         try {
             testDiscoveryService();
@@ -63,7 +67,31 @@ public class ConfigServiceTest {
         */
     }
 
-    public static Node createSNMPNode(Long switchId) {
+    private void createNetworkAndService(){
+        /*
+         *Create a testing network
+        */
+            //controller:
+        controller = new Controller();
+        controller.init_forTest();
+        controller.start();
+            //node:
+        testNode = null;
+        testNode = createSNMPNode(2L);
+            //switch:
+        SwitchHandler sw = new SwitchHandler(controller, "");
+        addNewSwitch(testNode, sw, (Long)(testNode.getID()));
+            //port:
+        testPort = NodeConnectorCreator.createNodeConnector("SNMP", (short) 1, testNode);
+
+         /*
+         * Create a Flow Programmer Service
+         */
+        cfgs = new ConfigService();
+        cfgs.setController(controller);
+    }
+
+    private static Node createSNMPNode(Long switchId) {
         try {
             return new Node("SNMP", switchId);
         } catch (ConstructionException e1) {
@@ -72,9 +100,7 @@ public class ConfigServiceTest {
         }
     }
 
-    private void addNewSwitch(Node node, SwitchHandler sw, String chassisID){
-        Long sid = HexString.toLong(chassisID);
-
+    private void addNewSwitch(Node node, SwitchHandler sw, Long sid){
         node = createSNMPNode(sid);
 
         sw = new SwitchHandler(controller, "");
@@ -86,8 +112,10 @@ public class ConfigServiceTest {
 
     ////@Test
     public void test_disableSTP() throws UnknownHostException {
+        System.out.println("Enter test_disableSTP()");
         Status status;
-        status = new CLIHandler(sw_ipAddr, username, password).disableSTP(sw_ipAddr, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableSTP();
+        status = cfgs.disableSTP(testNode);
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
     }
 
@@ -95,7 +123,8 @@ public class ConfigServiceTest {
     public void test_disableBpduFlooding() throws UnknownHostException {
         System.out.println("Enter test_disableBpduFlooding()");
         Status status;
-        status = new CLIHandler(sw_ipAddr, username, password).disableBpduFlooding(sw_ipAddr, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableBpduFlooding();
+        status = cfgs.disableBpduFlooding(testNode);
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         System.out.println("End test_disableBpduFlooding()");
     }
@@ -104,7 +133,8 @@ public class ConfigServiceTest {
     public void test_disableBpduFlooding_withPort() throws UnknownHostException {
         System.out.println("Enter test_disableBpduFlooding_withPort()");
         Status status;
-        status = new CLIHandler(sw_ipAddr, username, password).disableBpduFlooding(sw_ipAddr, (short)1, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableBpduFlooding((short)1);
+        status = cfgs.disableBpduFlooding(testNode, testPort);
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         System.out.println("End test_disableBpduFlooding_withPort()");
     }
@@ -113,88 +143,98 @@ public class ConfigServiceTest {
     public void test_disableBroadcastFlooding() throws UnknownHostException {
         System.out.println("Enter test_disableBroadcastFlooding()");
         Status status;
-        status = new CLIHandler(sw_ipAddr, username, password).disableBroadcastFlooding(sw_ipAddr, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableBroadcastFlooding();
+        status = cfgs.disableBroadcastFlooding(testNode);
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         System.out.println("End test_disableBroadcastFlooding()");
     }
 
-    //@Test
+   //@Test
     public void test_disableBroadcastFlooding_withPort() throws UnknownHostException {
         System.out.println("Enter test_disableBroadcastFlooding_withPort()");
         Status status;
-        status = new CLIHandler(sw_ipAddr, username, password).disableBroadcastFlooding(sw_ipAddr, (short)2, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableBroadcastFlooding((short)2);
+        status = cfgs.disableBroadcastFlooding(testNode, testPort);
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         System.out.println("End test_disableBroadcastFlooding_withPort()");
     }
 
-    //@Test
+  //@Test
     public void test_disableMulticastFlooding() throws UnknownHostException {
         System.out.println("Enter test_disableMulticastFlooding()");
         Status status;
-        status = new CLIHandler(sw_ipAddr, username, password).disableMulticastFlooding(sw_ipAddr, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableMulticastFlooding();
+        status = cfgs.disableMulticastFlooding(testNode);
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         System.out.println("End test_disableMulticastFlooding()");
     }
 
-    //@Test
+   //@Test
     public void test_disableMulticastFlooding_withPort() throws UnknownHostException {
         System.out.println("Enter test_disableMulticastFlooding_withPort()");
         Status status;
-        status = new CLIHandler(sw_ipAddr, username, password).disableMulticastFlooding(sw_ipAddr, (short)3, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableMulticastFlooding((short)3);
+        status = cfgs.disableMulticastFlooding(testNode, testPort);
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         System.out.println("End test_disableMulticastFlooding_withPort()");
     }
 
-    //@Test
+   //@Test
     public void test_disableUnknownFlooding() throws UnknownHostException {
         System.out.println("Enter test_disableUnknownFlooding()");
         Status status;
-        status = new CLIHandler(sw_ipAddr, username, password).disableUnknownFlooding(sw_ipAddr, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableUnknownFlooding();
+        status = cfgs.disableUnknownFlooding(testNode);
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         System.out.println("End test_disableUnknownFlooding()");
     }
 
-    //@Test
+   //@Test
     public void test_disableUnknownFlooding_withPort() throws UnknownHostException {
         System.out.println("Enter test_disableUnknownFlooding_withPort()");
         Status status;
-        status = new CLIHandler(sw_ipAddr, username, password).disableUnknownFlooding(sw_ipAddr, (short)4, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableUnknownFlooding((short)4);
+        status = cfgs.disableUnknownFlooding(testNode, testPort);
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         System.out.println("End test_disableUnknownFlooding_withPort()");
     }
     
-    ////@Test
+   //@Test
     public void test_disableSourceMacCheck() throws UnknownHostException {
         System.out.println("Enter test_disableSourceMacCheck()");
         Status status;
-        status = new CLIHandler(sw_ipAddr, username, password).disableSourceMacCheck(sw_ipAddr, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableSourceMacCheck();
+        status = cfgs.disableSourceMacCheck(testNode);
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         System.out.println("End test_disableSourceMacCheck()");
     }
 
-    //@Test
+   //@Test
     public void test_disableSourceMacCheck_withPort() throws UnknownHostException {
         System.out.println("Enter test_disableSourceMacCheck_withPort()");
         Status status;
-        status = new CLIHandler(sw_ipAddr, username, password).disableSourceMacCheck(sw_ipAddr, (short)5, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableSourceMacCheck((short)5);
+        status = cfgs.disableSourceMacCheck(testNode, testPort);
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         System.out.println("End test_disableSourceMacCheck_withPort()");
     }
 
-    //@Test
+   //@Test
     public void test_disableSourceLearning() throws UnknownHostException {
         System.out.println("Enter test_disableSourceLearning()");
         Status status;
-        status = new CLIHandler(sw_ipAddr, username, password).disableSourceLearning(sw_ipAddr, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableSourceLearning();
+        status = cfgs.disableSourceLearning(testNode);
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         System.out.println("End test_disableSourceLearning()");
     }
 
-    //@Test
+   //@Test
     public void test_disableSourceLearning_withPort() throws UnknownHostException {
         System.out.println("Enter test_disableSourceLearning_withPort()");
         Status status;
-        status = new CLIHandler(sw_ipAddr, username, password).disableSourceLearning(sw_ipAddr, (short)6, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableSourceLearning((short)6);
+        status = cfgs.disableSourceLearning(testNode, testPort);
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());  
         System.out.println("End test_disableSourceLearning_withPort()");
     }
@@ -204,43 +244,43 @@ public class ConfigServiceTest {
     public void test_AllTests() throws UnknownHostException {
         Status status;
 
-        /*status = new CLIHandler(sw_ipAddr, username, password).disableSTP(sw_ipAddr, username, password);
+        /*//status = new CLIHandler(sw_ipAddr, username, password).disableSTP();
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());*/
 
-        status = new CLIHandler(sw_ipAddr, username, password).disableBpduFlooding(sw_ipAddr, username, password);
+        status = new CLIHandler(sw_ipAddr, username, password).disableBpduFlooding();
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
 
-        status = new CLIHandler(sw_ipAddr, username, password).disableBpduFlooding(sw_ipAddr, (short)1, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableBpduFlooding((short)1);
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         
-        status = new CLIHandler(sw_ipAddr, username, password).disableBroadcastFlooding(sw_ipAddr, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableBroadcastFlooding();
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         
-        status = new CLIHandler(sw_ipAddr, username, password).disableBroadcastFlooding(sw_ipAddr, (short)2, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableBroadcastFlooding((short)2);
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         
-        status = new CLIHandler(sw_ipAddr, username, password).disableMulticastFlooding(sw_ipAddr, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableMulticastFlooding();
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         
-        status = new CLIHandler(sw_ipAddr, username, password).disableMulticastFlooding(sw_ipAddr, (short)3, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableMulticastFlooding((short)3);
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         
-        status = new CLIHandler(sw_ipAddr, username, password).disableUnknownFlooding(sw_ipAddr, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableUnknownFlooding();
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         
-        status = new CLIHandler(sw_ipAddr, username, password).disableUnknownFlooding(sw_ipAddr, (short)4, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableUnknownFlooding((short)4);
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         
-        status = new CLIHandler(sw_ipAddr, username, password).disableSourceMacCheck(sw_ipAddr, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableSourceMacCheck();
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         
-        status = new CLIHandler(sw_ipAddr, username, password).disableSourceMacCheck(sw_ipAddr, (short)5, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableSourceMacCheck((short)5);
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         
-        status = new CLIHandler(sw_ipAddr, username, password).disableSourceLearning(sw_ipAddr, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableSourceLearning();
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());
         
-        status = new CLIHandler(sw_ipAddr, username, password).disableSourceLearning(sw_ipAddr, (short)6, username, password);
+        //status = new CLIHandler(sw_ipAddr, username, password).disableSourceLearning((short)6);
         Assert.assertEquals(StatusCode.SUCCESS.toString(), status.getCode().toString());        
     }
 }
