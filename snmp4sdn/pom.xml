@@ -41,8 +41,8 @@
               org.osgi.framework,
               javax.net.ssl,
               java.math,<!--cmeth-->
-              java.net,<!--cmeth-->
-              org.expect4j
+              java.net<!--cmeth-->
+              <!--org.expect4j-->
             </Import-Package>
             <Export-Package>
               org.opendaylight.snmp4sdn.internal
