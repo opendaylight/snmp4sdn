@@ -1,55 +1,32 @@
 package org.opendaylight.snmp4sdn.internal;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.snmpj.*;
-
-import org.opendaylight.controller.sal.action.Action;
-import org.opendaylight.controller.sal.action.ActionType;
-import org.opendaylight.controller.sal.action.Output;
-import org.opendaylight.controller.sal.flowprogrammer.Flow;
-import org.opendaylight.controller.sal.match.Match;
-import org.opendaylight.controller.sal.match.MatchField;
-import org.opendaylight.controller.sal.match.MatchType;
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.controller.sal.reader.FlowOnNode;
-import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
-import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.sal.utils.StatusCode;
-
 import org.opendaylight.snmp4sdn.core.IController;
 import org.opendaylight.snmp4sdn.core.ISwitch;
 import org.opendaylight.snmp4sdn.core.internal.Controller;
 import org.opendaylight.snmp4sdn.core.internal.SwitchHandler;
-
 import org.opendaylight.snmp4sdn.protocol.util.HexString;
 import org.opendaylight.snmp4sdn.protocol.SNMPPhysicalPort;
 import org.opendaylight.snmp4sdn.protocol.SNMPPortStatus;
 import org.opendaylight.snmp4sdn.protocol.SNMPPortStatus.SNMPPortReason;
 import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
 
-import java.math.BigInteger;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.Date;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Vector;
 import java.io.*;
 
 public class SNMPListener implements SNMPv2TrapListener, Runnable{
+    private static final Logger LOG = LoggerFactory.getLogger(SNMPListener.class);
 
     private final IController controller;
     private CmethUtil cmethUtil;
     private SNMPTrapReceiverInterface trapReceiverInterface;
-    private static String bootColdStartOID = "1.3.6.1.6.3.1.1.5.1";
-    private static String bootWarmStartOID = "1.3.6.1.6.3.1.1.5.2";
-    private static String linkDownOID = "1.3.6.1.6.3.1.1.5.3";
-    private static String linkUpOID = "1.3.6.1.6.3.1.1.5.4";
+    private static final String bootColdStartOID = "1.3.6.1.6.3.1.1.5.1";
+    private static final String bootWarmStartOID = "1.3.6.1.6.3.1.1.5.2";
+    private static final String linkDownOID = "1.3.6.1.6.3.1.1.5.3";
+    private static final String linkUpOID = "1.3.6.1.6.3.1.1.5.4";
 
     public SNMPListener(IController controller, CmethUtil cmethUtil){
         this.controller = controller;
@@ -59,7 +36,7 @@ public class SNMPListener implements SNMPv2TrapListener, Runnable{
             trapReceiverInterface.addv2TrapListener(this);
             trapReceiverInterface.startReceiving();
         }catch(Exception e){
-            System.out.println("Problem starting Trap Interface: " + e.toString());
+            LOG.error("Problem starting Trap Interface", e);
         }
     }
 
@@ -76,7 +53,7 @@ public class SNMPListener implements SNMPv2TrapListener, Runnable{
         }
         catch (Exception e)
         {
-            System.out.println("Got trapReceiverInterface exception:" + e);
+            LOG.error("Got trapReceiverInterface exception", e);
         }
     }
 
@@ -86,18 +63,18 @@ public class SNMPListener implements SNMPv2TrapListener, Runnable{
         }
         catch (Exception e)
         {
-            System.out.println("Got trapReceiverInterface exception" + e);
+            LOG.error("Got trapReceiverInterface exception", e);
         }
     }
 
     @Override
     public void processv2Trap(SNMPv2TrapPDU pdu, String communityName, InetAddress agentIPAddress){
-        System.out.println("Got v2 trap:");
-        System.out.println("  sender IP address:  " + agentIPAddress.getHostAddress());
-        System.out.println("  community name:     " + communityName);
-        System.out.println("  system uptime:      " + pdu.getSysUptime().toString());
-        System.out.println("  trap OID:           " + pdu.getSNMPTrapOID().toString());
-        System.out.println("  var bind list:      " + pdu.getVarBindList().toString());
+        LOG.debug("Got v2 trap:");
+        LOG.debug("  sender IP address:  {}", agentIPAddress.getHostAddress());
+        LOG.debug("  community name:     {}", communityName);
+        LOG.debug("  system uptime:      {}", pdu.getSysUptime().toString());
+        LOG.debug("  trap OID:           {}", pdu.getSNMPTrapOID().toString());
+        LOG.debug("  var bind list:      {}", pdu.getVarBindList().toString());
 
         String switchIP = agentIPAddress.getHostAddress();
         String trapOID = pdu.getSNMPTrapOID().toString();
@@ -125,17 +102,17 @@ public class SNMPListener implements SNMPv2TrapListener, Runnable{
         {//link up
             SNMPSequence seq = pdu.getVarBindList();
             if(seq.size() < 3){
-                System.out.println("link up trap's information format error!");
-                System.exit(0);
+                LOG.error("Unexpected link up sequence size {}", seq.size());
+                throw new RuntimeException("Link up trap's information format error");
             }
             SNMPSequence seq2 = (SNMPSequence)(((Vector)(seq.getValue())).elementAt(2));
-            System.out.println(seq2.toString());
+            LOG.debug(seq2.toString());
             String oidstr = ((SNMPObject)(((Vector)(seq2.getValue())).elementAt(0))).toString();
             short port = Short.parseShort(oidstr.substring(oidstr.lastIndexOf(".") + 1));
             Long sid = cmethUtil.getSID(switchIP);
-            System.out.println("Get switch (ip: " + switchIP + ", mac:" + HexString.toHexString(sid) + ")'s link up trap, port number = " + port);
+            LOG.info("Get switch (ip: {}, mac: {})'s link up trap, port number = {}", switchIP, HexString.toHexString(sid), port);
             ISwitch sw = controller.getSwitch(sid);
-            if(sw == null)System.out.println("ISwitch sw is null!");
+            if(sw == null)LOG.warn("ISwitch sw is null!");
             //((SwitchHandler)sw).updatePhysicalPort(new SNMPPhysicalPort(port));
             SNMPPortStatus portStatus = new SNMPPortStatus();
             SNMPPhysicalPort phyPort = new SNMPPhysicalPort(port);
@@ -144,7 +121,7 @@ public class SNMPListener implements SNMPv2TrapListener, Runnable{
             ((Controller)controller).takeSwitchEventMsg(sw, portStatus);
         }
         else{
-            System.out.println("--> can't recognize this trap");
+            LOG.info("--> can't recognize this trap");
         }
         /* example
             trap OID:           1.3.6.1.6.3.1.1.5.4
