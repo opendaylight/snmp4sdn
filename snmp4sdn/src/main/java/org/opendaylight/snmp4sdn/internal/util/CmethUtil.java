@@ -22,17 +22,13 @@ public class CmethUtil{
     public CmethUtil(){
         table = new ConcurrentHashMap<Long, Vector>();
         readDB();
-        /*table.put(HexString.toLong("00:00:00:00:00:01"), "10.217.0.31");
-        table.put(HexString.toLong("00:00:00:00:00:02"), "10.217.0.32");
-        table.put(HexString.toLong("00:00:00:00:00:03"), "10.217.0.33");
-        table.put(HexString.toLong("00:00:00:00:00:04"), "10.217.0.34");
-        table.put(HexString.toLong("00:00:00:00:00:05"), "10.217.0.35");*/
     }
 
     private void readDB(){
         System.out.println("enter CmethUtil.readDB()");
         try{
-        FileReader FileStream=new FileReader("D:\\OpenDaylight\\snmp4sdn\\snmp4sdn\\src\\test\\switch_login_db.csv");
+        System.out.println("open file /home/christine/snmp4sdn/snmp4sdn/src/test/switch_login_db.csv");
+        FileReader FileStream=new FileReader("/home/christine/snmp4sdn/snmp4sdn/src/test/switch_login_db.csv");
         BufferedReader BufferedStream=new BufferedReader(FileStream);
         String line;
 
@@ -53,17 +49,17 @@ public class CmethUtil{
             ip = str.substring(0, str.indexOf(",")).trim();
             if(ip.startsWith(","))System.out.println("ip field is empty");
             //System.out.println("ip: " + ip);
-            
+
             str = str.substring(str.indexOf(",") + 1).trim();
             snmp_community = str.substring(0, str.indexOf(",")).trim();
             if(snmp_community.startsWith(","))System.out.println("snmp_community field is empty");
             //System.out.println("snmp_community: " + snmp_community);
-            
+
             str = str.substring(str.indexOf(",") + 1).trim();
             cli_username = str.substring(0, str.indexOf(",")).trim();
             if(cli_username.startsWith(","))System.out.println("cli_username field is empty");
             //System.out.println("cli_username: " + cli_username);
-            
+
             str = str.substring(str.indexOf(",") + 1).trim();
             cli_password = new String(str);
             if(cli_password.startsWith(","))System.out.println("cli_password field is empty");
@@ -74,7 +70,7 @@ public class CmethUtil{
         }catch(Exception e){
             System.out.println("CmethUtil.readDB() err: " + e);
         }
-        
+
     }
 
     public void addEntry(Long mac, String ip, String snmp_community, String cli_username, String cli_password){
@@ -84,6 +80,10 @@ public class CmethUtil{
         entryVec.add(cli_username);
         entryVec.add(cli_password);
         table.put(mac, entryVec);
+    }
+
+    public ConcurrentMap<Long, Vector> getEntries(){
+        return new ConcurrentHashMap<Long, Vector>(table);
     }
 
     public String getIpAddr(Long macAddr){
@@ -135,33 +135,5 @@ public class CmethUtil{
         return null;
     }
 
-    public static String _getIpAddr(Long macAddr){
-            //look up table...
-            long mac = macAddr.longValue();
-            /*if(mac == HexString.toLong("70:72:CF:2A:87:41"))
-                return "10.217.0.31";
-            else if(mac == HexString.toLong("90:94:E4:23:13:E0"))
-                return "10.217.0.32";
-            else if(mac == HexString.toLong("90:94:E4:23:0B:00"))
-                return "10.217.0.33";
-            else if(mac == HexString.toLong("90:94:E4:23:0B:20"))
-                return "10.217.0.34";
-            else if(mac == HexString.toLong("90:94:E4:23:0A:E0"))
-                return "10.217.0.35";
-            else
-                return null;*/
-            if(mac == HexString.toLong("00:00:00:00:00:01"))
-                return "10.217.0.31";
-            else if(mac == HexString.toLong("00:00:00:00:00:02"))
-                return "10.217.0.32";
-            else if(mac == HexString.toLong("00:00:00:00:00:03"))
-                return "10.217.0.33";
-            else if(mac == HexString.toLong("00:00:00:00:00:04"))
-                return "10.217.0.34";
-            else if(mac == HexString.toLong("00:00:00:00:00:05"))
-                return "10.217.0.35";
-            else
-                return null;
-        }
 }
 

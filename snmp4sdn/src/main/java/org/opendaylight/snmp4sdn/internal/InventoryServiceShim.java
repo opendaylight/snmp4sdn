@@ -216,6 +216,15 @@ public class InventoryServiceShim implements IContainerListener,
             return;
         }
 
+    boolean isTrapMechnismCancled = true;//s4s: if true, trap mechanism is cancled
+    if(isTrapMechnismCancled){//s4s:directly do what the "notifyInventoryShimListener()-->notifyInventoryShimExternalListener()" at the else section below will do.
+        for (IInventoryShimExternalListener s : this.inventoryShimExternalListeners) {
+            System.out.println("new port event: InventoryServiceShim.notifyInventoryShimExternalListener(), then now call to DiscoveryService.doEthSwDiscovery()");
+            if(s.getClass().getName().equals(DiscoveryService.class.getName()))
+                ((DiscoveryService)s).doEthSwDiscovery();
+        }
+    }
+    else{
         // Add all the nodeConnectors of this switch
         Map<NodeConnector, Set<Property>> ncProps = InventoryServiceHelper
                 .SNMPSwitchToProps(sw);
@@ -223,6 +232,7 @@ public class InventoryServiceShim implements IContainerListener,
             notifyInventoryShimListener(entry.getKey(), UpdateType.ADDED,
                     entry.getValue());
         }
+    }
 
         // Add this node
         addNode(sw);

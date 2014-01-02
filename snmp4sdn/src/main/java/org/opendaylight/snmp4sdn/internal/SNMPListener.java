@@ -51,6 +51,10 @@ public class SNMPListener implements SNMPv2TrapListener, Runnable{
     private static String linkDownOID = "1.3.6.1.6.3.1.1.5.3";
     private static String linkUpOID = "1.3.6.1.6.3.1.1.5.4";
 
+    private boolean isFakeSim = false;//s4s: if true, auto generate fake parameters
+    private boolean isTrapMechnismCancled = true;//s4s: if true, trap mechanism is cancled
+    //private boolean isRegardAnyTrapAsSwJoin = false;//s4s: if true, regard any received snmp trap as a switch want to join in
+
     public SNMPListener(IController controller, CmethUtil cmethUtil){
         this.controller = controller;
         this.cmethUtil = cmethUtil;
@@ -98,50 +102,86 @@ public class SNMPListener implements SNMPv2TrapListener, Runnable{
         System.out.println("  system uptime:      " + pdu.getSysUptime().toString());
         System.out.println("  trap OID:           " + pdu.getSNMPTrapOID().toString());
         System.out.println("  var bind list:      " + pdu.getVarBindList().toString());
+        System.out.println("000000000");
 
         String switchIP = agentIPAddress.getHostAddress();
         String trapOID = pdu.getSNMPTrapOID().toString();
-        if(trapOID.compareTo(bootColdStartOID) == 0 || trapOID.compareTo(bootWarmStartOID) == 0)
+
+        ISwitch sw;
+        String chassisID;
+        Long sid;
+
+        if(cmethUtil.getSID(switchIP) == null){
+            System.out.println("--> this switch is not listed in iplist.csv (can't find the sid of IP address" + agentIPAddress.getHostAddress() +")");
+            return;
+        }
+        if(cmethUtil.getSnmpCommunity(cmethUtil.getSID(switchIP)) == null){
+            System.out.println("--> this switch is not listed in iplist.csv (can't find the community '" + communityName +"' of IP address" + agentIPAddress.getHostAddress() +")");
+            return;
+        }
+        if(!communityName.equals(cmethUtil.getSnmpCommunity(cmethUtil.getSID(switchIP)))){
+            System.out.println("--> this switch doesn't belong to our SNMP community");
+            return;
+        }
+        if(communityName == null){
+            System.out.println("--> the 'community name' in the trap is null. Ignore this trap.");
+            return;
+        }
+
+        /*
+        //The following sections of isRegardAnyTrapAsSwJoin: regard any trap as switch join
+
+        //add new switch
+        if(isRegardAnyTrapAsSwJoin){
+            sid = cmethUtil.getSID(switchIP);
+            handleAddingSwitchAndItsPorts(sid);
+            return;
+        */
+
+        /*
+        * The following 'if-elseif-else' section: identify different trap OID, to process switch-boot / link-up / link-down
+        */
+        /*if(trapOID.compareTo(bootColdStartOID) == 0 || trapOID.compareTo(bootWarmStartOID) == 0)
         {//new switch
-            String chassisID = (new SNMPHandler(cmethUtil)).getLLDPChassis(switchIP);
+            if(isFakeSim == false){
+            chassisID = (new SNMPHandler(cmethUtil)).getLLDPChassis(switchIP);
             chassisID = chassisID.replaceAll(" ", ":");
-            Long sid = HexString.toLong(chassisID);
+            sid = HexString.toLong(chassisID);
             //TODO:should compare whether getLLDPChassis() == cmethUtil.getSID()
             //cmethUtil.addEntry(sid, switchIP);
             sid = cmethUtil.getSID(switchIP);
-            ((Controller)controller).handleNewConnection(sid);
+            }
+            else sid = 1L;
+
+            handleAddingSwitch(sid);
         }
-        else if(trapOID.compareTo(linkDownOID) == 0)
+        else */if(trapOID.compareTo(linkDownOID) == 0)
         {//link down
             short port = -1;
             //...retrieve the port number from the trap's content
             //...
             //...
-            Long sid = cmethUtil.getSID(switchIP);
-            ISwitch sw = controller.getSwitch(sid);
-            ((SwitchHandler)sw).deletePhysicalPort(new SNMPPhysicalPort(port));
+            //sid = cmethUtil.getSID(switchIP);
+            //sw = controller.getSwitch(sid);
+            //((SwitchHandler)sw).deletePhysicalPort(new SNMPPhysicalPort(port));
         }
         else if(trapOID.compareTo(linkUpOID) == 0)
         {//link up
+            short port = -1;
+            String portName;
+            if(isFakeSim == false){
+            sid = cmethUtil.getSID(switchIP);
             SNMPSequence seq = pdu.getVarBindList();
-            if(seq.size() < 3){
-                System.out.println("link up trap's information format error!");
-                System.exit(0);
+            portName = getPortName(sid, seq);
             }
-            SNMPSequence seq2 = (SNMPSequence)(((Vector)(seq.getValue())).elementAt(2));
-            System.out.println(seq2.toString());
-            String oidstr = ((SNMPObject)(((Vector)(seq2.getValue())).elementAt(0))).toString();
-            short port = Short.parseShort(oidstr.substring(oidstr.lastIndexOf(".") + 1));
-            Long sid = cmethUtil.getSID(switchIP);
+            else{
+            port = 1;
+            sid = 1L;
+            portName = new String("eth" + port);
+            }
+
             System.out.println("Get switch (ip: " + switchIP + ", mac:" + HexString.toHexString(sid) + ")'s link up trap, port number = " + port);
-            ISwitch sw = controller.getSwitch(sid);
-            if(sw == null)System.out.println("ISwitch sw is null!");
-            //((SwitchHandler)sw).updatePhysicalPort(new SNMPPhysicalPort(port));
-            SNMPPortStatus portStatus = new SNMPPortStatus();
-            SNMPPhysicalPort phyPort = new SNMPPhysicalPort(port);
-            portStatus.setDesc(phyPort);
-            portStatus.setReason((byte)SNMPPortReason.SNMPPPR_ADD.ordinal());
-            ((Controller)controller).takeSwitchEventMsg(sw, portStatus);
+            handleAddingNewPort(sid, port, portName);
         }
         else{
             System.out.println("--> can't recognize this trap");
@@ -153,10 +193,107 @@ public class SNMPListener implements SNMPv2TrapListener, Runnable{
         */
     }
 
+    private void handleAddingSwitchAndItsPorts(Long sid){
+        handleAddingSwitch(sid);
+        while(controller.getSwitch(sid) == null){
+            System.out.println("snmp4sdn-controller.handleNewConnection(" + sid + ") not yet done");
+            try{
+                Thread.sleep(500);
+            }catch(Exception e){;}
+        }
+        scanAndAddPort(sid);
+    }
+    
+    private ISwitch handleAddingSwitch(Long sid){
+        ISwitch sw = controller.getSwitch(sid);
+        if(sw != null){
+            System.out.println("--> switch (ip: " + cmethUtil.getIpAddr(sid) + ", sid: " + HexString.toHexString(sid) + ") already join in controller");
+        }
+        else{
+            System.out.println("--> a new switch (ip: " + cmethUtil.getIpAddr(sid) + ", sid: " + HexString.toHexString(sid) + ") join in controller");
+            ((Controller)controller).handleNewConnection(sid);
+        }
+        return sw;
+    }
+
+    private void scanAndAddPort(Long sid){
+            short port;
+            SNMPPhysicalPort phyPort;
+            Map<Short, String> portIDTable = (new SNMPHandler(cmethUtil)).readLLDPLocalPortIDs(sid);
+            for(Map.Entry<Short, String> entry : portIDTable.entrySet()){
+                String portName = entry.getValue();
+                port = entry.getKey().shortValue();
+                phyPort = new SNMPPhysicalPort(port);
+                phyPort.setName(portName);
+                System.out.println("In SNMPListener.java, Add to switch (ip: " + cmethUtil.getIpAddr(sid) + ", mac:" + HexString.toHexString(sid) + ") a new port, port number = " + port);
+                handleAddingNewPort(sid, port, portName);
+            }
+    }
+
+    private String getPortName(Long sid, SNMPSequence seq){
+            if(seq.size() < 3){
+                System.out.println("link up trap's information format error!");
+                System.exit(0);
+            }
+            SNMPSequence seq2 = (SNMPSequence)(((Vector)(seq.getValue())).elementAt(2));
+            System.out.println(seq2.toString());
+            String oidstr = ((SNMPObject)(((Vector)(seq2.getValue())).elementAt(0))).toString();
+            short port = Short.parseShort(oidstr.substring(oidstr.lastIndexOf(".") + 1));
+            Map<Short, String> portIDTable = (new SNMPHandler(cmethUtil)).readLLDPLocalPortIDs(sid);
+            String portName = portIDTable.get(new Short(port));
+            return portName;
+    }
+
     private Long getSIDfromLLDPChassis(String switchIP){
         String chassisID = (new SNMPHandler(cmethUtil)).getLLDPChassis(switchIP);
         chassisID = chassisID.replaceAll(" ", ":");
         Long sid = HexString.toLong(chassisID);
         return sid;
+    }
+
+    private void handleAddingNewPort(Long sid, short port, String portName){
+        ISwitch sw = controller.getSwitch(sid);
+        if(sw == null)System.out.println("ISwitch sw is null!"); 
+
+        SNMPPhysicalPort phyPort = new SNMPPhysicalPort(port);
+        phyPort.setName(portName);
+
+        SNMPPortStatus portStatus = new SNMPPortStatus();
+        portStatus.setDesc(phyPort);
+        portStatus.setReason((byte)SNMPPortReason.SNMPPPR_ADD.ordinal());
+
+        /*((SwitchHandler)sw).updatePhysicalPort(new SNMPPhysicalPort(port));
+        ((Controller)controller).takeSwitchEventMsg(sw, portStatus);*///done in the line below
+        ((SwitchHandler)sw).handleMessages(portStatus);
+    }
+
+    private void fake2switch(){//s4s fake2sw
+            Long sid = 2L;
+            short port = 2;
+            String switchIP = "10.217.0.32";
+            System.out.println("fake switch (ip: " + switchIP + ", mac:" + HexString.toHexString(sid) + " added");
+            ((Controller)controller).handleNewConnection(sid);
+    }
+    private void fake2switchport(){//s4s fake2sw
+            Long sid = 2L;
+            short port = 2;
+            String switchIP = "10.217.0.32";
+            System.out.println("fake port of switch (ip: " + switchIP + ", mac:" + HexString.toHexString(sid) + ")'s link up trap, port number = " + port);
+            ISwitch sw = controller.getSwitch(sid);
+            if(sw == null)System.out.println("ISwitch sw is null!");
+            
+            SNMPPhysicalPort phyPort = new SNMPPhysicalPort(port);
+            //Map<Short, String> portIDTable = (new SNMPHandler(cmethUtil)).readLLDPLocalPortIDs(cmethUtil.getSID(switchIP));
+            //String portName = portIDTable.get(new Short(port));
+            //phyPort.setName(portName);
+            phyPort.setName("eth2");
+
+            SNMPPortStatus portStatus = new SNMPPortStatus();
+            portStatus.setDesc(phyPort);
+            portStatus.setReason((byte)SNMPPortReason.SNMPPPR_ADD.ordinal());
+
+            /*((SwitchHandler)sw).updatePhysicalPort(new SNMPPhysicalPort(port));
+            ((Controller)controller).takeSwitchEventMsg(sw, portStatus);*///done in the line below
+            ((SwitchHandler)sw).handleMessages(portStatus);
     }
 }

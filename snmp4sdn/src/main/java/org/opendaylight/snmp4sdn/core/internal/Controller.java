@@ -34,15 +34,23 @@ import org.opendaylight.snmp4sdn.core.IController;
 import org.opendaylight.snmp4sdn.core.IMessageListener;
 import org.opendaylight.snmp4sdn.core.ISwitch;
 import org.opendaylight.snmp4sdn.core.ISwitchStateListener;
+import org.opendaylight.snmp4sdn.internal.SNMPHandler;
 import org.opendaylight.snmp4sdn.internal.SNMPListener;
 import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
 import org.opendaylight.snmp4sdn.protocol.SNMPMessage;
 import org.opendaylight.snmp4sdn.protocol.SNMPType;
+import org.opendaylight.snmp4sdn.protocol.SNMPPhysicalPort;
+import org.opendaylight.snmp4sdn.protocol.SNMPPortStatus;
+import org.opendaylight.snmp4sdn.protocol.SNMPPortStatus.SNMPPortReason;
 import org.openflow.util.HexString;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.Vector;
 
 public class Controller implements IController, CommandProvider {
     private static final Logger logger = LoggerFactory
@@ -83,6 +91,7 @@ public class Controller implements IController, CommandProvider {
                                     existingSwitch, sw);
                             disconnectSwitch(existingSwitch);
                         }
+                        if(sw == null)System.out.println("in EventHandler.SWITCH_ADD: ISwitch sw is null!");
                         switches.put(sid, sw);
                         notifySwitchAdded(sw);
                         break;
@@ -93,11 +102,14 @@ public class Controller implements IController, CommandProvider {
                         disconnectSwitch(sw);
                         break;
                     case SWITCH_MESSAGE:
+                        System.out.println("new port event -- Controller.EventHandler()");
                         SNMPMessage msg = ev.getMsg();
                         if (msg != null) {
+                            System.out.println("Controller has " + messageListeners.size() + " messageListeners");
                             IMessageListener listener = messageListeners
                                     .get(msg.getType());
                             if (listener != null) {
+                                System.out.println("call IMessageListener whose class name is " + listener.getClass().getName());
                                 listener.receive(sw, msg);
                             }
                         }
@@ -164,6 +176,8 @@ public class Controller implements IController, CommandProvider {
         cmethUtil = new CmethUtil();
         snmpListener = new SNMPListener(this, cmethUtil);
         snmpListener.start();
+
+        constructNetwork();//s4s: get switches from CmethUtil (i.e. a file), then for each of the switches, read their LLDP, and resolve all these LLDP data, then form the topology of the switches and their ports
     }
 
     /**
@@ -253,7 +267,7 @@ public class Controller implements IController, CommandProvider {
                 logger.info("Switch:{} is connected to the Controller",
                         sc.socket().getRemoteSocketAddress()
                         .toString().split("/")[1]);
-            }*///s4s:OF's 
+            }*///s4s:OF's
             logger.info("Switch:{} is connected to the Controller");
 
             takeSwitchEventAdd(switchHandler);//s4s: in OF, this function is called in SwitchHandler, now we put it here directly
@@ -295,6 +309,7 @@ public class Controller implements IController, CommandProvider {
     }
 
     public void takeSwitchEventAdd(ISwitch sw) {
+        if(sw == null)System.out.println("in takeSwitchEventAdd: ISwitch sw is null!");
         SwitchEvent ev = new SwitchEvent(
                 SwitchEvent.SwitchEventType.SWITCH_ADD, sw, null);
         addSwitchEvent(ev);
@@ -313,6 +328,7 @@ public class Controller implements IController, CommandProvider {
     }
 
     public void takeSwitchEventMsg(ISwitch sw, SNMPMessage msg) {
+        System.out.println("new port event-- Controller.takeSwitchEventMsg() and will addSwitchEvent() switchEvents.put");
         if (messageListeners.get(msg.getType()) != null) {
             SwitchEvent ev = new SwitchEvent(
                     SwitchEvent.SwitchEventType.SWITCH_MESSAGE, sw, msg);
@@ -391,6 +407,67 @@ public class Controller implements IController, CommandProvider {
                 .getBundleContext();
         bundleContext.registerService(CommandProvider.class.getName(), this,
                 null);
+    }
+
+    public void constructNetwork(){
+        ConcurrentMap<Long, Vector> entries = cmethUtil.getEntries();
+        for(ConcurrentMap.Entry<Long, Vector> entry : entries.entrySet()){
+            Long sid = entry.getKey();
+            handleAddingSwitchAndItsPorts(sid);
+        }
+    }
+
+    private void handleAddingSwitchAndItsPorts(Long sid){
+        handleAddingSwitch(sid);
+        while(this.switches.get(sid) == null){
+            System.out.println("snmp4sdn-controller.handleNewConnection(" + sid + ") not yet done");
+            try{
+                Thread.sleep(500);
+            }catch(Exception e){;}
+        }
+        scanAndAddPort(sid);
+    }
+
+    private ISwitch handleAddingSwitch(Long sid){
+        ISwitch sw = switches.get(sid);
+        if(sw != null){
+            System.out.println("--> switch (ip: " + cmethUtil.getIpAddr(sid) + ", sid: " + HexString.toHexString(sid) + ") already join in controller");
+        }
+        else{
+            System.out.println("--> a new switch (ip: " + cmethUtil.getIpAddr(sid) + ", sid: " + HexString.toHexString(sid) + ") join in controller");
+            handleNewConnection(sid);
+        }
+        return sw;
+    }
+
+    private void scanAndAddPort(Long sid){
+            short port;
+            SNMPPhysicalPort phyPort;
+            Map<Short, String> portIDTable = (new SNMPHandler(cmethUtil)).readLLDPLocalPortIDs(sid);
+            for(Map.Entry<Short, String> entry : portIDTable.entrySet()){
+                String portName = entry.getValue();
+                port = entry.getKey().shortValue();
+                phyPort = new SNMPPhysicalPort(port);
+                phyPort.setName(portName);
+                System.out.println("Add to switch (ip: " + cmethUtil.getIpAddr(sid) + ", mac:" + HexString.toHexString(sid) + ") a new port, port number = " + port);
+                handleAddingNewPort(sid, port, portName);
+            }
+    }
+
+    private void handleAddingNewPort(Long sid, short port, String portName){
+        ISwitch sw = switches.get(sid);
+        if(sw == null)System.out.println("ISwitch sw is null!"); 
+
+        SNMPPhysicalPort phyPort = new SNMPPhysicalPort(port);
+        phyPort.setName(portName);
+
+        SNMPPortStatus portStatus = new SNMPPortStatus();
+        portStatus.setDesc(phyPort);
+        portStatus.setReason((byte)SNMPPortReason.SNMPPPR_ADD.ordinal());
+
+        /*((SwitchHandler)sw).updatePhysicalPort(new SNMPPhysicalPort(port));
+        ((Controller)controller).takeSwitchEventMsg(sw, portStatus);*///done in the line below
+        ((SwitchHandler)sw).handleMessages(portStatus);
     }
 
     @Override
