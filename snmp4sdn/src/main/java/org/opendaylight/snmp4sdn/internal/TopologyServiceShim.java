@@ -14,6 +14,7 @@ package org.opendaylight.snmp4sdn.internal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,6 +44,7 @@ import org.opendaylight.controller.sal.core.Bandwidth;
 import org.opendaylight.controller.sal.core.Config;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.Edge;
+import org.opendaylight.controller.sal.core.IContainerAware;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -59,7 +61,7 @@ import org.opendaylight.controller.sal.utils.GlobalConstants;
  */
 public class TopologyServiceShim implements IDiscoveryListener,
         IContainerListener, CommandProvider, IRefreshInternalProvider,
-        IInventoryShimExternalListener {
+        IInventoryShimExternalListener, IContainerAware {
     protected static final Logger logger = LoggerFactory
             .getLogger(TopologyServiceShim.class);
     private ConcurrentMap<String, ITopologyServiceShimListener> topologyServiceShimListeners = new ConcurrentHashMap<String, ITopologyServiceShimListener>();
@@ -822,4 +824,29 @@ public class TopologyServiceShim implements IDiscoveryListener,
             break;
         }
     }
+    @Override
+    public void containerCreate(String containerName) {
+        // do nothing
+    }
+
+    @Override
+    public void containerDestroy(String containerName) {
+        Set<NodeConnector> removeNodeConnectorSet = new HashSet<NodeConnector>();
+        for (Map.Entry<NodeConnector, List<String>> entry : containerMap.entrySet()) {
+            List<String> ncContainers = entry.getValue();
+            if (ncContainers.contains(containerName)) {
+                NodeConnector nodeConnector = entry.getKey();
+                removeNodeConnectorSet.add(nodeConnector);
+            }
+        }
+        for (NodeConnector nodeConnector : removeNodeConnectorSet) {
+            List<String> ncContainers = containerMap.get(nodeConnector);
+            ncContainers.remove(containerName);
+            if (ncContainers.isEmpty()) {
+                containerMap.remove(nodeConnector);
+            }
+        }
+        edgeMap.remove(containerName);
+    }
+
 }

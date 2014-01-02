@@ -13,6 +13,7 @@ This code reused the code base of OpenFlow plugin contributed by Cisco Systems, 
 package org.opendaylight.snmp4sdn.internal;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.ContainerFlow;
+import org.opendaylight.controller.sal.core.IContainerAware;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -59,7 +61,7 @@ import org.opendaylight.snmp4sdn.protocol.action.SNMPActionOutput;
 
 
 public class DataPacketMuxDemux implements IContainerListener,
-        IMessageListener, IDataPacketMux, IInventoryShimExternalListener {
+        IMessageListener, IDataPacketMux, IInventoryShimExternalListener, IContainerAware {
     protected static final Logger logger = LoggerFactory
             .getLogger(DataPacketMuxDemux.class);
     private IController controller = null;
@@ -391,4 +393,29 @@ public class DataPacketMuxDemux implements IContainerListener,
             UpdateType type, Set<Property> props) {
         // do nothing
     }
+    @Override
+    public void containerCreate(String containerName) {
+        // do nothing
+    }
+
+    @Override
+    public void containerDestroy(String containerName) {
+        Set<NodeConnector> removeNodeConnectorSet = new HashSet<NodeConnector>();
+        for (Map.Entry<NodeConnector, List<String>> entry : nc2Container.entrySet()) {
+            List<String> ncContainers = entry.getValue();
+            if (ncContainers.contains(containerName)) {
+                NodeConnector nodeConnector = entry.getKey();
+                removeNodeConnectorSet.add(nodeConnector);
+            }
+        }
+        for (NodeConnector nodeConnector : removeNodeConnectorSet) {
+            List<String> ncContainers = nc2Container.get(nodeConnector);
+            ncContainers.remove(containerName);
+            if (ncContainers.isEmpty()) {
+                nc2Container.remove(nodeConnector);
+            }
+        }
+        container2FlowSpecs.remove(containerName);
+    }
+
 }

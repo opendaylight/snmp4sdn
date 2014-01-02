@@ -32,6 +32,7 @@ import org.opendaylight.snmp4sdn.core.IController;//s4s
 //import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;//s4s //receive()
 import org.opendaylight.snmp4sdn.core.ISwitch;//s4s
 import org.opendaylight.controller.sal.core.ContainerFlow;
+import org.opendaylight.controller.sal.core.IContainerAware;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
@@ -74,7 +75,7 @@ import org.opendaylight.snmp4sdn.internal.SNMPHandler;//s4s add
  */
 public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         /*IMessageListener,*/ IContainerListener, IInventoryShimExternalListener,//s4s actully IInventoryShimExternalListener seems useless
-        CommandProvider {
+        CommandProvider, IContainerAware {
     private static final Logger log = LoggerFactory
             .getLogger(FlowProgrammerService.class);
     private IController controller;
@@ -840,8 +841,9 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
             //to retrieve (3) and check it structure correct
         Action action1 = flow1.getActions().get(0);
         if(flow1.getActions().size() > 1) {
-            System.out.println("flow.getActions() > 1");
-            System.exit(0);
+            System.out.println("flow1.getActions() > 1, the Action are:");
+            for(int i = 0; i < flow1.getActions().size(); i++)
+                System.out.println(flow1.getActions().get(i));
         }
         if(action1.getType() != ActionType.OUTPUT){
             System.out.println("flow's action is not to set OUTPUT port!");
@@ -858,8 +860,9 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
             //to retrieve (3) and check it structure correct
         Action action2 = flow2.getActions().get(0);
         if(flow2.getActions().size() > 1) {
-            System.out.println("flow.getActions() > 1");
-            System.exit(0);
+            System.out.println("flow2.getActions() > 1, the Action are:");
+            for(int i = 0; i < flow1.getActions().size(); i++)
+                System.out.println(flow1.getActions().get(i));
         }
         if(action2.getType() != ActionType.OUTPUT){
             System.out.println("flow's action is not to set OUTPUT port!");
@@ -1185,4 +1188,13 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         return "10.216.0.31";
     }
 */
+    @Override
+    public void containerCreate(String containerName) {
+        // do nothing
+    }
+
+    @Override
+    public void containerDestroy(String containerName) {
+        containerToNc.remove(containerName);
+    }
 }

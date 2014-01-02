@@ -33,6 +33,7 @@ import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Output;
 import org.opendaylight.controller.sal.core.ContainerFlow;
+import org.opendaylight.controller.sal.core.IContainerAware;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -63,7 +64,7 @@ import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
  *
  */
 public class ReadServiceFilter implements IPluginReadServiceFilter,
-        IContainerListener {
+        IContainerListener, IContainerAware {
     private static final Logger logger = LoggerFactory
             .getLogger(ReadServiceFilter.class);
     private IController controller = null;
@@ -505,6 +506,15 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
 
                 return new TableStatisticsConverter(sid, filteredList)
                 .getNodeTableStatsList();
+    }
+    @Override
+    public void containerCreate(String containerName) {
+        // do nothing
+    }
+
+    @Override
+    public void containerDestroy(String containerName) {
+        containerToNc.remove(containerName);
     }
 
 }

@@ -34,6 +34,7 @@ import org.opendaylight.controller.sal.core.Capabilities;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.Description;
+import org.opendaylight.controller.sal.core.IContainerAware;
 import org.opendaylight.controller.sal.core.IContainerListener;
 import org.opendaylight.controller.sal.core.MacAddress;
 import org.opendaylight.controller.sal.core.Node;
@@ -62,7 +63,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class InventoryServiceShim implements IContainerListener,
-        IMessageListener, ISwitchStateListener, IStatisticsListener {
+        IMessageListener, ISwitchStateListener, IStatisticsListener, IContainerAware {
     protected static final Logger logger = LoggerFactory
             .getLogger(InventoryServiceShim.class);
     private IController controller = null;
@@ -498,4 +499,43 @@ public class InventoryServiceShim implements IContainerListener,
 
         return mac;
     }
+    @Override
+    public void containerCreate(String containerName) {
+        // do nothing
+    }
+
+    @Override
+    public void containerDestroy(String containerName) {
+        /*Set<NodeConnector> removeNodeConnectorSet = new HashSet<NodeConnector>();
+        Set<Node> removeNodeSet = new HashSet<Node>();
+        for (Map.Entry<NodeConnector, Set<String>> entry : nodeConnectorContainerMap.entrySet()) {
+            Set<String> ncContainers = entry.getValue();
+            if (ncContainers.contains(containerName)) {
+                NodeConnector nodeConnector = entry.getKey();
+                removeNodeConnectorSet.add(nodeConnector);
+            }
+        }
+        for (Map.Entry<Node, Set<String>> entry : nodeContainerMap.entrySet()) {
+            Set<String> nodeContainers = entry.getValue();
+            if (nodeContainers.contains(containerName)) {
+                Node node = entry.getKey();
+                removeNodeSet.add(node);
+            }
+        }
+        for (NodeConnector nodeConnector : removeNodeConnectorSet) {
+            Set<String> ncContainers = nodeConnectorContainerMap.get(nodeConnector);
+            ncContainers.remove(containerName);
+            if (ncContainers.isEmpty()) {
+                nodeConnectorContainerMap.remove(nodeConnector);
+            }
+        }
+        for (Node node : removeNodeSet) {
+            Set<String> nodeContainers = nodeContainerMap.get(node);
+            nodeContainers.remove(containerName);
+            if (nodeContainers.isEmpty()) {
+                nodeContainerMap.remove(node);
+            }
+        }*///s4s IContainerAware
+    }
+
 }
