@@ -32,6 +32,8 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
+import org.opendaylight.controller.sal.core.Bandwidth;
+import org.opendaylight.controller.sal.core.Name;
 import org.opendaylight.controller.sal.core.UpdateType;
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
 import org.opendaylight.controller.sal.inventory.IPluginOutInventoryService;
@@ -165,6 +167,12 @@ public class InventoryService implements IInventoryShimInternalListener,
         return nodeConnectorProps;
     }
 
+    // nothing to return
+    @Override
+    public Set<Node> getConfiguredNotConnectedNodes() {
+        return Collections.emptySet();
+    }
+
     @Override
     public void updateNodeConnector(NodeConnector nodeConnector,
             UpdateType type, Set<Property> props) {
@@ -175,6 +183,15 @@ public class InventoryService implements IInventoryShimInternalListener,
             return;
         }
 
+        /*Name newprop = new Name("s1-eth1");//s4s test
+        for (Property prop : props) {//s4s test
+            if(prop.getName().equals("name")){
+                props.remove(prop);
+                props.add(newprop);
+            }
+        }
+        props.add(new Bandwidth((long) Math.pow(10, 9)));//s4s test*/
+                
         Map<String, Property> propMap = nodeConnectorProps.get(nodeConnector);
         switch (type) {
         case ADDED:
@@ -199,6 +216,12 @@ public class InventoryService implements IInventoryShimInternalListener,
         // update sal and discovery
         synchronized (pluginOutInventoryServices) {
             for (IPluginOutInventoryService service : pluginOutInventoryServices) {
+                System.out.println("new port event-- InventoryService.updateNodeConnector() now inform SAL [node " + (Long)nodeConnector.getNode().getID() + "(" + nodeConnector.getNode().getType() + "), port " + (Short)nodeConnector.getID() + "(" + nodeConnector.getType() + "), type " + type.getName() + "]");
+                /*System.out.print("\tnodeConnector props: ");
+                for (Property prop : props)
+                    System.out.print(prop.toString() + ", ");
+                System.out.println();*/
+                System.out.println("\tthe SAL service's name: " + service.getClass().getName());
                 service.updateNodeConnector(nodeConnector, type, props);
             }
         }
