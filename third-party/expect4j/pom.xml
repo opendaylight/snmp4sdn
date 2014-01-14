@@ -21,7 +21,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <!--snmpj-->
         <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
     	<sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
     	<releaseplugin.version>2.3.2</releaseplugin.version>
@@ -29,7 +28,8 @@
 
     <repositories>
         <!-- tcljava is provided by SpringSource -->
-        <repository>
+        <!--the following two SpringSource repositories are used in Expect4j's source, but now were already cached in ODL nexus, so here remove them-->
+        <!--<repository>
             <id>com.springsource.repository.bundles.release</id>
             <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
             <url>http://repository.springsource.com/maven/bundles/release</url>
@@ -38,6 +38,21 @@
             <id>com.springsource.repository.bundles.external</id>
             <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
             <url>http://repository.springsource.com/maven/bundles/external</url>
+        </repository>-->
+
+        <!-- EBR release -->
+        <!-- http://repository.springsource.com/maven/bundles/release -->
+        <repository>
+          <id>ebr-bundles-release</id>
+          <name>ebr-bundles-release</name>
+          <url>${nexusproxy}/repositories/ebr-bundles-release/</url>
+        </repository>
+        <!-- EBR external -->
+        <!-- http://repository.springsource.com/maven/bundles/external -->
+        <repository>
+          <id>ebr-bundles-external</id>
+          <name>ebr-bundles-external</name>
+          <url>${nexusproxy}/repositories/ebr-bundles-external/</url>
         </repository>
     </repositories>
 
