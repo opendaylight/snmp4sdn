@@ -178,14 +178,13 @@ public class InventoryServiceShim implements IContainerListener,
                 handlePortStatusMessage(sw, (SNMPPortStatus) msg);
             }
         } catch (ConstructionException e) {
-            logger.error("",e);
+            logger.warn("",e);
         }
         return;
     }
 
     protected void handlePortStatusMessage(ISwitch sw, SNMPPortStatus m)
             throws ConstructionException {
-        if(sw == null)System.out.println("in handlePortStatusMessage(), ISwitch sw is null!");
         Node node = new Node("SNMP", sw.getId());
         NodeConnector nodeConnector = PortConverter.toNodeConnector(m.getDesc()
                 .getPortNumber(), node);
@@ -200,7 +199,7 @@ public class InventoryServiceShim implements IContainerListener,
         }
 
         logger.trace("handlePortStatusMessage {} type {}", nodeConnector, type);
-        System.out.println("new port event: [Node " + (Long)(nodeConnector.getNode().getID()) + "(" + nodeConnector.getNode().getType() + ")" + " port " + (Short)(nodeConnector.getID()) + "(" + nodeConnector.getType() + ")" + "] -- InventoryServiceShim.handlePortStatusMessage()");
+        //logger.debug("new port event: [Node " + (Long)(nodeConnector.getNode().getID()) + "(" + nodeConnector.getNode().getType() + ")" + " port " + (Short)(nodeConnector.getID()) + "(" + nodeConnector.getType() + ")" + "] -- InventoryServiceShim.handlePortStatusMessage()");
 
         if (type != null) {
             // get node connector properties
@@ -219,7 +218,7 @@ public class InventoryServiceShim implements IContainerListener,
     boolean isTrapMechnismCancled = true;//s4s: if true, trap mechanism is cancled
     if(isTrapMechnismCancled){//s4s:directly do what the "notifyInventoryShimListener()-->notifyInventoryShimExternalListener()" at the else section below will do.
         for (IInventoryShimExternalListener s : this.inventoryShimExternalListeners) {
-            System.out.println("new port event: InventoryServiceShim.notifyInventoryShimExternalListener(), then now call to DiscoveryService.doEthSwDiscovery()");
+            //logger.trace("new port event: InventoryServiceShim.notifyInventoryShimExternalListener(), then now call to DiscoveryService.doEthSwDiscovery()");
             if(s.getClass().getName().equals(DiscoveryService.class.getName()))
                 ((DiscoveryService)s).doEthSwDiscovery();
         }
@@ -255,7 +254,7 @@ public class InventoryServiceShim implements IContainerListener,
     @Override
     public void tagUpdated(String containerName, Node n, short oldTag,
             short newTag, UpdateType t) {
-        logger.debug("tagUpdated: {} type {} for container {}", new Object[] {
+        logger.trace("tagUpdated: {} type {} for container {}", new Object[] {
                 n, t, containerName });
     }
 
@@ -267,10 +266,10 @@ public class InventoryServiceShim implements IContainerListener,
     @Override
     public void nodeConnectorUpdated(String containerName, NodeConnector p,
             UpdateType t) {
-        logger.debug("nodeConnectorUpdated: {} type {} for container {}",
+        logger.trace("nodeConnectorUpdated: {} type {} for container {}",
                 new Object[] { p, t, containerName });
         if (this.containerMap == null) {
-            logger.error("containerMap is NULL");
+            logger.warn("containerMap is NULL");
             return;
         }
         List<String> containers = this.containerMap.get(p);
@@ -319,7 +318,7 @@ public class InventoryServiceShim implements IContainerListener,
     private void notifyInventoryShimExternalListener(
             NodeConnector nodeConnector, UpdateType type, Set<Property> props) {
         for (IInventoryShimExternalListener s : this.inventoryShimExternalListeners) {
-            System.out.println("new port event: InventoryServiceShim.notifyInventoryShimExternalListener(), then now call to DiscoveryService.updateNodeConnector()");
+            //logger.trace("new port event: InventoryServiceShim.notifyInventoryShimExternalListener(), then now call to DiscoveryService.updateNodeConnector()");
             s.updateNodeConnector(nodeConnector, type, props);
         }
     }

@@ -140,7 +140,7 @@ public class InventoryService implements IInventoryShimInternalListener,
      */
     @Override
     public ConcurrentMap<Node, Map<String, Property>> getNodeProps() {
-        logger.debug("getNodePros for container {}", containerName);
+        logger.trace("getNodePros for container {}", containerName);
         return nodeProps;
     }
 
@@ -216,12 +216,8 @@ public class InventoryService implements IInventoryShimInternalListener,
         // update sal and discovery
         synchronized (pluginOutInventoryServices) {
             for (IPluginOutInventoryService service : pluginOutInventoryServices) {
-                System.out.println("new port event-- InventoryService.updateNodeConnector() now inform SAL [node " + (Long)nodeConnector.getNode().getID() + "(" + nodeConnector.getNode().getType() + "), port " + (Short)nodeConnector.getID() + "(" + nodeConnector.getType() + "), type " + type.getName() + "]");
-                /*System.out.print("\tnodeConnector props: ");
-                for (Property prop : props)
-                    System.out.print(prop.toString() + ", ");
-                System.out.println();*/
-                System.out.println("\tthe SAL service's name: " + service.getClass().getName());
+                //logger.trace("new port event-- InventoryService.updateNodeConnector() now inform SAL [node {}({}), port {}({}), type {}]", (Long)nodeConnector.getNode().getID(), nodeConnector.getNode().getType(), nodeConnector.getID(), nodeConnector.getType(), type.getName());
+                //logger.trace("\tthe SAL service's name: {}", service.getClass().getName());
                 service.updateNodeConnector(nodeConnector, type, props);
             }
         }

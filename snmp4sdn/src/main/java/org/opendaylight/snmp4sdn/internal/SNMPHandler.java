@@ -28,6 +28,9 @@ import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.snmp4sdn.protocol.util.HexString;
 import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -41,6 +44,8 @@ import java.util.Map.Entry;
 import java.io.*;
 
 public class SNMPHandler{
+    private static final Logger logger = LoggerFactory
+            .getLogger(SNMPHandler.class);
 
     String portGetOID = "1.3.6.1.2.1.17.7.1.2.2.1.2";//s4s: MAC_PORT_GET's OID
     String typeGetOID = "1.3.6.1.2.1.17.7.1.2.2.1.3";//s4s: MAC_TYPE_GET's OID
@@ -78,7 +83,7 @@ public class SNMPHandler{
         }
         catch(Exception e)
         {
-            System.out.println("Exception during SNMP createSNMPv1CommInterface to switch " + hostAddress + ":" + e + "\n");
+            logger.error("In createSNMPv1CommInterface(), Exception during SNMP createSNMPv1CommInterface to switch {}: {}", hostAddress, e);
         }
 
         return null;
@@ -121,7 +126,7 @@ public class SNMPHandler{
             ans = ans + "00" + sep + "0" + str;
         }
         else{
-            System.out.println("convertToEthSwitchPortString() is given port > 32!");
+            logger.error("convertToEthSwitchPortString() is given port > 32!");
             System.exit(0);
         }
 
@@ -177,7 +182,7 @@ public class SNMPHandler{
             ans = ans + "00" + sep + "00" + sep + "00" + sep + "0" + str;
         }
         else{
-            System.out.println("convertToEthSwitchPortString() is given port > 32!");
+            logger.error("convertToEthSwitchPortString() is given port > 32!");
             System.exit(0);
         }
 
@@ -202,7 +207,7 @@ public class SNMPHandler{
         int count = 0;
         while(loc1 < oid.length()){
             if(count > 5){
-                System.out.println("fwd table has mac addr longer than 6 bytes");
+                logger.error("fwd table has mac addr longer than 6 bytes");
                 System.exit(0);
             }
             loc2 = oid.indexOf(".", loc1 + 1);
@@ -218,7 +223,7 @@ public class SNMPHandler{
 
     //s4s
     private boolean setFwdTableEntry(SNMPv1CommunicationInterface comInterface, String destMac, short vlan, int port, int type){
-        System.out.println("enter setFwdTableEntry()...");
+        logger.debug("enter SNMPHandler.setFwdTableEntry()...");
         try{
             String macOid = macAddrToOID(destMac);
             String portOid = portSetOID + "." + vlan + "." + macOid + ".0";
@@ -228,26 +233,26 @@ public class SNMPHandler{
             SNMPOctetString portOStr =  new SNMPOctetString(convPort);
             SNMPInteger typeInt =  new SNMPInteger(type);
 
-            System.out.println("mac (" + destMac +")'s OID: " + macOid);
-            System.out.println("type: " + typeInt.toString());
+            logger.debug("switch ({})'s OID: {}", destMac, macOid);
+            logger.debug("type: {}", typeInt.toString());
 
             if(type == 2){//delete entry
                 SNMPVarBindList newVars = comInterface.setMIBEntry(typeOid, typeInt);
-                System.out.println("set OID  " + typeOid + ", new value = " + typeInt.getClass().getName() + ":" + typeInt);
+                logger.debug("set OID {}: as new value of {} = {}", typeOid, typeInt.getClass().getName(), typeInt);
             }
             else if(type == 3){//add or modify entry
-                System.out.println("port: " + portOStr.toString());
+                logger.debug("port: {}", portOStr.toString());
 
                 String[] oids = {typeOid, portOid};
                 SNMPObject [] newValues = {typeInt, portOStr};
                 SNMPVarBindList newVars = comInterface.setMIBEntry(oids, newValues); //comInterface.setMIBEntry() can either input array or variable, like here or below
 
                 for(int i = 0; i < oids.length; i++){
-                    System.out.println("set OID  " + oids[i] + ", new value = " + newValues[i].getClass().getName() + ":" + newValues[i]);
+                    logger.debug("set OID {}: new value of {} = {}", oids[i], newValues[i].getClass().getName(), newValues[i]);
                 }
             }
             else{
-                System.out.println("Error: given type (type" + typeInt + ") invalid");
+                logger.error("Error: given type (type {}) invalid", typeInt);
                 System.exit(0);
             }
 
@@ -255,7 +260,7 @@ public class SNMPHandler{
         }
         catch(Exception e)
         {
-            System.out.println("Exception during SNMP setMIBEntry:  " + e + "\n");
+            logger.error("In setFwdTableEntry(), Exception during SNMP setMIBEntry: {}", e);
             return false;
         }
    }
@@ -267,9 +272,9 @@ public class SNMPHandler{
     }*///move to CmethUtil
 
     public Status sendBySNMP(Flow flow, int modType, Long sw_macAddr){
-        System.out.println("enter SNMPHandler.sendBySNMP()");
+        logger.debug("enter SNMPHandler.sendBySNMP()");
 
-        System.out.println("retrieving the metrics in the Flow...");
+        logger.debug("retrieving the metrics in the Flow...");
         //retrieve from the flow: (1)src mac (2)dest mac (3)the port value, to write into fwd table
             //to retrieve (1)&(2)
         Match match = flow.getMatch();
@@ -282,11 +287,11 @@ public class SNMPHandler{
             //to retrieve (3)
         Action action = flow.getActions().get(0);
         if(flow.getActions().size() > 1) {
-            System.out.println("flow.getActions() > 1");
+            logger.error("flow.getActions() > 1");
             System.exit(0);
         }
         if(action.getType() != ActionType.OUTPUT){
-            System.out.println("flow's action is not to set OUTPUT port!");
+            logger.error("flow's action is not to set OUTPUT port!");
             System.exit(0);
         }
         NodeConnector oport = ((Output)action).getPort();
@@ -301,10 +306,10 @@ public class SNMPHandler{
             String community = cmethUtil.getSnmpCommunity(sw_macAddr);
             SNMPv1CommunicationInterface comInterface = createSNMPv1CommInterface(0, sw_ipAddr, community);
 
-            //System.out.println("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
+            //logger.debug("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
 
             //2. now can set fwd table entry
-           // System.out.println("going to set fwd table entry...");
+           // logger.debug("going to set fwd table entry...");
             Short portShort = (Short)(oport.getID());
             short portID = portShort.shortValue();
             int portInt = (int)portID;
@@ -314,7 +319,7 @@ public class SNMPHandler{
                     errorString("program", "snmp to set fwd table", "Vendor Extension Internal Error")));
         }
         catch (UnknownHostException e) {
-            System.out.println("sw_macAddr " + sw_macAddr + "into InetAddress.getByName() error!\n" + e);
+            logger.error("sw_macAddr {} into InetAddress.getByName() error: {}", sw_macAddr, e);
             System.exit(0);
         }
 
@@ -322,11 +327,11 @@ public class SNMPHandler{
     }
 
     private int readFwdTableEntry(SNMPv1CommunicationInterface comInterface, short vlan, String destMac){
-        System.out.println("enter readFwdTableEntry()...");
+        logger.debug("enter readFwdTableEntry()...");
         try{
             String macOid = macAddrToOID(destMac);
             String portOid = portGetOID + "." + vlan + "." + macOid;
-            System.out.println("to retieve mac (" + destMac +")'s port, the OID: " + portOid);
+            logger.debug("to retieve mac ({})'s port, the OID: {}", destMac, portOid);
 
             SNMPVarBindList newVars = comInterface.getMIBEntry(portOid);
             SNMPSequence pair = (SNMPSequence)(newVars.getSNMPObjectAt(0));
@@ -334,27 +339,27 @@ public class SNMPHandler{
             SNMPInteger value = (SNMPInteger)pair.getSNMPObjectAt(1);
             int valueInt = ((BigInteger)value.getValue()).intValue();
 
-            System.out.println("get value " + value.getClass().getName() + ":" + valueInt);
+            logger.debug("get value of {} = {}" + value.getClass().getName(), valueInt);
 
             return valueInt;
 
         }
         catch(Exception e)
         {
-            System.out.println("Exception during SNMP getMIBEntry:  " + e + "\n");
+            logger.error("In readFwdTableEntry(), Exception during SNMP getMIBEntry: {}", e);
             return -1;//meaning fail
         }
     }
 
     private Map<String, Integer> readAllFwdTableEntry(SNMPv1CommunicationInterface comInterface){
-        System.out.println("enter readAllFwdTableEntry()...");
+        logger.debug("enter readAllFwdTableEntry()...");
         Map<String, Integer> table =  new HashMap<String, Integer>();
 
         try{
-            System.out.println("to retieve oid " + portGetOID + "'s value...");
+            logger.debug("to retieve oid {}'s value...", portGetOID);
 
             SNMPVarBindList tableVars = comInterface.retrieveMIBTable(portGetOID);
-            System.out.println("Number of table entries: " + tableVars.size());
+            logger.debug("Number of table entries: {}", tableVars.size());
             for(int i = 0; i < tableVars.size(); i++){
                 SNMPSequence pair = (SNMPSequence)(tableVars.getSNMPObjectAt(i));
                 SNMPObjectIdentifier snmpOID = (SNMPObjectIdentifier)pair.getSNMPObjectAt(0);
@@ -365,22 +370,22 @@ public class SNMPHandler{
                 String vlanOID = vlanmacOID.substring(0, vlanmacOID.indexOf("."));
                 String macOID = vlanmacOID.substring(vlanmacOID.indexOf(".") + 1);
                 table.put(vlanmacOID, new Integer(valueInt));
-                System.out.println("Retrieved OID: " + snmpOID +" (the vlan:" + vlanOID + ", mac:" + macOID +"), value " + value.getClass().getName() + ":" + valueInt);
+                logger.debug("Retrieved OID {} (vlan:{}, mac:{}): value of {} = {}", snmpOID, vlanOID, macOID, value.getClass().getName(), valueInt);
             }
             return table;
 
            }
            catch(Exception e)
            {
-               System.out.println("Exception during SNMP getMIBEntry:  " + e + "\n");
+               logger.error("In readAllFwdTableEntry(), Exception during SNMP getMIBEntry: {}", e);
                return null;
            }
       }
 
     public FlowOnNode readFlowRequest(Flow flow, Node node){
-        System.out.println("enter SNMPHandler.readFlowRequest()");
+        logger.debug("enter SNMPHandler.readFlowRequest()");
 
-        System.out.println("retrieving the metrics in the Flow...");
+        logger.debug("retrieving the metrics in the Flow...");
         //retrieve dest mac from the flow
         Match match = flow.getMatch();
         MatchField fieldVlan = match.getField(MatchType.DL_VLAN);
@@ -399,17 +404,17 @@ public class SNMPHandler{
             sw_ipAddr = InetAddress.getByName(switchIP);
         }
         catch (UnknownHostException e) {
-            System.out.println("sw_macAddr " + sw_macAddr + "into InetAddress.getByName() error!\n" + e);
+            logger.error("sw_macAddr {} into InetAddress.getByName() error!: {}", sw_macAddr, e);
             System.exit(0);
         }
         if(sw_ipAddr == null) return null;
 
         String community = cmethUtil.getSnmpCommunity(sw_macAddr);
         SNMPv1CommunicationInterface comInterface = createSNMPv1CommInterface(0, sw_ipAddr, community);
-        //System.out.println("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
+        //logger.debug("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
 
         //2. read fwd table entry
-        //System.out.println("going to read fwd table entry...");
+        //logger.debug("going to read fwd table entry...");
         int port = readFwdTableEntry(comInterface, vlan, destMac);
         if(port < 0) return null;
 
@@ -423,7 +428,7 @@ public class SNMPHandler{
 
     //return value: 1. null -- switch not found  2. an empty List<FlowOnNode> -- switch found and has no entries
     public List<FlowOnNode>  readAllFlowRequest(Node node){
-        System.out.println("enter SNMPHandler.readAllFlowRequest()");
+        logger.debug("enter SNMPHandler.readAllFlowRequest()");
 
         //Use snmp to read switch fwd table...
 
@@ -436,17 +441,17 @@ public class SNMPHandler{
             sw_ipAddr = InetAddress.getByName(switchIP);
         }
         catch (UnknownHostException e) {
-            System.out.println("sw_macAddr " + sw_macAddr + "into InetAddress.getByName() error!\n" + e);
+            logger.error("sw_macAddr {} into InetAddress.getByName() error!: {}", sw_macAddr, e);
             System.exit(0);
         }
         if(sw_ipAddr == null) return null;
 
         String community = cmethUtil.getSnmpCommunity(sw_macAddr);
         SNMPv1CommunicationInterface comInterface = createSNMPv1CommInterface(0, sw_ipAddr, community);
-        //System.out.println("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
+        //logger.debug("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
 
         //2. now can set fwd table entry
-        //System.out.println("going to read fwd table entry...");
+        //logger.debug("going to read fwd table entry...");
         Map<String, Integer> entries = readAllFwdTableEntry(comInterface);
         if(entries == null) return null;
         return forwardingTableEntriesToFlows(entries, node);
@@ -476,22 +481,22 @@ public class SNMPHandler{
         //e.g. oidstr as "iso.0.8802.1.1.2.1.4.1.1.5.0.49.1", then return "49"
         int tail = oidstr.lastIndexOf(".");
         int head = oidstr.substring(0, tail).lastIndexOf(".") + 1;
-        //System.out.println(oidstr + " ==> head=" + head + ",tail=" + tail);
+        //logger.debug(oidstr + " ==> head=" + head + ",tail=" + tail);
         String ansStr= oidstr.substring(head, tail);
         Short ans = Short.parseShort(ansStr);
-        //System.out.println("oidstr (" + oidstr +") to retrieve port number:" + ans);
+        //logger.debug("oidstr (" + oidstr +") to retrieve port number:" + ans);
         return ans;
     }
 
     private Map<Short, String> readLLDPRemoteChassisIDEntries(SNMPv1CommunicationInterface comInterface){
-        System.out.println("enter readLLDPRemoteChassisIDEntries()...");
+        logger.debug("enter readLLDPRemoteChassisIDEntries()...");
         Map<Short, String> table =  new HashMap<Short, String>();
 
         try{
-            //System.out.println("to retieve oid " + lldpRemoteChassisIdOID + "'s values...");
+            //logger.debug("to retieve oid " + lldpRemoteChassisIdOID + "'s values...");
 
             SNMPVarBindList tableVars = comInterface.retrieveMIBTable(lldpRemoteChassisIdOID);
-            //System.out.println("Number of table entries: " + tableVars.size());
+            //logger.debug("Number of table entries: " + tableVars.size());
             for(int i = 0; i < tableVars.size(); i++){
                 SNMPSequence pair = (SNMPSequence)(tableVars.getSNMPObjectAt(i));
                 SNMPObjectIdentifier snmpOID = (SNMPObjectIdentifier)pair.getSNMPObjectAt(0);
@@ -504,20 +509,20 @@ public class SNMPHandler{
                 String valueStr = HexString.toHexString(valueBytes);
 
                 table.put(portNum, valueStr);
-                //System.out.println("Retrieved OID: " + snmpOID + ", value: " + valueStr);
+                //logger.debug("Retrieved OID: " + snmpOID + ", value: " + valueStr);
             }
             return table;
 
            }
            catch(Exception e)
            {
-               System.out.println("Exception during SNMP getMIBEntry:  " + e + "\n");
+               logger.error("In readLLDPRemoteChassisIDEntries(), Exception during SNMP getMIBEntry: {}", e);
                return null;
            }
       }
 
     public Map<Short, String>  readLLDPAllRemoteChassisID(Long sw_macAddr){//return <portNumber, remoteChassisID>
-        System.out.println("enter SNMPHandler.readLLDPAllRemoteChassisID()");
+        logger.debug("enter SNMPHandler.readLLDPAllRemoteChassisID()");
 
         //Use snmp to read switch fwd table...
 
@@ -529,29 +534,29 @@ public class SNMPHandler{
             sw_ipAddr = InetAddress.getByName(switchIP);
         }
         catch (UnknownHostException e) {
-            System.out.println("sw_macAddr " + sw_macAddr + "into InetAddress.getByName() error!\n" + e);
+            logger.error("sw_macAddr {} into InetAddress.getByName() error!: {}", sw_macAddr, e);
             System.exit(0);
         }
         if(sw_ipAddr == null) return null;
 
         String community = cmethUtil.getSnmpCommunity(sw_macAddr);
         SNMPv1CommunicationInterface comInterface = createSNMPv1CommInterface(0, sw_ipAddr, community);
-        //System.out.println("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
+        //logger.debug("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
 
         //2. now can set fwd table entry
-        //System.out.println("going to read LLDP remote chassis IDs...");
+        //logger.debug("going to read LLDP remote chassis IDs...");
         return readLLDPRemoteChassisIDEntries(comInterface);
     }
 
     public String getLLDPChassis(Long sw_macAddr){//return a hex-string, e.g. 70 72 CF 2A 80 E9 (just a chassis id, not mac address!)
-        System.out.println("enter SNMPHandler.getLLDPChassis(" + HexString.toHexString(sw_macAddr) + ")...");
+        logger.debug("enter SNMPHandler.getLLDPChassis({})...", HexString.toHexString(sw_macAddr));
         try{
             String switchIP = cmethUtil.getIpAddr(sw_macAddr);
             InetAddress sw_ipAddr = InetAddress.getByName(switchIP);
 
             String community = cmethUtil.getSnmpCommunity(sw_macAddr);
             SNMPv1CommunicationInterface comInterface = createSNMPv1CommInterface(0, sw_ipAddr, community);
-            //System.out.println("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
+            //logger.debug("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
 
             SNMPVarBindList newVars = comInterface.getMIBEntry(lldpLocalChassisIdOID);
             SNMPSequence pair = (SNMPSequence)(newVars.getSNMPObjectAt(0));
@@ -560,26 +565,26 @@ public class SNMPHandler{
             byte[] valueBytes = (byte[])value.getValue();
             String valueStr = HexString.toHexString(valueBytes);
 
-            System.out.println("to retieve switch (" + sw_macAddr +")'s local chassis (OID: " + lldpLocalChassisIdOID +"), get value:" + valueStr);
+            logger.debug("to retieve switch ({})'s local chassis (OID: {}), get value: {}", sw_macAddr, lldpLocalChassisIdOID, valueStr);
             return valueStr;
 
         }
         catch(Exception e)
         {
-            System.out.println("Exception during SNMP getLLDPChassis:  " + e + "\n");
+            logger.error("Exception during SNMP getLLDPChassis: {}", e);
             return null;//meaning fail
         }
     }
 
     public String getLLDPChassis(String sw_ipAddr){//return a hex-string, e.g. 70 72 CF 2A 80 E9 (just a chassis id, not mac address!)
-        System.out.println("enter SNMPHandler.getLLDPChassis()...");
+        logger.debug("enter SNMPHandler.getLLDPChassis()...");
         try{
             InetAddress swIpAddr = InetAddress.getByName(sw_ipAddr);
             if(swIpAddr == null) return null;
 
             String community = cmethUtil.getSnmpCommunity(cmethUtil.getSID(sw_ipAddr));
             SNMPv1CommunicationInterface comInterface = createSNMPv1CommInterface(0, swIpAddr, community);
-            System.out.println("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
+            logger.debug("snmp connection created...swtich IP addr={}, community={}" + sw_ipAddr, community);
 
             SNMPVarBindList newVars = comInterface.getMIBEntry(lldpLocalChassisIdOID);
             SNMPSequence pair = (SNMPSequence)(newVars.getSNMPObjectAt(0));
@@ -588,19 +593,19 @@ public class SNMPHandler{
             byte[] valueBytes = (byte[])value.getValue();
             String valueStr = HexString.toHexString(valueBytes);
 
-            System.out.println("to retieve switch (" + sw_ipAddr +")'s local chassis (OID: " + lldpLocalChassisIdOID +"), get value:" + valueStr);
+            logger.debug("to retieve switch ({})'s local chassis (OID: {}), get value: {}", sw_ipAddr, lldpLocalChassisIdOID, valueStr);
             return valueStr;
 
         }
         catch(Exception e)
         {
-            System.out.println("Exception during SNMP getLLDPChassis:  " + e + "\n");
+            logger.error("Exception during SNMP getLLDPChassis:  " + e + "\n");
             return null;//meaning fail
         }
     }
 
     public Map<Short, String>  readLLDPLocalPortIDs(Long sw_macAddr){//return <portNumber, remoteChassisID>
-        System.out.println("enter SNMPHandler.readLLDPLocalPortIDs()");
+        logger.debug("enter SNMPHandler.readLLDPLocalPortIDs()");
 
         //Use snmp to read switch fwd table...
 
@@ -612,29 +617,29 @@ public class SNMPHandler{
             sw_ipAddr = InetAddress.getByName(switchIP);
         }
         catch (UnknownHostException e) {
-            System.out.println("sw_macAddr " + sw_macAddr + "into InetAddress.getByName() error!\n" + e);
+            logger.error("sw_macAddr " + sw_macAddr + "into InetAddress.getByName() error!\n" + e);
             System.exit(0);
         }
         if(sw_ipAddr == null) return null;
 
         String community = cmethUtil.getSnmpCommunity(sw_macAddr);
         SNMPv1CommunicationInterface comInterface = createSNMPv1CommInterface(0, sw_ipAddr, community);
-        //System.out.println("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
+        //logger.debug("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
 
         //2. now can set fwd table entry
-        //System.out.println("going to read LLDP local port IDs...");
+        //logger.debug("going to read LLDP local port IDs...");
         return readLLDPLocalPortIDEntries(comInterface);
     }
 
     private Map<Short, String> readLLDPLocalPortIDEntries(SNMPv1CommunicationInterface comInterface){
-        System.out.println("enter SNMPHandler.readLLDPLocalPortIDEntries()...");
+        logger.debug("enter SNMPHandler.readLLDPLocalPortIDEntries()...");
         Map<Short, String> table =  new HashMap<Short, String>();
 
         try{
-            //System.out.println("to retieve oid " + lldpLocalPortIdOID + "'s values...");
+            //logger.debug("to retieve oid " + lldpLocalPortIdOID + "'s values...");
 
             SNMPVarBindList tableVars = comInterface.retrieveMIBTable(lldpLocalPortIdOID);
-            //System.out.println("Number of table entries: " + tableVars.size());
+            //logger.debug("Number of table entries: " + tableVars.size());
             for(int i = 0; i < tableVars.size(); i++){
                 SNMPSequence pair = (SNMPSequence)(tableVars.getSNMPObjectAt(i));
                 SNMPObjectIdentifier snmpOID = (SNMPObjectIdentifier)pair.getSNMPObjectAt(0);
@@ -647,14 +652,14 @@ public class SNMPHandler{
                 String valueStr = HexString.toHexString(valueBytes);
 
                 table.put(portNum, valueStr);
-                //System.out.println("Retrieved OID: " + snmpOID + ", value: " + valueStr);
+                //logger.debug("Retrieved OID: " + snmpOID + " (so port num=" + portNum + "), value: " + valueStr);
             }
             return table;
 
            }
            catch(Exception e)
            {
-               System.out.println("Exception during SNMP getMIBEntry:  " + e + "\n");
+               logger.error("In readLLDPLocalPortIDEntries(), Exception during SNMP getMIBEntry:  " + e + "\n");
                return null;
            }
       }
@@ -664,12 +669,12 @@ public class SNMPHandler{
         int index = oidstr.lastIndexOf(".") + 1;
         String ansStr= oidstr.substring(index);
         Short ans = Short.parseShort(ansStr);
-        //System.out.println("oidstr (" + oidstr +") to retrieve port number:" + ans);
+        //logger.debug("oidstr (" + oidstr +") to retrieve port number:" + ans);
         return ans;
     }
 
     public Map<Short, String>  readLLDPRemotePortIDs(Long sw_macAddr){//return <portNumber, remoteChassisID>
-        System.out.println("enter SNMPHandler.readLLDPRemotePortIDs()");
+        logger.debug("enter SNMPHandler.readLLDPRemotePortIDs()");
 
         //Use snmp to read switch fwd table...
 
@@ -681,29 +686,29 @@ public class SNMPHandler{
             sw_ipAddr = InetAddress.getByName(switchIP);
         }
         catch (UnknownHostException e) {
-            System.out.println("sw_macAddr " + sw_macAddr + "into InetAddress.getByName() error!\n" + e);
+            logger.error("sw_macAddr " + sw_macAddr + "into InetAddress.getByName() error!\n" + e);
             System.exit(0);
         }
         if(sw_ipAddr == null) return null;
 
         String community = cmethUtil.getSnmpCommunity(sw_macAddr);
         SNMPv1CommunicationInterface comInterface = createSNMPv1CommInterface(0, sw_ipAddr, community);
-        //System.out.println("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
+        //logger.debug("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
 
         //2. now can set fwd table entry
-        //System.out.println("going to read LLDP remote chassis IDs...");
+        //logger.debug("going to read LLDP remote chassis IDs...");
         return readLLDPRemotePortIDEntries(comInterface);
     }
 
     private Map<Short, String> readLLDPRemotePortIDEntries(SNMPv1CommunicationInterface comInterface){
-        System.out.println("enter readLLDPRemotePortIDEntries()...");
+        logger.debug("enter readLLDPRemotePortIDEntries()...");
         Map<Short, String> table =  new HashMap<Short, String>();
 
         try{
-            //System.out.println("to retieve oid " + lldpLocalPortIdOID + "'s values...");
+            //logger.debug("to retieve oid " + lldpLocalPortIdOID + "'s values...");
 
             SNMPVarBindList tableVars = comInterface.retrieveMIBTable(lldpRemotePortIdOID);
-            //System.out.println("Number of table entries: " + tableVars.size());
+            //logger.debug("Number of table entries: " + tableVars.size());
             for(int i = 0; i < tableVars.size(); i++){
                 SNMPSequence pair = (SNMPSequence)(tableVars.getSNMPObjectAt(i));
                 SNMPObjectIdentifier snmpOID = (SNMPObjectIdentifier)pair.getSNMPObjectAt(0);
@@ -716,14 +721,14 @@ public class SNMPHandler{
                 String valueStr = HexString.toHexString(valueBytes);
 
                 table.put(portNum, valueStr);
-                //System.out.println("Retrieved OID: " + snmpOID + ", value: " + valueStr);
+                //logger.debug("Retrieved OID: " + snmpOID + ", value: " + valueStr);
             }
             return table;
 
            }
            catch(Exception e)
            {
-               System.out.println("Exception during SNMP getMIBEntry:  " + e + "\n");
+               logger.error("In readLLDPRemotePortIDEntries(), Exception during SNMP getMIBEntry:  " + e + "\n");
                return null;
            }
       }

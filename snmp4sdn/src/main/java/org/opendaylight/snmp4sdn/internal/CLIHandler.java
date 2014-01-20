@@ -22,6 +22,9 @@ import java.net.Socket;
 import java.net.InetAddress;
 
 public class CLIHandler{
+    private static final Logger logger = LoggerFactory
+            .getLogger(CLIHandler.class);
+
     ExpectHandler expect;
     String sw_ipAddr, username, password, prompt = "#";
 
@@ -32,7 +35,7 @@ public class CLIHandler{
         try{
             expect = new ExpectHandler(sw_ipAddr, "UserName:", "PassWord:", username, password);//d-link:UserName,PassWord  Accton:Username, Passwrod
         }catch(Exception e){
-            System.out.println("CLIHandler() err:" + e);
+            logger.error("CLIHandler() err:" + e);
         }
     }
 
@@ -42,121 +45,121 @@ public class CLIHandler{
             expect.send("show access_profile profile_id 1\r\n");
             expect.send("a\r\n");
             expect.expect("#");
-            System.out.println("3:" + expect.getBuffer());
+            logger.trace("3:{}", expect.getBuffer());
         }catch(Exception e){
-            System.out.println("CLIHandler.printACL() err:" + e);
+            logger.error("CLIHandler.printACL() err: {}", e);
         }*///TODO:expectHandler that can call multiple send() is not ready
         return str;
     }
     
     public Status reboot(){
         try{
-            System.out.println("expecting--reboot(y/n)?");
+            logger.trace("expecting--reboot(y/n)?");
             if(expect.execute_2step_end("reboot", "system reboot?(y/n)", "y")){
-                System.out.println("sent 'y' to the question above");
+                logger.trace("sent 'y' to the question above");
                 return new Status(StatusCode.SUCCESS);
             }
         }catch(Exception e){
-            System.out.println("CLIHandler.reboot() err:" + e);
+            logger.error("CLIHandler.reboot() err: {}", e);
         }
         return new Status(StatusCode.INTERNALERROR);
     }
 
     public Status disableSTP(){
         try{
-            System.out.println("disableSTP...");
+            logger.trace("disableSTP...");
             if(expect.execute("disable stp", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
-            System.out.println("CLIHandler.disableSTP() err:" + e);
+            logger.error("CLIHandler.disableSTP() err: {}", e);
         }
         return new Status(StatusCode.INTERNALERROR);
     }
 
     public Status disableBpduFlooding(){
         try{
-            System.out.println("disableBpduFlooding()...");
+            logger.trace("disableBpduFlooding()...");
             if(expect.execute("config stp fbpdu disable", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
-            System.out.println("CLIHandler.disableBpduFlooding() err:" + e);
+            logger.error("CLIHandler.disableBpduFlooding() err: {}", e);
         }
         return new Status(StatusCode.INTERNALERROR);
     }
 
     public Status disableBpduFlooding(Short port){
         try{
-            System.out.println("disableBpduFlooding(port " + port +" )...");
+            logger.trace("disableBpduFlooding(port {})...", port);
             if(expect.execute("config stp ports " + port + "-" + port + " fbpdu disable", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
-            System.out.println("CLIHandler.disableBpduFlooding(port) err:" + e);
+            logger.error("CLIHandler.disableBpduFlooding(port) err: {}", e);
         }
         return new Status(StatusCode.INTERNALERROR);
     }
 
     public Status disableBroadcastFlooding(){
         try{
-            System.out.println("disableBroadcastFlooding()...");
+            logger.trace("disableBroadcastFlooding()...");
             if(expect.execute("config traffic control all broadcast disable", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
-            System.out.println("CLIHandler.disableBroadcastFlooding() err:" + e);
+            logger.error("CLIHandler.disableBroadcastFlooding() err: {}", e);
         }
         return new Status(StatusCode.INTERNALERROR);
     }
 
     public Status disableBroadcastFlooding(Short port){
         try{
-            System.out.println("disableBroadcastFlooding(port " + port + ")...");
+            logger.trace("disableBroadcastFlooding(port {})...", port);
             if(expect.execute("config traffic control " + port + "-" + port + " broadcast disable", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
-            System.out.println("CLIHandler.disableBroadcastFlooding(port) err:" + e);
+            logger.error("CLIHandler.disableBroadcastFlooding(port) err: {}", e);
         }
         return new Status(StatusCode.INTERNALERROR);
     }
 
     public Status disableMulticastFlooding(){
         try{
-            System.out.println("disableMulticastFlooding()...");
+            logger.trace("disableMulticastFlooding()...");
             if(expect.execute("config traffic control all multicast disable", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
-            System.out.println("CLIHandler.disableMulticastFlooding() err:" + e);
+            logger.error("CLIHandler.disableMulticastFlooding() err: {}", e);
         }
         return new Status(StatusCode.INTERNALERROR);
     }
 
     public Status disableMulticastFlooding(Short port){
         try{
-            System.out.println("disableMulticastFlooding(port " + port +" )...");
+            logger.trace("disableMulticastFlooding(port {})...", port);
             if(expect.execute("config traffic control " + port + "-" + port + " multicast disable", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
-            System.out.println("CLIHandler disableMulticastFlooding(port) err:" + e);
+            logger.error("CLIHandler disableMulticastFlooding(port) err: {}", e);
         }
         return new Status(StatusCode.INTERNALERROR);
     }
 
     public Status disableUnknownFlooding(){
         try{
-            System.out.println("disableUnknownFlooding()...");
+            logger.trace("disableUnknownFlooding()...");
             if(expect.execute("config traffic control all unicast enable action drop threshold 0", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
-            System.out.println("CLIHandler.disableUnknownFlooding() err:" + e);
+            logger.error("CLIHandler.disableUnknownFlooding() err: {}", e);
         }
         return new Status(StatusCode.INTERNALERROR);
     }
 
     public Status disableUnknownFlooding(Short port){
         try{
-            System.out.println("disableUnknownFlooding(port " + port +" )...");
+            logger.trace("disableUnknownFlooding(port {})...", port);
             if(expect.execute("config traffic control " + port + "-" + port + " unicast enable action drop threshold 0", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
-            System.out.println("CLIHandler.disableUnknownFlooding(port) err:" + e);
+            logger.error("CLIHandler.disableUnknownFlooding(port) err: {}", e);
         }
         return new Status(StatusCode.INTERNALERROR);
     }
@@ -173,31 +176,31 @@ public class CLIHandler{
 
     public Status disableSourceLearning(){
         try{
-            System.out.println("disableSourceLearning()...");
+            logger.trace("disableSourceLearning()...");
             if(expect.execute("config ports all learning disable", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
-            System.out.println("CLIHandler.disableSourceLearning() err:" + e);
+            logger.error("CLIHandler.disableSourceLearning() err: {}", e);
         }
         return new Status(StatusCode.INTERNALERROR);
     }
 
     public Status disableSourceLearning(Short port){
         try{
-            System.out.println("disableSourceLearning(port " + port +" )...");
+            logger.trace("disableSourceLearning(port {})...", port);
             if(expect.execute("config ports " + port + "-" + port + " learning disable", "#", "Success"))
                 return new Status(StatusCode.SUCCESS);
         }catch(Exception e){
-            System.out.println("CLIHandler.disableSourceLearning(port) err:" + e);
+            logger.error("CLIHandler.disableSourceLearning(port) err: {}", e);
         }
         return new Status(StatusCode.INTERNALERROR);
     }
 
 /*
     public void readFlowRequest(Flow flow, Long sw_macAddr){
-        System.out.println("enter CLIHandler.readFlowRequest()");
+        logger.trace("enter CLIHandler.readFlowRequest()");
 
-        System.out.println("retrieving the metrics in the Flow...");
+        logger.trace("retrieving the metrics in the Flow...");
 
     //retrieve match fields from the flow...
         Match match = flow.getMatch();

@@ -799,7 +799,6 @@ public class SwitchHandler implements ISwitch {
         public void run() {
             running = true;
             while (running) {
-                //System.out.println("Waiting for new SNMPMessage to send...");//s4s. If we run FlowProgrammerServiceTest.java in console, the program doen't exit but freeze, actually the program is staying here, let's de-mark this line and shows it's indeed so.
                 try {
                     while (!transmitQ.isEmpty()) {
                         PriorityMessage pmsg = transmitQ.poll();

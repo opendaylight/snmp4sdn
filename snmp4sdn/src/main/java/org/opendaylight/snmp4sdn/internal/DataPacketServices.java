@@ -24,6 +24,7 @@ public class DataPacketServices implements IPluginInDataPacketService {
     private IDataPacketMux iDataPacketMux = null;
 
     void setIDataPacketMux(IDataPacketMux s) {
+        logger.trace("s4s:enter plugin's IPluginInDataPacketService.setIDataPacketMux() impl by DataPacketServices");//s4s
         this.iDataPacketMux = s;
     }
 
@@ -38,5 +39,6 @@ public class DataPacketServices implements IPluginInDataPacketService {
         // SNMP and commodity Ethernet switches do not support 'OFPacketOut'-like
         // function. This function will not be implemented until new usage in
         // the SNMP context is found.
+        logger.trace("s4s:enter plugin's IPluginInDataPacketService.transmitDataPacket() impl by DataPacketServices");//s4s
     }
 }

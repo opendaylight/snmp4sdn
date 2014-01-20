@@ -20,7 +20,7 @@ import java.net.Socket;
 import java.net.InetAddress;
 
 public class ExpectHandler{
-
+    private static Logger logger = LoggerFactory.getLogger(ExpectHandler.class);
     Socket socket;
     //Expect4j expect;//e4j
     ExpectDummy expect;//e4j-dummy
@@ -41,8 +41,8 @@ public class ExpectHandler{
         this.password = new String(password);
 
         socket = new Socket(sw_ipAddr, 23);
-        if(!socket.isClosed())System.out.println("(telnet to switch " + sw_ipAddr + " successful)");
-        else System.out.println("(telnet to switch " + sw_ipAddr + " fail)");
+        if(!socket.isClosed())logger.info("(telnet to switch " + sw_ipAddr + " successful)");
+        else logger.info("(telnet to switch " + sw_ipAddr + " fail)");
         boolean isLoggedIn = loginCLI();
     }
 
@@ -50,11 +50,11 @@ public class ExpectHandler{
         if(socket.isClosed()){
             socket = new Socket(sw_ipAddr, 23);
             if(socket.isClosed()){
-                System.out.println("(telnet to switch " + sw_ipAddr + " fail)");
+                logger.trace("(telnet to switch " + sw_ipAddr + " fail)");
                 return false;
             }
             else
-                System.out.println("(telnet to switch " + sw_ipAddr + " successfully)");
+                logger.trace("(telnet to switch " + sw_ipAddr + " successfully)");
         }
         //expect = new Expect4j(socket);//e4j
         expect = new ExpectDummy(socket);//e4j-dummy
@@ -63,18 +63,18 @@ public class ExpectHandler{
             isDummy = true;//e4j-dummy
         expect.setDefaultTimeout(expectTimeout);
 
-        System.out.println("expecting--" + username_prompt);
+        logger.trace("expecting--" + username_prompt);
         expect.expect(username_prompt);
-        System.out.println("1:" + expect.getLastState().getBuffer());
+        logger.trace("1:" + expect.getLastState().getBuffer());
         expect.send(username + "\r\n");
-        System.out.println("expecting--" + password_prompt);
+        logger.trace("expecting--" + password_prompt);
         expect.expect(password_prompt);//d-link:PassWord  Accton:"Password "
-        System.out.println("2:" + expect.getLastState().getBuffer());
+        logger.trace("2:" + expect.getLastState().getBuffer());
         expect.send(password + "\r\n");
-        System.out.println("login().expecting--#");
+        logger.trace("login().expecting--#");
         expect.expect("#");
         if(expect.getLastState().getBuffer().endsWith("#")){
-            System.out.println("(login successfully to " + sw_ipAddr +")");
+            logger.trace("(login successfully to " + sw_ipAddr +")");
             return true;//login successfully
         }
         return false;//login fail
@@ -113,7 +113,7 @@ public class ExpectHandler{
         
         int index = -1;
         if(socket.isClosed()){
-            System.out.println("not logged in, try login again");
+            logger.trace("not logged in, try login again");
             loginCLI();
         }
         expect.send(sendStr + "\r\n");
@@ -125,7 +125,7 @@ public class ExpectHandler{
         if(isDummy)return true;
         
         if(socket.isClosed()){
-            System.out.println("not logged in, try login again");
+            logger.trace("not logged in, try login again");
             loginCLI();
         }
         expect.send(sendStr + "\r\n");

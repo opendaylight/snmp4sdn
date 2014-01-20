@@ -347,7 +347,8 @@ public class ExpectEmulation extends Extension {
             }
             
             if( isEcho(interp) )
-                System.out.println(arg);
+                //System.out.println(arg);
+                logger.debug(arg);
         }
     }
     

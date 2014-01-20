@@ -105,7 +105,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
     public void setFlowProgrammerNotifier(Map<String, ?> props,
             IFlowProgrammerNotifier s) {
         if (props == null || props.get("containerName") == null) {
-            log.error("Didn't receive the service correct properties");
+            log.warn("Didn't receive the service correct properties");
             return;
         }
         String containerName = (String) props.get("containerName");
@@ -117,7 +117,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
     public void unsetFlowProgrammerNotifier(Map<String, ?> props,
             IFlowProgrammerNotifier s) {
         if (props == null || props.get("containerName") == null) {
-            log.error("Didn't receive the service correct properties");
+            log.warn("Didn't receive the service correct properties");
             return;
         }
         String containerName = (String) props.get("containerName");
@@ -168,41 +168,41 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
 
     @Override
     public Status addFlow(Node node, Flow flow) {
-        System.out.println("enter FlowProgrammerService.addFlow()");
+        log.info("enter FlowProgrammerService.addFlow()");
         return addFlowInternal(node, flow, 0);//OF's
         //return my_modifyFlow(node, flow, 3); //s4s. modType 3 is type of 3, means "learned"
     }
 
     @Override
     public Status modifyFlow(Node node, Flow oldFlow, Flow newFlow) {
-        System.out.println("enter FlowProgrammerService.modifyFlow()");
+        log.info("enter FlowProgrammerService.modifyFlow()");
         return modifyFlowInternal(node, oldFlow, newFlow, 0);
         //return my_modifyFlow(node, flow, 3); //s4s. modType 3 is type of 3, means "learned"
     }
 
     @Override
     public Status removeFlow(Node node, Flow flow) {
-        System.out.println("enter FlowProgrammerService.removeFlow()");
+        log.info("enter FlowProgrammerService.removeFlow()");
         return removeFlowInternal(node, flow, 0);
         //return my_modifyFlow(node, flow, 2); //s4s. modType 2 is type of 2, means "invalid(delete)"
     }
 
     @Override
     public Status addFlowAsync(Node node, Flow flow, long rid) {
-        System.out.println("enter FlowProgrammerService.addFlowAsync()");
+        log.info("enter FlowProgrammerService.addFlowAsync()");
         return addFlowInternal(node, flow, rid);//s4s
         //return new Status(StatusCode.SUCCESS);
     }
 
     @Override
     public Status modifyFlowAsync(Node node, Flow oldFlow, Flow newFlow, long rid) {
-        System.out.println("enter FlowProgrammerService.modifyFlowAsync()");
+        log.info("enter FlowProgrammerService.modifyFlowAsync()");
         return modifyFlowInternal(node, oldFlow, newFlow, rid);
     }
 
     @Override
     public Status removeFlowAsync(Node node, Flow flow, long rid) {
-        System.out.println("enter FlowProgrammerService.removeFlowAsync()");
+        log.info("enter FlowProgrammerService.removeFlowAsync()");
         return removeFlowInternal(node, flow, rid);
     }
 
@@ -282,7 +282,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                 */
 
                 //s4s's work, similar to above OF's work: 'check data correctness' and 'type convertion'
-                if(checkSameSrcDest(oldFlow, newFlow)){
+                if(!checkSameSrcDest(oldFlow, newFlow)){
                     return new Status(StatusCode.NOTACCEPTABLE, errorString("send", action,
                             "Inconsistency of oldFlow and newFlow (src/dest mac inconsistent)"));
                 }
@@ -841,12 +841,12 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
             //to retrieve (3) and check it structure correct
         Action action1 = flow1.getActions().get(0);
         if(flow1.getActions().size() > 1) {
-            System.out.println("flow1.getActions() > 1, the Action are:");
+            log.trace("flow1.getActions() > 1, the Action are:");
             for(int i = 0; i < flow1.getActions().size(); i++)
-                System.out.println(flow1.getActions().get(i));
+                log.trace("{}", flow1.getActions().get(i));
         }
         if(action1.getType() != ActionType.OUTPUT){
-            System.out.println("flow's action is not to set OUTPUT port!");
+            log.warn("flow's action is not to set OUTPUT port!");
             System.exit(0);
         }
 
@@ -860,12 +860,12 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
             //to retrieve (3) and check it structure correct
         Action action2 = flow2.getActions().get(0);
         if(flow2.getActions().size() > 1) {
-            System.out.println("flow2.getActions() > 1, the Action are:");
+            log.trace("flow2.getActions() > 1, the Action are:");
             for(int i = 0; i < flow1.getActions().size(); i++)
-                System.out.println(flow1.getActions().get(i));
+                log.trace("{}", flow1.getActions().get(i));
         }
         if(action2.getType() != ActionType.OUTPUT){
-            System.out.println("flow's action is not to set OUTPUT port!");
+            log.warn("flow's action is not to set OUTPUT port!");
             System.exit(0);
         }
 
@@ -875,319 +875,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         else
             return false;
     }
-//--------------cmeth----------------//
 
-/*
-//s4s. can add/modify/delete flow
-
-    //@Override
-    public Status cmeth_override_addFlow(Node node, Flow flow) {
-        System.out.println("enter FlowProgrammerService.addFlow()");
-        return my_modifyFlow(node, flow, 3); //s4s. modType 3 is type of 3, means "learned"
-    }
-
-    //@Override
-    public Status cmeth_override_modifyFlow(Node node, Flow oldFlow, Flow newFlow) {
-        String action = "modify";//s4s
-        if (!node.getType().equals(NodeIDType.ETHSW)) {//s4s orig:NodeIDType.OPENFLOW
-            return new Status(StatusCode.NOTACCEPTABLE,
-                    errorString("send", action, "Invalid node type"));
-        }
-
-        //check consistency of oldFlow and newFlow: their src/dest mac same?
-        if (checkSameSrcDest(oldFlow, newFlow) == false)
-            return new Status(StatusCode.NOTACCEPTABLE,
-                    errorString("send", action, "Inconsistency of oldFlow and newFlow (src/dest mac inconsistent)"));
-
-        //check whether exsit oldFlow
-        //
-        //
-        //
-
-
-        Status result = my_modifyFlow(node, newFlow, 3);//modType 3 is type of 3, means "learned"
-        return result;
-    }
-
-    //@Override //s4s
-    public Status cmeth_override_removeFlow(Node node, Flow flow) {
-        String action = "remove";
-        if (!node.getType().equals(NodeIDType.ETHSW)) {//s4s orig:NodeIDType.OPENFLOW
-            return new Status(StatusCode.NOTACCEPTABLE,
-                    errorString("send", action, "Invalid node type"));
-        }
-
-        return my_modifyFlow(node, flow, 2); //modType 2 is type of 2, means "invalid"
-    }
-
-
-//s4s. can add/modify/delete flow
-    public Status my_modifyFlow(Node node, Flow flow, int modType) {
-        System.out.println("enter FlowProgrammerService.my_modifyFlow()");
-        String actionstr = "add";
-        if (!node.getType().equals(NodeIDType.ETHSW)) {//s4s orig:NodeIDType.OPENFLOW
-            return new Status(StatusCode.NOTACCEPTABLE,
-                    errorString("send", actionstr, "Invalid node type"));
-        }
-
-        System.out.println("retrieving the metrics in the Flow...");
-        //retrieve from the flow: (1)src mac (2)dest mac (3)the port value, to write into fwd table
-            //to retrieve (1)&(2)
-        Match match = flow.getMatch();
-        MatchField fieldDlSrc= match.getField(MatchType.DL_SRC);
-        MatchField fieldDlDest= match.getField(MatchType.DL_DST);
-        String srcMac = HexString.toHexString((byte[])fieldDlSrc.getValue());
-        String destMac = HexString.toHexString((byte[])fieldDlDest.getValue());
-            //to retrieve (3)
-        Action action = flow.getActions().get(0);
-        if(flow.getActions().size() > 1) {
-            System.out.println("flow.getActions() > 1");
-            System.exit(0);
-        }
-        if(action.getType() != ActionType.OUTPUT){
-            System.out.println("flow's action is not to set OUTPUT port!");
-            System.exit(0);
-        }
-        NodeConnector oport = ((Output)action).getPort();
-
-
-        //Use snmp to write to switch fwd table...
-
-        String community = "private";
-        Long sw_macAddr = (Long) node.getID();
-        try{
-            //1. open snmp communication interface
-            InetAddress sw_ipAddr = InetAddress.getByName(getIpAddr(sw_macAddr));
-            SNMPv1CommunicationInterface comInterface = createSNMPv1CommInterface(0, sw_ipAddr, community);
-
-            System.out.println("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
-
-            //2. now can set fwd table entry
-            System.out.println("going to set fwd table entry...");
-            Short portShort = (Short)(oport.getID());
-            short portID = portShort.shortValue();
-            int portInt = (int)portID;
-            boolean result = setFwdTableEntry(comInterface, destMac, portInt, modType);//oport.getID() is the port.  modType as 3 means "learned". modType as 2 means "invalid"
-            return (result == true)?(new Status(StatusCode.SUCCESS, null)):
-                    (new Status(StatusCode.INTERNALERROR,
-                    errorString("program", actionstr, "Vendor Extension Internal Error")));
-        }
-        catch (UnknownHostException e) {
-            System.out.println("sw_macAddr " + sw_macAddr + "into InetAddress.getByName() error!\n" + e);
-            System.exit(0);
-        }
-
-            return new Status(StatusCode.SUCCESS, null);
-    }
-*/
-
-/*snmp
-    String portGetOID = "1.3.6.1.2.1.17.7.1.2.2.1.2";//s4s: MAC_PORT_GET's OID
-    String typeGetOID = "1.3.6.1.2.1.17.7.1.2.2.1.3";//s4s: MAC_TYPE_GET's OID
-    String portSetOID = "1.3.6.1.2.1.17.7.1.3.1.1.3";//s4s: MAC_PORT_SET's OID
-    String typeSetOID = "1.3.6.1.2.1.17.7.1.3.1.1.4";//s4s: MAC_TYPE_SET's OID
-    */
-
-//snmp
-/*
-    private SNMPv1CommunicationInterface createSNMPv1CommInterface(int version, InetAddress hostAddress, String community){
-        try{
-
-            // create a communications interface to a remote SNMP-capable device;
-            // need to provide the remote host's InetAddress and the community
-            // name for the device; in addition, need to  supply the version number
-            // for the SNMP messages to be sent (the value 0 corresponding to SNMP
-            // version 1)
-            //InetAddress hostAddress = InetAddress.getByName("10.0.1.1");
-            //String community = "public";
-            //int version = 0;    // SNMPv1
-
-          SNMPv1CommunicationInterface comInterface = new SNMPv1CommunicationInterface(version, hostAddress, community);
-          return comInterface;
-
-        }
-        catch(Exception e)
-        {
-            System.out.println("Exception during SNMP operation:  " + e + "\n");
-        }
-
-        return null;
-    }
-
-    //s4s
-    private void getMIBEntry(SNMPv1CommunicationInterface comInterface, String oid){
-        try{
-
-            // now send an SNMP GET request to retrieve the value of the SNMP variable
-            // corresponding to OID 1.3.6.1.2.1.2.1.0; this is the OID corresponding to
-            // the device identifying string, and the type is thus SNMPOctetString
-            String itemID = "1.3.6.1.2.1.1.1.0";
-            System.out.println("Retrieving value corresponding to OID " + oid);
-
-            // the getMIBEntry method of the communications interface returns an SNMPVarBindList
-            // object; this is essentially a Vector of SNMP (OID,value) pairs. In this case, the
-            // returned Vector has just one pair inside it.
-            SNMPVarBindList newVars = comInterface.getMIBEntry(oid);
-        }
-        catch(Exception e)
-        {
-            System.out.println("Exception during SNMP operation:  " + e + "\n");
-        }
-    }
-
-    //s4s
-    String convertToSNMPSwitchPortString(int port){
-        //String ans = "0x";//for linux snmpset command parameter form
-        String ans = "";
-        String sep = ":";//see what seperate character is assigned, eg. ":" or " " or ""  (i.e.  colon or blank or connected)
-        int pow;
-        String str = "";
-
-        if(port <= 8){
-            pow = 8 - port;
-            str = new Integer((int)Math.pow(2, pow)).toString();
-            ans = ans + str + "0"  + sep + "00";
-        }
-        else if(port <= 16){
-            pow = 16 - port;
-            str = new Integer((int)Math.pow(2, pow)).toString();
-            ans = ans + "0" + str + sep + "00";
-        }
-        else if(port <= 24){
-            pow = 24 - port;
-            str = new Integer((int)Math.pow(2, pow)).toString();
-            ans = ans + "00" + sep + str + "0";
-        }
-        else if(port <= 32){
-            pow = 32 - port;
-            str = new Integer((int)Math.pow(2, pow)).toString();
-            ans = ans + "00" + sep + "0" + str;
-        }
-        else{
-            System.out.println("convertToSNMPSwitchPortString() is given port > 32!");
-            System.exit(0);
-        }
-
-        return ans;
-    }
-
-    //s4s
-    String convertToSNMPSwitchPortString_4bits_as_a_character(int port){
-        //String ans = "0x";//for linux snmpset command parameter form
-        String ans = "";
-        String sep = ":";//see what seperate character is assigned, eg. ":" or " " or ""  (i.e.  colon or blank or connected)
-        int pow;
-        String str = "";
-
-        if(port <= 4){
-            pow = 4 - port;
-            str = new Integer((int)Math.pow(2, pow)).toString();
-            ans = ans + str + "0" + sep + "00" + sep + "00" + sep + "00";
-        }
-        else if(port <= 8){
-            pow = 8 - port;
-            str = new Integer((int)Math.pow(2, pow)).toString();
-            ans = ans + "0" + str + "00" + sep + "00" + sep + "00";
-        }
-        else if(port <= 12){
-            pow = 12 - port;
-            str = new Integer((int)Math.pow(2, pow)).toString();
-            ans = ans + "00" + str + "0" + sep + "00" + sep + "00";
-        }
-        else if(port <= 16){
-            pow = 16 - port;
-            str = new Integer((int)Math.pow(2, pow)).toString();
-            ans = ans + "000" + str + "00" + sep + "00";
-        }
-        else if(port <= 20){
-            pow = 20 - port;
-            str = new Integer((int)Math.pow(2, pow)).toString();
-            ans = ans + "0000" + str + "0" + sep + "00";
-        }
-        else if(port <= 24){
-            pow = 24 - port;
-            str = new Integer((int)Math.pow(2, pow)).toString();
-            ans = ans + "00" + sep + "00" + sep + "0" + str + "00";
-        }
-        else if(port <= 28){
-            pow = 28 - port;
-            str = new Integer((int)Math.pow(2, pow)).toString();
-            ans = ans + "00" + sep + "00" + sep + "00" + str + "0";
-        }
-        else if(port <= 32){
-            pow = 32 - port;
-            str = new Integer((int)Math.pow(2, pow)).toString();
-            ans = ans + "00" + sep + "00" + sep + "00" + sep + "0" + str;
-        }
-        else{
-            System.out.println("convertToSNMPSwitchPortString() is given port > 32!");
-            System.exit(0);
-        }
-
-        return ans;
-    }
-
-    //s4s
-    private String macAddrToOID(String macAddr){
-        String macOID = "";
-        for(int i = 0; i < 17; ){
-            macOID += ".";
-            macOID  += new Integer(Integer.parseInt(macAddr.substring(i, i + 2), 16)).toString();
-            i += 3;
-        }
-        return macOID.substring(1, macOID.length());
-    }
-
-    //s4s
-    private boolean setFwdTableEntry(SNMPv1CommunicationInterface comInterface, String destMac, int port, int type){
-        System.out.println("enter setFwdTableEntry()...");
-        try{
-            String macOid = macAddrToOID(destMac);
-            String portOid = portSetOID + ".216." + macOid + ".0";
-            String typeOid = typeSetOID + ".216." + macOid + ".0";
-
-            byte[] convPort = new HexString().fromHexString(convertToSNMPSwitchPortString(port));
-            SNMPOctetString portOStr =  new SNMPOctetString(convPort);
-            SNMPInteger typeInt =  new SNMPInteger(type);
-
-            System.out.println("mac (" + destMac +")'s OID: " + macOid);
-            System.out.println("type: " + typeInt.toString());
-
-            if(type == 2){//delete entry
-                SNMPVarBindList newVars = comInterface.setMIBEntry(typeOid, typeInt);
-                System.out.println("set OID  " + typeOid + ", new value = " + typeInt.getClass().getName() + ":" + typeInt);
-            }
-            else if(type == 3){//add or modify entry
-                System.out.println("port: " + portOStr.toString());
-
-                String[] oids = {typeOid, portOid};
-                SNMPObject [] newValues = {typeInt, portOStr};
-                SNMPVarBindList newVars = comInterface.setMIBEntry(oids, newValues); //comInterface.setMIBEntry() can either input array or variable, like here or below
-
-                for(int i = 0; i < oids.length; i++){
-                    System.out.println("set OID  " + oids[i] + ", new value = " + newValues[i].getClass().getName() + ":" + newValues[i]);
-                }
-            }
-            else{
-                System.out.println("Error: given type (type" + typeInt + ") invalid");
-                System.exit(0);
-            }
-
-            return true;
-        }
-        catch(Exception e)
-        {
-            System.out.println("Exception during SNMP operation:  " + e + "\n");
-            return false;
-        }
-   }
-
-    //s4s
-    private String getIpAddr(Long macAddr){
-        //look up table...
-        return "10.216.0.31";
-    }
-*/
     @Override
     public void containerCreate(String containerName) {
         // do nothing

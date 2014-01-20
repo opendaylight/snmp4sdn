@@ -1652,10 +1652,11 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         Node node = nodeConnector.getNode();
         Long localSwitchID = (Long)(node.getID());
         Short localPortNum = (Short)(nodeConnector.getID());
+        logger.trace("enter DiscoveryService.processLinkUpTrap(NodeConnector: node " + HexString.toHexString(localSwitchID) + "(ip " + cmethUtil.getIpAddr(localSwitchID)+ ")'s port " + localPortNum + ")");
 
         boolean val = readLLDPonOneSwitch(localSwitchID);//read the LLDP data on this port's switch
         if(val == false){
-            System.out.println("read node " + localSwitchID + "'s LLDP data error! so stop processLinkUpTrap()");
+            logger.trace("--> read node " + localSwitchID + "'s LLDP data error! so stop processLinkUpTrap()");
             return;
         }
 
@@ -1663,29 +1664,36 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
 
         String remoteChassis = portToRemoteChassisOnSwitches.get(localSwitchID).get(localPortNum);
         if(remoteChassis == null){
-            System.out.println("can't find switch(Node " + localSwitchID + ",port " + localPortNum + ")'s remoteChassis (==> LLDP exchange with the remote port not yet done)");
+            logger.trace("--> can't find switch(Node " + localSwitchID + ",port " + localPortNum + ")'s remoteChassis (==> LLDP exchange with the remote port not yet done)");
             return;
         }
+        else
+            logger.trace("--> this port's remoteChassis is " + remoteChassis);
 
         String remotePortID = portToRemotePortIDOnSwitches.get(localSwitchID).get(localPortNum);
         if(remotePortID == null){
-            System.out.println("can't find switch(Node " + localSwitchID + ",port " + localPortNum + ")'s remotePortID");
+            logger.trace("--> can't find switch(Node " + localSwitchID + ",port " + localPortNum + ")'s remotePortID (==> abnormal, should not happen!since remoteChassis is known)");
             return;
         }
+        else
+            logger.trace("--> this port's remotePortID is " + remotePortID);
 
         Long remoteSwitchID = switches_Chassis2ID.get(remoteChassis);
         if(remoteSwitchID == null){
-            System.out.println("can't find remote switch(chassis " + remoteChassis + ")'s node ID (==> abnormal, should not happen!)");
+            logger.trace("can't find remote switch(chassis " + remoteChassis + ")'s node ID (==> abnormal, should not happen!since remoteChassis is known)");
             return;
         }
+        else
+            logger.trace("--> this port's remoteSwitchID is " + remoteSwitchID);
 
         Map<Short, String>remotePortIDs = localPortIDsOnSwitches.get(remoteSwitchID);
 
+        logger.trace("Compare with remote switch " + HexString.toHexString(remoteSwitchID) + "(ip " + cmethUtil.getIpAddr(remoteSwitchID)  +")'s " + remotePortIDs.size() + " ports");
         for(Map.Entry<Short, String> entry : remotePortIDs.entrySet()){
-            System.out.println("...compare with remote port of id: " + entry.getValue());
+            logger.trace("\tcompare with remote port of id: " + entry.getValue());
             if(entry.getValue().compareToIgnoreCase(remotePortID) == 0){
                 Short remotePortNum = entry.getKey();
-                System.out.println("\t\tAdd edge: local (ip " + cmethUtil.getIpAddr(localSwitchID) + ", port " + localPortNum + ") --> remote (ip " + cmethUtil.getIpAddr(remoteSwitchID) + ", port " + remotePortNum +")");
+                logger.trace("\t\t==> Add edge: local (ip " + cmethUtil.getIpAddr(localSwitchID) + ", port " + localPortNum + ") --> remote (ip " + cmethUtil.getIpAddr(remoteSwitchID) + ", port " + remotePortNum +")");
                 myAddEdge(localSwitchID, localPortNum, remoteSwitchID, remotePortNum);
                 break;
             }
@@ -1708,59 +1716,63 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
             if(localChassis == null) return false;//this switch is not in the switches' ip list
             switches_ID2Chassis.put(switchID, localChassis);
             switches_Chassis2ID.put(localChassis, switchID);
-            System.out.println("#############################################################################");
-            System.out.println("######### Reading switch (ip: " + HexString.toHexString(switchID) + ")'s, chassis = " + localChassis +" ##############");
+            logger.trace("#############################################################################");
+            logger.trace("######### Reading switch (ip: " + HexString.toHexString(switchID) + ")'s, chassis = " + localChassis +" ##############");
 
             Map<Short, String> localPortIDs = snmp.readLLDPLocalPortIDs(switchID);
             localPortIDsOnSwitches.put(switchID, localPortIDs);
-            System.out.println("local port id: " + localPortIDs.size() + "entries");
-            /*for(Map.Entry<Short, String> entryp: localPortIDs.entrySet()){
-                System.out.println("local port: " + entryp.getKey() + " as port id " + entryp.getValue());
-            }*/
+            logger.trace("--> local port id: " + localPortIDs.size() + "entries");
+            for(Map.Entry<Short, String> entryp: localPortIDs.entrySet()){
+                logger.trace("\tlocal port " + entryp.getKey() + " as port id " + entryp.getValue());
+            }
 
             Map<Short, String> portToRemoteChassis = snmp.readLLDPAllRemoteChassisID(switchID);
             portToRemoteChassisOnSwitches.put(switchID, portToRemoteChassis);
-            System.out.println("remote chassis: " + localPortIDs.size() + "entries");
-            /*for(Map.Entry<Short, String> entryp: portToRemoteChassis.entrySet()){
-                System.out.println("local port: " + entryp.getKey() + " ==> remote chassis: " + entryp.getValue());
-            }*/
+            logger.trace("--> remote chassis: " + portToRemoteChassis.size() + "entries");
+            for(Map.Entry<Short, String> entryp: portToRemoteChassis.entrySet()){
+                logger.trace("\tlocal port " + entryp.getKey() + " ==> remote chassis: " + entryp.getValue());
+            }
 
             Map<Short, String> portToRemotePortID = snmp.readLLDPRemotePortIDs(switchID);
             portToRemotePortIDOnSwitches.put(switchID, portToRemotePortID);
-            System.out.println("remote port id: " + localPortIDs.size() + "entries");
-            /*for(Map.Entry<Short, String> entryp: portToRemotePortID.entrySet()){
-                System.out.println("local port: " + entryp.getKey() + " ==> remote port id\"" + entryp.getValue() + "\"");
-            }*/
+            logger.trace("--> remote port id " + portToRemotePortID.size() + "entries");
+            for(Map.Entry<Short, String> entryp: portToRemotePortID.entrySet()){
+                logger.trace("\tlocal port " + entryp.getKey() + " ==> remote port id\"" + entryp.getValue() + "\"");
+            }
+
+            logger.trace("###### end of Reading switch (ip: " + HexString.toHexString(switchID) + ")'s, chassis = " + localChassis +" #####");
+            logger.trace("#########################################################################");
+
             return true;
     }
 
     //snmp4sdn add
     private void readLLDPonSwitches(){
-        System.out.println("=======================================");
-        System.out.println("============= Read LLDP on switches ===========");
+        logger.trace("============================================");
+        logger.trace("=============== Read LLDP on switches ==============");
         Map<Long, ISwitch> switches = controller.getSwitches();
         for(ISwitch sw : switches.values()){
             //this "for loop"'s body, entirely move to readLLDPonOneSwitch()
             Long switchID = sw.getId();
             boolean val = readLLDPonOneSwitch(switchID);
             if(val == false)
-                System.out.println("read node " + switchID + "'s LLDP data error!");
+                logger.trace("read node " + switchID + "'s LLDP data error!");
         }
-        System.out.println("======== end of   Read LLDP on switches ========");
-        System.out.println("====================================");
+        logger.trace("======== end of Read LLDP on switches ========");
+        logger.trace("====================================");
     }
 
     //snmp4sdn add
     private void resolvePortPairsAndAddEdges(){
-        System.out.println("===========================================");
-        System.out.println("===== Resolve the port pars, and add edges correspondingly =====");
-        System.out.println("number of switches to resolve: " + portToRemoteChassisOnSwitches.size());
+        logger.trace("===========================================");
+        logger.trace("===== Resolve the port pars, and add edges correspondingly =====");
+        logger.trace("number of switches to resolve: " + portToRemoteChassisOnSwitches.size());
         for(Map.Entry<Long, Map<Short, String>> entryS : portToRemoteChassisOnSwitches.entrySet()){
             Long localSwitchID = entryS.getKey();
             String localChassis = switches_ID2Chassis.get(localSwitchID);
             Map<Short, String> localPortIDs = entryS.getValue();
             String localIP = cmethUtil.getIpAddr(localSwitchID);
-            System.out.println("processing local switch (id: ip = " + localIP + ", chassis: " + localChassis + ", number of ports which connect another remote switch: " + localPortIDs.size() + ")");
+            logger.trace("processing local switch (id: ip = " + localIP + ", chassis: " + localChassis + ", number of ports which connect another remote switch: " + localPortIDs.size() + ")");
             for(Map.Entry<Short, String> entryP : localPortIDs.entrySet()){
                 Short localPortNum = entryP.getKey();
                 String remoteChassis = entryP.getValue();
@@ -1770,13 +1782,13 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
                     continue;
                 String localPortID = localPortIDsOnSwitches.get(localSwitchID).get(localPortNum);
                 String remoteIP = cmethUtil.getIpAddr(remoteSwitchID);
-                System.out.println("\tchecking local port (num: " + localPortNum + ", id: " +localPortID + ", remote switch's chassis: " + remoteChassis + "), so look into this remote switch (ip: " + remoteIP + ")");
+                logger.trace("\tchecking local port (num: " + localPortNum + ", id: " +localPortID + ", remote switch's chassis: " + remoteChassis + "), so look into this remote switch (ip: " + remoteIP + ")");
                 for(Map.Entry<Short, String> entryR : remotePortIDs.entrySet()){
-                    //System.out.println("...compare with remote port of id: " + entryR.getValue());
+                    //logger.trace("...compare with remote port of id: " + entryR.getValue());
                     if(entryR.getValue().compareToIgnoreCase(localPortID) == 0){
                         Short remotePortNum = entryR.getKey();
 
-                        System.out.println("\t\tAdd edge: local (ip " + localIP + ", port " + localPortNum + ") --> remote (ip " + remoteIP + ", port " + remotePortNum +")");
+                        logger.trace("\t\tAdd edge: local (ip " + localIP + ", port " + localPortNum + ") --> remote (ip " + remoteIP + ", port " + remotePortNum +")");
                         myAddEdge(localSwitchID, localPortNum, remoteSwitchID, remotePortNum);
 
                         break;
@@ -1784,8 +1796,8 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
                 }
             }
         }
-        System.out.println("===== end of   Resolve the port pars, and add edges correspondingly =====");
-        System.out.println("=================================================");
+        logger.trace("===== end of Resolve the port pars, and add edges correspondingly =====");
+        logger.trace("=================================================");
     }
 
     //s4s add

@@ -105,7 +105,7 @@ public class MessageReadWriteService implements IMessageReadWrite {
             new SNMPHandler(cmethUtil).sendBySNMP(msgMod.getFlow(), msgMod.getCommand(), msg.getTargetSwitchID());
         }
         else{
-            System.out.println("This SNMPMessage type doens't support (or not yet done): SNMPType " + msg.getType());
+            logger.warn("This SNMPMessage type doens't support (or not yet done): SNMPType " + msg.getType());
         }
         logger.trace("Message sent: {}", msg);
     }

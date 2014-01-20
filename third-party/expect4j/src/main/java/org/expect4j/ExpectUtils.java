@@ -63,20 +63,20 @@ public abstract class ExpectUtils {
             PrintWriter out = new PrintWriter(s.getOutputStream(), false);
             BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
 
-            System.out.println("Sending request");
+            //System.out.println("Sending request");
             out.print("GET " + url + " HTTP/1.1\r\n");
             out.print("Host: " + remotehost + "\r\n");
             out.print("Connection: close\r\n");
             out.print("User-Agent: Expect4j\r\n");
             out.print("\r\n");
             out.flush();
-            System.out.println("Request sent");
+            //System.out.println("Request sent");
 
-            System.out.println("Receiving response");
+            //System.out.println("Receiving response");
             String line;
             while ((line = in.readLine()) != null)
-                System.out.println(line);
-            System.out.println("Received response");
+                //System.out.println(line);
+            //System.out.println("Received response");
             if (line == null)
                 System.exit(0);
         }
