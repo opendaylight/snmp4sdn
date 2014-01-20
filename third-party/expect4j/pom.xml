@@ -10,6 +10,13 @@
     <url>http://github.com/cverges/expect4j</url>
     <description>A Java implementation of the standard Expect library</description>
 
+  <scm>
+    <connection>scm:git:https://git.opendaylight.org/gerrit/p/snmp4sdn.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</developerConnection>
+    <url>https://wiki.opendaylight.org/view/SNMP4SDN:Main</url>
+    <tag>HEAD</tag>
+  </scm>
+
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
