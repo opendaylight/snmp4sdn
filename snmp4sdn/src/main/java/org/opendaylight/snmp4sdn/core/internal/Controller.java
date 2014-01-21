@@ -174,11 +174,6 @@ public class Controller implements IController, CommandProvider {
         snmpListener = new SNMPListener(this, cmethUtil);
         snmpListener.start();
 
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException ie) {
-            logger.error("before constructNetwork, Thread.sleep() err: " + ie.toString());
-        }
         constructNetwork();//s4s: get switches from CmethUtil (i.e. a file), then for each of the switches, read their LLDP, and resolve all these LLDP data, then form the topology of the switches and their ports
     }
 
@@ -412,6 +407,14 @@ public class Controller implements IController, CommandProvider {
     }
 
     public void constructNetwork(){
+        ConcurrentMap<Long, Vector> entries = cmethUtil.getEntries();
+        for(ConcurrentMap.Entry<Long, Vector> entry : entries.entrySet()){
+            Long sid = entry.getKey();
+            handleAddingSwitchAndItsPorts(sid);
+        }
+    }
+
+    public void _constructNetwork(CommandInterpreter ci){
         ConcurrentMap<Long, Vector> entries = cmethUtil.getEntries();
         for(ConcurrentMap.Entry<Long, Vector> entry : entries.entrySet()){
             Long sid = entry.getKey();
