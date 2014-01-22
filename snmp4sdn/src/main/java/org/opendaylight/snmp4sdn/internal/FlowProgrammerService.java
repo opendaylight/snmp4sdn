@@ -284,7 +284,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                 //s4s's work, similar to above OF's work: 'check data correctness' and 'type convertion'
                 if(!checkSameSrcDest(oldFlow, newFlow)){
                     return new Status(StatusCode.NOTACCEPTABLE, errorString("send", action,
-                            "Inconsistency of oldFlow and newFlow (src/dest mac inconsistent)"));
+                            "Inconsistency of oldFlow and newFlow (src/dest mac inconsistent), or flow's action OUTPUT port not set"));
                 }
                 //SNMPMessage msg1 = null, msg2 = null;//s4s. msg2 is useless in cmeth's code
                 SNMPMessage msg1 = new SNMPFlowMod(SNMPFlowMod.ETHPFC_MODIFY, newFlow.clone());//s4s
@@ -847,7 +847,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         }
         if(action1.getType() != ActionType.OUTPUT){
             log.warn("flow's action is not to set OUTPUT port!");
-            System.exit(0);
+            return false;
         }
 
         //for flow 2... do the same things as above
@@ -866,7 +866,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         }
         if(action2.getType() != ActionType.OUTPUT){
             log.warn("flow's action is not to set OUTPUT port!");
-            System.exit(0);
+            return false;
         }
 
         //now compare flow1 and flow2

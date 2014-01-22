@@ -127,7 +127,7 @@ public class SNMPHandler{
         }
         else{
             logger.error("convertToEthSwitchPortString() is given port > 32!");
-            System.exit(0);
+            return null;
         }
 
         return ans;
@@ -183,7 +183,7 @@ public class SNMPHandler{
         }
         else{
             logger.error("convertToEthSwitchPortString() is given port > 32!");
-            System.exit(0);
+            return null;
         }
 
         return ans;
@@ -208,7 +208,7 @@ public class SNMPHandler{
         while(loc1 < oid.length()){
             if(count > 5){
                 logger.error("fwd table has mac addr longer than 6 bytes");
-                System.exit(0);
+                return null;
             }
             loc2 = oid.indexOf(".", loc1 + 1);
             if(loc2 < 0)
@@ -229,31 +229,35 @@ public class SNMPHandler{
             String portOid = portSetOID + "." + vlan + "." + macOid + ".0";
             String typeOid = typeSetOID + "." + vlan + "." + macOid + ".0";
 
-            byte[] convPort = new HexString().fromHexString(convertToEthSwitchPortString(port));
+            String convPortStr = convertToEthSwitchPortString(port);
+            if(convPortStr == null){
+                return false;
+            }
+            byte[] convPort = new HexString().fromHexString(convPortStr);
             SNMPOctetString portOStr =  new SNMPOctetString(convPort);
             SNMPInteger typeInt =  new SNMPInteger(type);
 
-            logger.debug("switch ({})'s OID: {}", destMac, macOid);
-            logger.debug("type: {}", typeInt.toString());
+            logger.warn("switch ({})'s OID: {}", destMac, macOid);
+            logger.warn("type: {}", typeInt.toString());
 
             if(type == 2){//delete entry
                 SNMPVarBindList newVars = comInterface.setMIBEntry(typeOid, typeInt);
-                logger.debug("set OID {}: as new value of {} = {}", typeOid, typeInt.getClass().getName(), typeInt);
+                logger.warn("set OID {}: as new value of {} = {}", typeOid, typeInt.getClass().getName(), typeInt);
             }
             else if(type == 3){//add or modify entry
-                logger.debug("port: {}", portOStr.toString());
+                logger.warn("port: {}", portOStr.toString());
 
                 String[] oids = {typeOid, portOid};
                 SNMPObject [] newValues = {typeInt, portOStr};
                 SNMPVarBindList newVars = comInterface.setMIBEntry(oids, newValues); //comInterface.setMIBEntry() can either input array or variable, like here or below
 
                 for(int i = 0; i < oids.length; i++){
-                    logger.debug("set OID {}: new value of {} = {}", oids[i], newValues[i].getClass().getName(), newValues[i]);
+                    logger.warn("set OID {}: new value of {} = {}", oids[i], newValues[i].getClass().getName(), newValues[i]);
                 }
             }
             else{
                 logger.error("Error: given type (type {}) invalid", typeInt);
-                System.exit(0);
+                return false;
             }
 
             return true;
@@ -286,11 +290,11 @@ public class SNMPHandler{
         Action action = flow.getActions().get(0);
         if(flow.getActions().size() > 1) {
             logger.error("flow.getActions() > 1");
-            System.exit(0);
+            return new Status(StatusCode.NOTALLOWED, null);
         }
         if(action.getType() != ActionType.OUTPUT){
             logger.error("flow's action is not to set OUTPUT port!");
-            System.exit(0);
+            return new Status(StatusCode.NOTALLOWED, null);
         }
         NodeConnector oport = ((Output)action).getPort();
 
@@ -318,7 +322,7 @@ public class SNMPHandler{
         }
         catch (UnknownHostException e) {
             logger.error("sw_macAddr {} into InetAddress.getByName() error: {}", sw_macAddr, e);
-            System.exit(0);
+            return new Status(StatusCode.INTERNALERROR, null);
         }
 
         return new Status(StatusCode.SUCCESS, null);
@@ -403,7 +407,7 @@ public class SNMPHandler{
         }
         catch (UnknownHostException e) {
             logger.error("sw_macAddr {} into InetAddress.getByName() error!: {}", sw_macAddr, e);
-            System.exit(0);
+            return null;
         }
         if(sw_ipAddr == null) return null;
 
@@ -440,7 +444,7 @@ public class SNMPHandler{
         }
         catch (UnknownHostException e) {
             logger.error("sw_macAddr {} into InetAddress.getByName() error!: {}", sw_macAddr, e);
-            System.exit(0);
+            return null;
         }
         if(sw_ipAddr == null) return null;
 
@@ -461,10 +465,12 @@ public class SNMPHandler{
             Match match = new Match();
             String str = entry.getKey();
             short vlan = Short.parseShort(str.substring(0, str.indexOf(".")));
-            byte[] madAddrBytes = OIDToMacAddrBytes(str.substring(str.indexOf(".") + 1));
+            byte[] macAddrBytes = OIDToMacAddrBytes(str.substring(str.indexOf(".") + 1));
+            if(macAddrBytes == null)
+                return null;
 
             match.setField(MatchType.DL_VLAN, vlan);
-            match.setField(MatchType.DL_DST, madAddrBytes);
+            match.setField(MatchType.DL_DST, macAddrBytes);
             List<Action> actions = new ArrayList<Action>();
             NodeConnector oport = NodeConnectorCreator.createNodeConnector("SNMP", Short.parseShort(entry.getValue().toString()), node);
             actions.add(new Output(oport));
@@ -533,7 +539,7 @@ public class SNMPHandler{
         }
         catch (UnknownHostException e) {
             logger.error("sw_macAddr {} into InetAddress.getByName() error!: {}", sw_macAddr, e);
-            System.exit(0);
+            return null;
         }
         if(sw_ipAddr == null) return null;
 
@@ -616,7 +622,7 @@ public class SNMPHandler{
         }
         catch (UnknownHostException e) {
             logger.error("sw_macAddr " + sw_macAddr + "into InetAddress.getByName() error!\n" + e);
-            System.exit(0);
+            return null;
         }
         if(sw_ipAddr == null) return null;
 
@@ -685,7 +691,7 @@ public class SNMPHandler{
         }
         catch (UnknownHostException e) {
             logger.error("sw_macAddr " + sw_macAddr + "into InetAddress.getByName() error!\n" + e);
-            System.exit(0);
+            return null;
         }
         if(sw_ipAddr == null) return null;
 

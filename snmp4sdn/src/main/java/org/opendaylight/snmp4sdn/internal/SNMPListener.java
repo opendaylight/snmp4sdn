@@ -185,6 +185,8 @@ public class SNMPListener implements SNMPv2TrapListener, Runnable{
             sid = cmethUtil.getSID(switchIP);
             SNMPSequence seq = pdu.getVarBindList();
             portName = getPortName(sid, seq);
+            if(portName == null)
+                return;
             }
             else{
             port = 1;
@@ -245,7 +247,7 @@ public class SNMPListener implements SNMPv2TrapListener, Runnable{
     private String getPortName(Long sid, SNMPSequence seq){
             if(seq.size() < 3){
                 logger.warn("link up trap's information format error!");
-                System.exit(0);
+                return null;
             }
             SNMPSequence seq2 = (SNMPSequence)(((Vector)(seq.getValue())).elementAt(2));
             String oidstr = ((SNMPObject)(((Vector)(seq2.getValue())).elementAt(0))).toString();
