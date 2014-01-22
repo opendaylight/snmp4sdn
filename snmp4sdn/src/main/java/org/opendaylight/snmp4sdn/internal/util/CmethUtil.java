@@ -8,6 +8,11 @@
 
 package org.opendaylight.snmp4sdn.internal.util;
 
+import org.eclipse.osgi.framework.console.CommandInterpreter;
+import org.eclipse.osgi.framework.console.CommandProvider;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+
 import org.opendaylight.snmp4sdn.protocol.util.HexString;
 
 import java.io.FileReader;
@@ -19,22 +24,28 @@ import java.util.Vector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CmethUtil{
+public class CmethUtil implements CommandProvider{
     private static final Logger logger = LoggerFactory
             .getLogger(CmethUtil.class);
 
     private ConcurrentMap<Long, Vector> table;//<Long, Vector> as <mac, <ip, community_readonly, community_readwrite, cli_username, cli_password>>
 
+    boolean isDBPathFixed = false;
+
     public CmethUtil(){
+        registerWithOSGIConsole();
         table = new ConcurrentHashMap<Long, Vector>();
-        readDB();
+        if(isDBPathFixed)
+            readDB("/home/christine/snmp4sdn/snmp4sdn/src/test/switch_login_db.csv");
     }
 
-    private void readDB(){
+    private void readDB(String dbPath){
         logger.info("enter CmethUtil.readDB()");
+        table.clear();
+        logger.trace("DB cleared");
         try{
-        logger.info("open file /home/christine/snmp4sdn/snmp4sdn/src/test/switch_login_db.csv");
-        FileReader FileStream=new FileReader("/home/christine/snmp4sdn/snmp4sdn/src/test/switch_login_db.csv");
+        logger.info("open file " + dbPath);//  "/home/christine/snmp4sdn/snmp4sdn/src/test/switch_login_db.csv"
+        FileReader FileStream=new FileReader(dbPath); //"/home/christine/snmp4sdn/snmp4sdn/src/test/switch_login_db.csv"
         BufferedReader BufferedStream=new BufferedReader(FileStream);
         String line;
 
@@ -141,5 +152,41 @@ public class CmethUtil{
         return null;
     }
 
+    private void registerWithOSGIConsole() {
+        BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass())
+                .getBundleContext();
+        bundleContext.registerService(CommandProvider.class.getName(), this,
+                null);
+    }
+
+    @Override
+    public String getHelp() {
+        StringBuffer help = new StringBuffer();
+        help.append("---SNMP4SDN CmethUtil---\n");
+        help.append("\t readDB <switch list file path>\n");
+        return help.toString();
+    }
+
+    public void _s4sReadDB(CommandInterpreter ci){
+        readDB(ci.nextArgument());
+    }
+
+     public void _s4sPrintDB(CommandInterpreter ci){
+         ConcurrentMap<Long, Vector> table = getEntries();
+         ci.print("MAC address (sid)\t\t");
+         ci.print("IP address\t");
+         ci.print("SNMP community\t");
+         ci.print("CLI username\t");
+         ci.println("CLI password\t");
+         for (ConcurrentMap.Entry<Long, Vector> entry: table.entrySet()) {
+            Long mac = entry.getKey();
+            ci.print(HexString.toHexString(mac) + "\t");
+            ci.print("(" + mac + ")\t");
+            ci.print(getIpAddr(mac) + "\t");
+            ci.print(getSnmpCommunity(mac) + "\t");
+            ci.print(getCliUsername(mac) + "\t");
+            ci.println(getCliPassword(mac));
+        }
+     }
 }
 
