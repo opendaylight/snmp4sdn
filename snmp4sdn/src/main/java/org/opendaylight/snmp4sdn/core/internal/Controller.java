@@ -174,7 +174,7 @@ public class Controller implements IController, CommandProvider {
         snmpListener = new SNMPListener(this, cmethUtil);
         snmpListener.start();
 
-        constructNetwork();//s4s: get switches from CmethUtil (i.e. a file), then for each of the switches, read their LLDP, and resolve all these LLDP data, then form the topology of the switches and their ports
+        topologyDiscover();//s4s: get switches from CmethUtil (i.e. a file), then for each of the switches, read their LLDP, and resolve all these LLDP data, then form the topology of the switches and their ports
     }
 
     /**
@@ -406,7 +406,7 @@ public class Controller implements IController, CommandProvider {
                 null);
     }
 
-    public void constructNetwork(){
+    public void topologyDiscover(){
         ConcurrentMap<Long, Vector> entries = cmethUtil.getEntries();
         for(ConcurrentMap.Entry<Long, Vector> entry : entries.entrySet()){
             Long sid = entry.getKey();
@@ -414,12 +414,8 @@ public class Controller implements IController, CommandProvider {
         }
     }
 
-    public void _constructNetwork(CommandInterpreter ci){
-        ConcurrentMap<Long, Vector> entries = cmethUtil.getEntries();
-        for(ConcurrentMap.Entry<Long, Vector> entry : entries.entrySet()){
-            Long sid = entry.getKey();
-            handleAddingSwitchAndItsPorts(sid);
-        }
+    public void _s4sTopoDiscover(CommandInterpreter ci){
+        topologyDiscover();
     }
 
     private void handleAddingSwitchAndItsPorts(Long sid){
