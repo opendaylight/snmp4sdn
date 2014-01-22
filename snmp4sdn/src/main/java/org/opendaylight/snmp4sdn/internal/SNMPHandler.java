@@ -278,9 +278,7 @@ public class SNMPHandler{
         //retrieve from the flow: (1)src mac (2)dest mac (3)the port value, to write into fwd table
             //to retrieve (1)&(2)
         Match match = flow.getMatch();
-        MatchField fieldDlSrc= match.getField(MatchType.DL_SRC);
         MatchField fieldDlDest= match.getField(MatchType.DL_DST);
-        String srcMac = HexString.toHexString((byte[])fieldDlSrc.getValue());
         String destMac = HexString.toHexString((byte[])fieldDlDest.getValue());
         MatchField fieldVlan = match.getField(MatchType.DL_VLAN);
         short vlan = ((Short)(fieldVlan.getValue())).shortValue();
