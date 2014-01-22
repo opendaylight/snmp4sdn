@@ -650,8 +650,8 @@ IInventoryShimExternalListener, CommandProvider {
             Object result = sw.getStatistics(req);
 
             if (result == null) {
-                log.warn("Request Timed Out for ({}) from switch {}", type,
-                        HexString.toHexString(switchId));
+                /*log.warn("Request Timed Out for ({}) from switch {}", type,
+                        HexString.toHexString(switchId));*/
             } else if (result instanceof OFError) {
                 log.warn("Switch {} failed to handle ({}) stats request: {}",
                         new Object[] { HexString.toHexString(switchId), type,
