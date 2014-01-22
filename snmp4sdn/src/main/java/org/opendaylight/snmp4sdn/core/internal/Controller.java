@@ -274,13 +274,13 @@ public class Controller implements IController, CommandProvider {
     }
 
     private void disconnectSwitch(ISwitch sw) {
-        if (((SwitchHandler) sw).isOperational()) {
+        //if (((SwitchHandler) sw).isOperational()) {//s4s: no need to check isOperational
             Long sid = sw.getId();
             if (this.switches.remove(sid, sw)) {
-                logger.info("{} is Disconnected", sw);
+                logger.info("switch {} is Disconnected", HexString.toHexString(sid));
                 notifySwitchDeleted(sw);
             }
-        }
+        //}//s4s: no need to check isOperational
         ((SwitchHandler) sw).stop();
         sw = null;
     }
@@ -407,6 +407,17 @@ public class Controller implements IController, CommandProvider {
     }
 
     public void topologyDiscover(){
+        logger.trace("Remove existing switches...");
+        for(ConcurrentHashMap.Entry<Long, ISwitch> entry : switches.entrySet()){
+            ISwitch sw = entry.getValue();
+            logger.trace("\tSwitch {} is being removed", HexString.toHexString(sw.getId()));
+            takeSwitchEventDelete(sw);
+        }
+
+        try{
+                Thread.sleep(2000);
+        }catch(Exception e){;}
+
         ConcurrentMap<Long, Vector> entries = cmethUtil.getEntries();
         for(ConcurrentMap.Entry<Long, Vector> entry : entries.entrySet()){
             Long sid = entry.getKey();
