@@ -16,7 +16,7 @@
     <relativePath>commons/parent</relativePath>
   </parent>
   <artifactId>snmp4sdn_distribution</artifactId>
-  <version>0.1.1-SNAPSHOT</version>
+  <version>0.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <scm>
