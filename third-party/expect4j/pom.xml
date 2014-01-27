@@ -4,7 +4,7 @@
 
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>org.expect4j</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1</version>
     <name>expect4j</name>
     <url>http://github.com/cverges/expect4j</url>
     <description>A Java implementation of the standard Expect library</description>
@@ -13,7 +13,7 @@
     <connection>scm:git:https://git.opendaylight.org/gerrit/p/snmp4sdn.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</developerConnection>
     <url>https://wiki.opendaylight.org/view/SNMP4SDN:Main</url>
-    <tag>HEAD</tag>
+    <tag>master-tagforprepareonly-snmp4sdn-bulk-release-prepare-only-12</tag>
   </scm>
 
     <licenses>
