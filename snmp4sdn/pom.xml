@@ -87,7 +87,7 @@
     <dependency>
       <groupId>org.opendaylight.controller.thirdparty</groupId>
       <artifactId>org.openflow.openflowj</artifactId>
-      <version>1.0.3-SNAPSHOT</version>
+      <version>1.0.2</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
