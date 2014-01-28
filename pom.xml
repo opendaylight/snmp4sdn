@@ -12,18 +12,18 @@
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.parent</artifactId>
-    <version>0.1.1</version>
+    <version>0.1.2-SNAPSHOT</version>
     <relativePath>commons/parent</relativePath>
   </parent>
   <artifactId>snmp4sdn_distribution</artifactId>
-  <version>0.1.1</version>
+  <version>0.1.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <scm>
     <connection>scm:git:https://git.opendaylight.org/gerrit/p/snmp4sdn.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</developerConnection>
     <url>https://wiki.opendaylight.org/view/SNMP4SDN:Main</url>
-    <tag>master-tagforprepareonly-snmp4sdn-bulk-release-2</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <modules>
