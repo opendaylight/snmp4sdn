@@ -89,6 +89,7 @@ public class SNMPListener implements SNMPv2TrapListener, Runnable{
     public void stopListening(){
         try{
             trapReceiverInterface.stopReceiving();
+            trapReceiverInterface.closeSocket();
             trapReceiverInterface.removev2TrapListener(this);
         }
         catch (Exception e)
