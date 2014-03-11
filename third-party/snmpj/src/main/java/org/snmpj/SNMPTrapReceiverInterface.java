@@ -456,6 +456,12 @@ public class SNMPTrapReceiverInterface
         return this.receiveBufferSize;
     }
 
-
+    public void closeSocket(){//s4s: add by snmp4sdn, because in junit test, occurs "java.net.BindException: Address already in use: Cannot bind"
+        if(dSocket == null)
+            return;
+        if(dSocket.isConnected())
+            dSocket.disconnect();
+        dSocket.close();
+    }
 
 }
