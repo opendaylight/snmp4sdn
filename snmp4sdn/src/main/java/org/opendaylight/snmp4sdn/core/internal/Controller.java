@@ -554,7 +554,7 @@ public class Controller implements IController, CommandProvider {
         try{
             node = new Node("SNMP", new Long(HexString.toLong(sw_mac)));
         }catch(Exception e){
-            logger.error("in _s4sAddVLAN(): create node error -- " + e);
+            logger.error("in s4sSetVLANPorts_execute(): create node error -- " + e);
         }
 
         //get vlandID
@@ -566,8 +566,7 @@ public class Controller implements IController, CommandProvider {
             for(int i = 0; i < ports.length; i++)
                 nodeConns.add(new NodeConnector("SNMP", Short.parseShort(ports[i]), node));
         }catch(Exception e){
-            logger.error("in _s4sAddVLAN(): create node or nodeconnector error -- " + e);
-            logger.error("\nmaybe because this vlan already exits, please check.");
+            logger.error("in s4sSetVLANPorts_execute(): create node or nodeconnector error -- " + e);
         }
 
 
@@ -593,7 +592,7 @@ public class Controller implements IController, CommandProvider {
         try{
             node = new Node("SNMP", new Long(HexString.toLong(sw_mac)));
         }catch(Exception e){
-            logger.error("in _s4sAddVLAN(): create node error -- " + e);
+            logger.error("in s4sPrintVLANTable_execute(): create node error -- " + e);
         }
 
         VLANTable table = null;
