@@ -554,7 +554,7 @@ public class Controller implements IController, CommandProvider {
         try{
             node = new Node("SNMP", new Long(HexString.toLong(sw_mac)));
         }catch(Exception e){
-            logger.error("in s4sSetVLANPorts_execute(): create node error -- " + e);
+            logger.error("in _s4sAddVLAN(): create node error -- " + e);
         }
 
         //get vlandID
@@ -566,13 +566,39 @@ public class Controller implements IController, CommandProvider {
             for(int i = 0; i < ports.length; i++)
                 nodeConns.add(new NodeConnector("SNMP", Short.parseShort(ports[i]), node));
         }catch(Exception e){
-            logger.error("in s4sSetVLANPorts_execute(): create node or nodeconnector error -- " + e);
+            logger.error("in _s4sAddVLAN(): create node or nodeconnector error -- " + e);
+            logger.error("\nmaybe because this vlan already exits, please check.");
         }
 
 
         //(new SNMPHandler(cmethUtil)).setVLANPorts(node, vlanID, nodeConns);//skip the VLANService wrapper, call SNMPHandler directly
         (new VLANService()).setVLANPorts(node, vlanID, nodeConns);
     }
+
+    public void _s4sDeleteVLAN(CommandInterpreter ci){
+        String sw_mac = null, vlanID = null, vlanName = null;
+        
+        sw_mac = ci.nextArgument();
+        vlanID= ci.nextArgument();
+        
+        s4sDeleteVLAN_execute(sw_mac, vlanID);
+    }
+    
+     private void s4sDeleteVLAN_execute(String sw_mac, String vlanID){
+         if(sw_mac == null || vlanID == null){
+             logger.error("\nPlease use command: s4s, vlanNameVLAN <switch's mac addr> <vlan id>");
+             return;
+         }
+         
+         Node node = null;
+         try{
+             node = new Node("SNMP", new Long(HexString.toLong(sw_mac)));
+         }catch(Exception e){
+             logger.error("in _s4sDeleteVLAN(): create node error -- " + e);
+         }
+         //(new SNMPHandler(cmethUtil)).deleteVLAN(node, new Long(Long.parseLong(vlanID)));//skip the VLANService wrapper, call SNMPHandler directly
+         (new VLANService()).deleteVLAN(node, new Long(Long.parseLong(vlanID)));
+     }
 
     public void _s4sPrintVLANTable(CommandInterpreter ci){
         String sw_mac = ci.nextArgument();
@@ -592,7 +618,7 @@ public class Controller implements IController, CommandProvider {
         try{
             node = new Node("SNMP", new Long(HexString.toLong(sw_mac)));
         }catch(Exception e){
-            logger.error("in s4sPrintVLANTable_execute(): create node error -- " + e);
+            logger.error("in _s4sAddVLAN(): create node error -- " + e);
         }
 
         VLANTable table = null;
