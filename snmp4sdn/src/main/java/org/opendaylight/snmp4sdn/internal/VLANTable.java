@@ -49,6 +49,7 @@ public class VLANTable{
             List<NodeConnector> ports = entry.getPorts();
             for(int j = 0; j < ports.size(); j++)
                 ans += (Short)(ports.get(j).getID()) + ",";
+            if(ans.endsWith(",")) ans = ans.substring(0, ans.length() -1);
             ans += "}\n";
         }
         return ans;
