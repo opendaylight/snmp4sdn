@@ -82,7 +82,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
-      <version>0.7.0</version>
+      <version>0.8.1-v20140616153620_38fad7a</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller.thirdparty</groupId>
@@ -92,7 +92,7 @@
     <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>org.snmpj</artifactId>
-      <version>1.4.5-SNAPSHOT</version>
+      <version>1.4.5-v20140616153620_908330e</version>
     </dependency>
     <!--<dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
