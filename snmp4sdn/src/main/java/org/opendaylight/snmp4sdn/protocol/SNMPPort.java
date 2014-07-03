@@ -13,15 +13,6 @@ This code reused the code of OpenFlow Java package. The authours' efforts are ap
 package org.opendaylight.snmp4sdn.protocol;
 
 public enum SNMPPort {
-    /*OFPP_MAX                ((short)0xff00),
-    OFPP_IN_PORT            ((short)0xfff8),
-    OFPP_TABLE              ((short)0xfff9),
-    OFPP_NORMAL             ((short)0xfffa),
-    OFPP_FLOOD              ((short)0xfffb),
-    OFPP_ALL                ((short)0xfffc),
-    OFPP_CONTROLLER         ((short)0xfffd),
-    OFPP_LOCAL              ((short)0xfffe),
-    OFPP_NONE               ((short)0xffff);*/
     SNMPPP_MAX                ((short)0xff00),
     SNMPPP_IN_PORT            ((short)0xfff8),
     SNMPPP_TABLE              ((short)0xfff9),

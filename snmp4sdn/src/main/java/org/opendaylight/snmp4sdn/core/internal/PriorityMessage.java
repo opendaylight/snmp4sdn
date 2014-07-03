@@ -21,29 +21,29 @@ import org.opendaylight.snmp4sdn.protocol.SNMPMessage;//s4s add
  * This class describes an OpenFlow message with priority
  */
 class PriorityMessage {
-    /*OFMessage msg*/SNMPMessage msg;
+    SNMPMessage msg;
     int priority;
     final static AtomicLong seq = new AtomicLong();
     final long seqNum;
     boolean syncReply; // set to true if we want to be blocked until the response arrives
 
-    public PriorityMessage(/*OFMessage msg*/SNMPMessage msg, int priority) {
+    public PriorityMessage(SNMPMessage msg, int priority) {
         this.msg = msg;
         this.priority = priority;
         this.seqNum = seq.getAndIncrement();
         this.syncReply = false;
     }
 
-    public PriorityMessage(/*OFMessage msg*/SNMPMessage msg, int priority, boolean syncReply) {
+    public PriorityMessage(SNMPMessage msg, int priority, boolean syncReply) {
         this(msg, priority);
         this.syncReply = syncReply;
     }
 
-    public /*OFMessage*/SNMPMessage getMsg() {
+    public SNMPMessage getMsg() {
         return msg;
     }
 
-    public void setMsg(/*OFMessage msg*/SNMPMessage msg) {
+    public void setMsg(SNMPMessage msg) {
         this.msg = msg;
     }
 

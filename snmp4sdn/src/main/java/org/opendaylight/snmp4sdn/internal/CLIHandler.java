@@ -196,46 +196,6 @@ public class CLIHandler{
         return new Status(StatusCode.INTERNALERROR);
     }
 
-/*
-    public void readFlowRequest(Flow flow, Long sw_macAddr){
-        logger.trace("enter CLIHandler.readFlowRequest()");
-
-        logger.trace("retrieving the metrics in the Flow...");
-
-    //retrieve match fields from the flow...
-        Match match = flow.getMatch();
-
-        //src/dest mac
-        MatchField fieldDlSrc= match.getField(MatchType.DL_SRC);
-        String srcMac = (fieldDlSrc == null)? null : HexString.toHexString((byte[])fieldDlSrc.getValue());
-        MatchField fieldDlDest= match.getField(MatchType.DL_DST);
-        String destMac = (fieldDlDest == null)? null : HexString.toHexString((byte[])fieldDlDest.getValue());
-
-        //vlan
-        MatchField fieldVlan = match.getField(MatchType.DL_VLAN);
-        short vlan = (fieldVlan == null)? null : ((Short)(fieldVlan.getValue())).shortValue();
-
-        //ethernet_type 
-        MatchField fieldEthType= match.getField(MatchType.DL_TYPE);
-        short ethType = (fieldEthType == null)? null : ((Short)fieldNwSrc.getValue()).shortValue();
-
-        //network protocol
-        MatchField fieldNwProtocol= match.getField(MatchType.NW_PROTO);
-        int nwProtocol = (fieldNwProtocol == null)? null : ((byte)(fieldNwProtocol.getValue())).intValue();//actually not int ~ value range is just 0~255
-
-        //src/dest IP address
-        MatchField fieldNwSrc= match.getField(MatchType.NW_SRC);
-        String srcIP = (fieldNwSrc == null)? null : ((InetAddress)(fieldNwSrc.getValue())).getHostAddress();
-        MatchField fieldNwDest= match.getField(MatchType.NW_DST);
-        String destIP = (fieldNwDest == null)? null : ((InetAddress)(fieldNwDest.getValue())).getHostAddress();
-
-        //src/dest IP port
-        MatchField fieldSrcPort= match.getField(MatchType.TP_SRC);
-        short srcPort = (fieldSrcPort == null)? null : ((Short)(fieldSrcPort.getValue())).shortValue();
-        MatchField fieldDestPort= match.getField(MatchType.TP_DST);
-        short destPort = (fieldDestPort == null)? null : ((Short)(fieldDestPort.getValue())).shortValue();
-    }
-*/
     public void addFlow(String command){
         
     }
