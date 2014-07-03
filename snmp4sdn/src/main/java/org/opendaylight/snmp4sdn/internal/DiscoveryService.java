@@ -82,66 +82,10 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
     private IDiscoveryListener discoveryListener = null;
     private IInventoryProvider inventoryProvider = null;
     private IDataPacketMux iDataPacketMux = null;
-    //snmp4sdn: OF's need
-    /*
-    // Newly added ports go into this list and will be served first
-    private List<NodeConnector> readyListHi = null;
-    // Come here after served at least once
-    private List<NodeConnector> readyListLo = null;
-    // Staging area during quiet period
-    private List<NodeConnector> waitingList = null;
-    // Wait for next discovery packet. The map contains the time elapsed since
-    // the last received LLDP frame on each node connector
-    private ConcurrentMap<NodeConnector, Integer> pendingMap = null;*/
-    // openflow edges keyed by head connector
     private ConcurrentMap<NodeConnector, Edge> edgeMap = null;
-    //snmp4sdn: OF's need
-    /*
-    // Aging entries keyed by head edge connector
-    private ConcurrentMap<NodeConnector, Integer> agingMap = null;
-    // Production edges keyed by head edge connector
-    private ConcurrentMap<NodeConnector, Edge> prodMap = null;
-
-    private Timer discoveryTimer;
-    private DiscoveryTimerTask discoveryTimerTask;
-    private long discoveryTimerTick = 1L * 1000; // per tick in msec
-    private int discoveryTimerTickCount = 0; // main tick counter
-    // Max # of ports handled in one batch
-    private int discoveryBatchMaxPorts = 500;
-    // Periodically restart batching process
-    private int discoveryBatchRestartTicks = getDiscoveryInterval();
-    private int discoveryBatchPausePeriod = 5; // pause for few secs
-    // Pause after this point
-    private int discoveryBatchPauseTicks = discoveryBatchRestartTicks - discoveryBatchPausePeriod;
-    // Number of retries after initial timeout
-    private int discoveryRetry = getDiscoveryRetry();
-    private int discoveryTimeoutTicks = getDiscoveryTimeout(); // timeout in sec
-    private int discoveryAgeoutTicks = 120; // age out 2 min
-    // multiple of discoveryBatchRestartTicks
-    private int discoveryConsistencyCheckMultiple = 2;
-    // CC tick counter
-    private int discoveryConsistencyCheckTickCount = discoveryBatchPauseTicks;
-    // # of times CC getscalled
-    private int discoveryConsistencyCheckCallingTimes = 0;
-    // # of cases CC corrected
-    private int discoveryConsistencyCheckCorrected = 0;
-    // Enable or disable CC
-    private boolean discoveryConsistencyCheckEnabled = true;
-    // Enable or disable aging
-    private boolean discoveryAgingEnabled = true;
-    // Global flag to enable or disable LLDP snooping
-    private boolean discoverySnoopingEnabled = true;
-    // The list of ports that will not do LLDP snooping
-    private List<NodeConnector> discoverySnoopingDisableList;
-    private BlockingQueue<NodeConnector> <Node> transmitQ;//snmp4sdn: OF'code
-    */
     private BlockingQueue <Node> transmitQ;
     private Thread transmitThread;
-    //private Boolean throttling = false; // if true, no more batching.//snmp4sdn. OF's need
     private volatile Boolean shuttingDown = false;
-
-    //private LLDPTLV chassisIdTlv, portIdTlv, ttlTlv, customTlv;//snmp4sdn. OF's need
-
 
     //s4s add
     /*LLDP data structure of a switch:
@@ -169,10 +113,8 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
     Map<Long, Map<Short, String>> portToRemotePortIDOnSwitches = new HashMap<Long, Map<Short, String>>();
 
     class DiscoveryTransmit implements Runnable {
-        //private final BlockingQueue<NodeConnector> transmitQ;//snmp4sdn. OF's
         private final BlockingQueue<Node> transmitQ;//snmp4sdn
 
-        //DiscoveryTransmit(BlockingQueue<NodeConnector> transmitQ) {//snmp4sdn. OF's
         DiscoveryTransmit(BlockingQueue<Node> transmitQ) {
             this.transmitQ = transmitQ;
         }
@@ -181,12 +123,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         public void run() {
             while (true) {
                 try {
-                    //NodeConnector nodeConnector = transmitQ.take();//snmp4sdn. OF's code
                     Node node = transmitQ.take();//snmp4sdn
-                    /*//snmp4sdn. OF's need
-                    RawPacket outPkt = createDiscoveryPacket(nodeConnector);
-                    sendDiscoveryPacket(nodeConnector, outPkt);
-                    nodeConnector = null;*/
 
                     /*s4s: here should process new switch join in and to figure out the topology.
                         but currently we don't deal with "a new switch" but we deal with "link up trap -- that is, a new port"
@@ -204,100 +141,6 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         }
     }
 
-    //snmp4sdn: OF's need
-    /*
-    class DiscoveryTimerTask extends TimerTask {
-        @Override
-        public void run() {
-            checkTimeout();
-            checkAging();
-            doConsistencyCheck();
-            doDiscovery();
-        }
-    }*/
-
-    //snmp4sdn: OF's need
-    /*
-    private RawPacket createDiscoveryPacket(NodeConnector nodeConnector) {
-        String nodeId = HexEncode.longToHexString((Long) nodeConnector.getNode().getID());
-
-        // Create LLDP ChassisID TLV
-        byte[] cidValue = LLDPTLV.createChassisIDTLVValue(nodeId);
-        chassisIdTlv.setType(LLDPTLV.TLVType.ChassisID.getValue()).setLength((short) cidValue.length)
-                .setValue(cidValue);
-
-        // Create LLDP PortID TLV
-        String portId = nodeConnector.getNodeConnectorIDString();
-        byte[] pidValue = LLDPTLV.createPortIDTLVValue(portId);
-        portIdTlv.setType(LLDPTLV.TLVType.PortID.getValue()).setLength((short) pidValue.length).setValue(pidValue);
-
-        // Create LLDP Custom TLV
-        byte[] customValue = LLDPTLV.createCustomTLVValue(nodeConnector.toString());
-        customTlv.setType(LLDPTLV.TLVType.Custom.getValue()).setLength((short) customValue.length)
-                .setValue(customValue);
-
-        // Create LLDP Custom Option list
-        List<LLDPTLV> customList = new ArrayList<LLDPTLV>();
-        customList.add(customTlv);
-
-        // Create discovery pkt
-        LLDP discoveryPkt = new LLDP();
-        discoveryPkt.setChassisId(chassisIdTlv).setPortId(portIdTlv).setTtl(ttlTlv).setOptionalTLVList(customList);
-
-        RawPacket rawPkt = null;
-        try {
-            // Create ethernet pkt
-            byte[] sourceMac = getSourceMACFromNodeID(nodeId);
-            Ethernet ethPkt = new Ethernet();
-            ethPkt.setSourceMACAddress(sourceMac).setDestinationMACAddress(LLDP.LLDPMulticastMac)
-                    .setEtherType(EtherTypes.LLDP.shortValue()).setPayload(discoveryPkt);
-
-            byte[] data = ethPkt.serialize();
-            rawPkt = new RawPacket(data);
-            rawPkt.setOutgoingNodeConnector(nodeConnector);
-        } catch (ConstructionException cex) {
-            logger.warn("RawPacket creation caught exception {}", cex.getMessage());
-        } catch (Exception e) {
-            logger.error("Failed to serialize the LLDP packet: " + e);
-        }
-
-        return rawPkt;
-    }*/
-
-    //snmp4sdn: OF's need
-    /*
-    private void sendDiscoveryPacket(NodeConnector nodeConnector, RawPacket outPkt) {
-        if (nodeConnector == null) {
-            logger.debug("Can not send discovery packet out since nodeConnector is null");
-            return;
-        }
-
-        if (outPkt == null) {
-            logger.debug("Can not send discovery packet out since outPkt is null");
-            return;
-        }
-
-        long sid = (Long) nodeConnector.getNode().getID();
-        ISwitch sw = controller.getSwitches().get(sid);
-
-        if (sw == null) {
-            logger.debug("Can not send discovery packet out since switch {} is null", sid);
-            return;
-        }
-
-        if (!sw.isOperational()) {
-            logger.debug("Can not send discovery packet out since switch {} is not operational", sw);
-            return;
-        }
-
-        if (this.iDataPacketMux == null) {
-            logger.debug("Can not send discovery packet out since DataPacket service is not available");
-            return;
-        }
-
-        logger.trace("Sending topology discovery pkt thru {}", nodeConnector);
-        this.iDataPacketMux.transmitDataPacket(outPkt);
-    }*/
 
     @Override
     public PacketResult receiveDataPacket(RawPacket inPkt) {
@@ -331,121 +174,8 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
             return PacketResult.IGNORED;
         }
 
-        /*
-        if (ethPkt.getPayload() instanceof LLDP) {
-            NodeConnector dst = inPkt.getIncomingNodeConnector();
-            if (isEnabled(dst)) {
-                if (!processDiscoveryPacket(dst, ethPkt)) {
-                    // Snoop the discovery pkt if not generated from us
-                    snoopDiscoveryPacket(dst, ethPkt);
-                }
-                return PacketResult.CONSUME;
-            }
-        }*///OF'code. snmp4sdn don't send/receive LLDP (the discovery task is done by snmp LLDP request)
         return PacketResult.IGNORED;
     }
-
-    /*
-     * Snoop incoming discovery frames generated by the production network
-     * neighbor switch
-     */
-    /*
-    private void snoopDiscoveryPacket(NodeConnector dstNodeConnector, Ethernet ethPkt) {
-        if (!this.discoverySnoopingEnabled || discoverySnoopingDisableList.contains(dstNodeConnector)) {
-            logger.trace("Discarded received discovery packet on {} since snooping is turned off", dstNodeConnector);
-            return;
-        }
-
-        if ((dstNodeConnector == null) || (ethPkt == null)) {
-            logger.trace("Quit snooping discovery packet: Null node connector or packet");
-            return;
-        }
-
-        LLDP lldp = (LLDP) ethPkt.getPayload();
-
-        try {
-            String nodeId = LLDPTLV.getHexStringValue(lldp.getChassisId().getValue(), lldp.getChassisId().getLength());
-            String portId = LLDPTLV.getStringValue(lldp.getPortId().getValue(), lldp.getPortId().getLength());
-            byte[] systemNameBytes = null;
-            // get system name if present in the LLDP pkt
-            for (LLDPTLV lldptlv : lldp.getOptionalTLVList()) {
-                if (lldptlv.getType() == LLDPTLV.TLVType.SystemName.getValue()) {
-                    systemNameBytes = lldptlv.getValue();
-                    break;
-                }
-            }
-            String nodeName = (systemNameBytes == null) ? nodeId
-                    : new String(systemNameBytes, Charset.defaultCharset());
-            Node srcNode = new Node(Node.NodeIDType.PRODUCTION, nodeName);
-            NodeConnector srcNodeConnector = NodeConnectorCreator.createNodeConnector(
-                    NodeConnector.NodeConnectorIDType.PRODUCTION, portId, srcNode);
-
-            Edge edge = null;
-            Set<Property> props = null;
-            edge = new Edge(srcNodeConnector, dstNodeConnector);
-            props = getProps(dstNodeConnector);
-
-            updateProdEdge(edge, props);
-        } catch (Exception e) {
-            logger.warn("Caught exception ", e);
-        }
-    }*///OF' need
-
-    /*
-     * Handle discovery frames generated by our controller
-     *
-     * @return true if it's a success
-     */
-    /*
-    private boolean processDiscoveryPacket(NodeConnector dstNodeConnector, Ethernet ethPkt) {
-        if ((dstNodeConnector == null) || (ethPkt == null)) {
-            logger.trace("Ignoring processing of discovery packet: Null node connector or packet");
-            return false;
-        }
-
-        logger.trace("Handle discovery packet {} from {}", ethPkt, dstNodeConnector);
-
-        LLDP lldp = (LLDP) ethPkt.getPayload();
-
-        List<LLDPTLV> optionalTLVList = lldp.getOptionalTLVList();
-        if (optionalTLVList == null) {
-            logger.info("The discovery packet with null custom option from {}", dstNodeConnector);
-            return false;
-        }
-
-        Node srcNode = null;
-        NodeConnector srcNodeConnector = null;
-        for (LLDPTLV lldptlv : lldp.getOptionalTLVList()) {
-            if (lldptlv.getType() == LLDPTLV.TLVType.Custom.getValue()) {
-                String ncString = LLDPTLV.getCustomString(lldptlv.getValue(), lldptlv.getLength());
-                srcNodeConnector = NodeConnector.fromString(ncString);
-                if (srcNodeConnector != null) {
-                    srcNode = srcNodeConnector.getNode();
-                }
-            }
-        }
-
-        if ((srcNode == null) || (srcNodeConnector == null)) {
-            logger.trace("Received non-controller generated discovery packet from {}", dstNodeConnector);
-            return false;
-        }
-
-        // push it out to Topology
-        Edge edge = null;
-        Set<Property> props = null;
-        try {
-            edge = new Edge(srcNodeConnector, dstNodeConnector);
-            props = getProps(dstNodeConnector);
-        } catch (ConstructionException e) {
-            logger.error("Caught exception ", e);
-        }
-        addEdge(edge, props);
-        pendingMap.put(dstNodeConnector, 0);
-
-        logger.trace("Received discovery packet for Edge {}", edge);
-
-        return true;
-    }*///snmp4sdn: OF's need
 
     public Map<String, Property> getPropMap(NodeConnector nodeConnector) {
         if (nodeConnector == null) {
@@ -494,101 +224,14 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         return ((config != null) && (config.getValue() == Config.ADMIN_UP) && (state != null) && (state.getValue() == State.EDGE_UP));
     }
 
-    //snmp4sdn: OF's need
-    /*
-    private boolean isTracked(NodeConnector nodeConnector) {
-        if (readyListHi.contains(nodeConnector)) {
-            return true;
-        }
-
-        if (readyListLo.contains(nodeConnector)) {
-            return true;
-        }
-
-        if (pendingMap.keySet().contains(nodeConnector)) {
-            return true;
-        }
-
-        if (waitingList.contains(nodeConnector)) {
-            return true;
-        }
-
-        return false;
-    }*/
-
-    //snmp4sdn: OF's need
-    /*
-    private Set<NodeConnector> getWorkingSet() {
-        Set<NodeConnector> workingSet = new HashSet<NodeConnector>();
-        Set<NodeConnector> removeSet = new HashSet<NodeConnector>();
-
-        for (NodeConnector nodeConnector : readyListHi) {
-            if (isOverLimit(workingSet.size())) {
-                break;
-            }
-
-            workingSet.add(nodeConnector);
-            removeSet.add(nodeConnector);
-        }
-        readyListHi.removeAll(removeSet);
-
-        removeSet.clear();
-        for (NodeConnector nodeConnector : readyListLo) {
-            if (isOverLimit(workingSet.size())) {
-                break;
-            }
-
-            workingSet.add(nodeConnector);
-            removeSet.add(nodeConnector);
-        }
-        readyListLo.removeAll(removeSet);
-
-        return workingSet;
-    }
-
-    private Boolean isOverLimit(int size) {
-        return ((size >= discoveryBatchMaxPorts) && !throttling);
-    }*/
-
-    /*//snmp4sdn. OF's need. Here addDiscovery for all switches, but our plugin do this by doEthSwDiscovery()
-    private void addDiscovery() {
-        Map<Long, ISwitch> switches = controller.getSwitches();
-        Set<Long> sidSet = switches.keySet();
-        if (sidSet == null) {
-            return;
-        }
-        for (Long sid : sidSet) {
-            Node node = NodeCreator.createOFNode(sid);
-            Node node = NodeCreator.createESNode(sid);
-            addDiscovery(node);
-        }
-    }*/
 
     private void addDiscovery(Node node) {
         Map<Long, ISwitch> switches = controller.getSwitches();
         ISwitch sw = switches.get(node.getID());
-        /*//snmp4sdn. OF's need. OF do addDiscovery for every port, but our plugin is once a switch
-        List<OFPhysicalPort> ports = sw.getEnabledPorts();
-        if (ports == null) {
-            return;
-        }
-        for (OFPhysicalPort port : ports) {
-            NodeConnector nodeConnector = NodeConnectorCreator.createOFNodeConnector(port.getPortNumber(), node);
-            if (!readyListHi.contains(nodeConnector)) {
-                readyListHi.add(nodeConnector);
-            }
-        }*/
         transmitQ.add(node);
     }
 
     private void addDiscovery(NodeConnector nodeConnector) {
-        /*//snmp4sdn. OF's need
-        if (isTracked(nodeConnector)) {
-            return;
-        }
-
-        readyListHi.add(nodeConnector);*/
-
         processLinkUpTrap(nodeConnector);
     }
 
@@ -608,185 +251,17 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
     private void removeDiscovery(Node node) {
         Set<NodeConnector> removeSet;
 
-        /*//snmp4sdn. OF's need
-        removeSet = getRemoveSet(readyListHi, node);
-        readyListHi.removeAll(removeSet);
-
-        removeSet = getRemoveSet(readyListLo, node);
-        readyListLo.removeAll(removeSet);
-
-        removeSet = getRemoveSet(waitingList, node);
-        waitingList.removeAll(removeSet);
-
-        removeSet = getRemoveSet(pendingMap.keySet(), node);
-        for (NodeConnector nodeConnector : removeSet) {
-            pendingMap.remove(nodeConnector);
-        }*/
-
         removeSet = getRemoveSet(edgeMap.keySet(), node);
         for (NodeConnector nodeConnector : removeSet) {
             removeEdge(nodeConnector, false);
         }
 
-        /*//snmp4sdn. OF's need
-        removeSet = getRemoveSet(prodMap.keySet(), node);
-        for (NodeConnector nodeConnector : removeSet) {
-            removeProdEdge(nodeConnector);
-        }*/
     }
 
     private void removeDiscovery(NodeConnector nodeConnector) {
-        //snmp4sdn: OF's need
-        /*
-        readyListHi.remove(nodeConnector);
-        readyListLo.remove(nodeConnector);
-        waitingList.remove(nodeConnector);
-        pendingMap.remove(nodeConnector);*/
         removeEdge(nodeConnector, false);
-        /*//snmp4sdn: OF's need
-        removeProdEdge(nodeConnector);*/
     }
 
-    //snmp4sdn: OF's need
-    /*
-    private void checkTimeout() {
-        Set<NodeConnector> removeSet = new HashSet<NodeConnector>();
-        Set<NodeConnector> retrySet = new HashSet<NodeConnector>();
-        int ticks;
-
-        Set<NodeConnector> pendingSet = pendingMap.keySet();
-        if (pendingSet != null) {
-            for (NodeConnector nodeConnector : pendingSet) {
-                ticks = pendingMap.get(nodeConnector);
-                pendingMap.put(nodeConnector, ++ticks);
-                if (ticks > getDiscoveryFinalTimeoutInterval()) {
-                    // timeout the edge
-                    removeSet.add(nodeConnector);
-                    logger.trace("Discovery timeout {}", nodeConnector);
-                } else if (ticks % discoveryTimeoutTicks == 0) {
-                    retrySet.add(nodeConnector);
-                }
-            }
-        }
-
-        for (NodeConnector nodeConnector : removeSet) {
-            removeEdge(nodeConnector);
-        }
-
-        for (NodeConnector nodeConnector : retrySet) {
-            transmitQ.add(nodeConnector);
-        }
-    }*/
-
-    //snmp4sdn: OF's need
-    /*
-    private void checkAging() {
-        if (!discoveryAgingEnabled) {
-            return;
-        }
-
-        Set<NodeConnector> removeSet = new HashSet<NodeConnector>();
-        int ticks;
-
-        Set<NodeConnector> agingSet = agingMap.keySet();
-        if (agingSet != null) {
-            for (NodeConnector nodeConnector : agingSet) {
-                ticks = agingMap.get(nodeConnector);
-                agingMap.put(nodeConnector, ++ticks);
-                if (ticks > discoveryAgeoutTicks) {
-                    // age out the edge
-                    removeSet.add(nodeConnector);
-                    logger.trace("Discovery age out {}", nodeConnector);
-                }
-            }
-        }
-
-        for (NodeConnector nodeConnector : removeSet) {
-            removeProdEdge(nodeConnector);
-        }
-    }*/
-
-    //snmp4sdn: OF's need
-    /*
-    private void doDiscovery() {
-        if (++discoveryTimerTickCount <= discoveryBatchPauseTicks) {
-            for (NodeConnector nodeConnector : getWorkingSet()) {
-                transmitQ.add(nodeConnector);
-            }
-        } else if (discoveryTimerTickCount >= discoveryBatchRestartTicks) {
-            discoveryTimerTickCount = 0;
-            for (NodeConnector nodeConnector : waitingList) {
-                if (!readyListLo.contains(nodeConnector)) {
-                    readyListLo.add(nodeConnector);
-                }
-            }
-            waitingList.removeAll(readyListLo);
-        }
-    }*/
-
-    //snmp4sdn: OF's need
-    /*
-    private void doConsistencyCheck() {
-        if (!discoveryConsistencyCheckEnabled) {
-            return;
-        }
-
-        if (++discoveryConsistencyCheckTickCount % getDiscoveryConsistencyCheckInterval() != 0) {
-            return;
-        }
-
-        discoveryConsistencyCheckCallingTimes++;
-
-        Set<NodeConnector> removeSet = new HashSet<NodeConnector>();
-        Set<NodeConnector> ncSet = edgeMap.keySet();
-        if (ncSet == null) {
-            return;
-        }
-        for (NodeConnector nodeConnector : ncSet) {
-            if (!isEnabled(nodeConnector)) {
-                removeSet.add(nodeConnector);
-                discoveryConsistencyCheckCorrected++;
-                logger.debug("ConsistencyChecker: remove disabled {}", nodeConnector);
-                continue;
-            }
-
-            if (!isTracked(nodeConnector)) {
-                waitingList.add(nodeConnector);
-                discoveryConsistencyCheckCorrected++;
-                logger.debug("ConsistencyChecker: add back untracked {}", nodeConnector);
-                continue;
-            }
-        }
-
-        for (NodeConnector nodeConnector : removeSet) {
-            removeEdge(nodeConnector, false);
-        }
-
-        // remove stale entries
-        removeSet.clear();
-        for (NodeConnector nodeConnector : waitingList) {
-            if (!isEnabled(nodeConnector)) {
-                removeSet.add(nodeConnector);
-                discoveryConsistencyCheckCorrected++;
-                logger.debug("ConsistencyChecker: remove disabled {}", nodeConnector);
-            }
-        }
-        waitingList.removeAll(removeSet);
-
-        // Get a snapshot of all the existing switches
-        Map<Long, ISwitch> switches = this.controller.getSwitches();
-        for (ISwitch sw : switches.values()) {
-            for (OFPhysicalPort port : sw.getEnabledPorts()) {
-                Node node = NodeCreator.createOFNode(sw.getId());
-                NodeConnector nodeConnector = NodeConnectorCreator.createOFNodeConnector(port.getPortNumber(), node);
-                if (!isTracked(nodeConnector)) {
-                    waitingList.add(nodeConnector);
-                    discoveryConsistencyCheckCorrected++;
-                    logger.debug("ConsistencyChecker: add back untracked {}", nodeConnector);
-                }
-            }
-        }
-    }*/
 
     private void addEdge(Edge edge, Set<Property> props) {
         if (edge == null) {
@@ -807,85 +282,10 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         logger.trace("Add edge {}", edge);
     }
 
-    /**
-     * Update Production Edge
-     *
-     * @param edge
-     *            The Production Edge
-     * @param props
-     *            Properties associated with the edge
-     */
-    //snmp4sdn: OF's need
     /*
-    private void updateProdEdge(Edge edge, Set<Property> props) {
-        NodeConnector edgePort = edge.getHeadNodeConnector();
-
-        // * Do not update in case there is an existing OpenFlow link * //
-        if (edgeMap.get(edgePort) != null) {
-            logger.trace("Discarded edge {} since there is an existing OF link {}", edge, edgeMap.get(edgePort));
-            return;
-        }
-
-        // * Look for any existing Production Edge * //
-        Edge oldEdge = prodMap.get(edgePort);
-        if (oldEdge == null) {
-            // * Let's add a new one * //
-            addEdge(edge, props);
-        } else if (!edge.equals(oldEdge)) {
-            // * Remove the old one first * //
-            removeProdEdge(oldEdge.getHeadNodeConnector());
-            // * Then add the new one * //
-            addEdge(edge, props);
-        } else {
-            // * o/w, just reset the aging timer * //
-            NodeConnector dst = edge.getHeadNodeConnector();
-            agingMap.put(dst, 0);
-        }
-    }*/
-
-    /**
-     * Remove Production Edge for a given edge port
-     *
-     * @param edgePort
-     *            The OF edge port
-     */
-    /*//snmp4sdn: OF's need
-        private void removeProdEdge(NodeConnector edgePort) {
-        agingMap.remove(edgePort);
-
-        Edge edge = null;
-        Set<NodeConnector> prodKeySet = prodMap.keySet();
-        if ((prodKeySet != null) && (prodKeySet.contains(edgePort))) {
-            edge = prodMap.get(edgePort);
-            prodMap.remove(edgePort);
-        }
-
-        // notify Topology
-        if (this.discoveryListener != null) {
-            this.discoveryListener.notifyEdge(edge, UpdateType.REMOVED, null);
-        }
-        logger.trace("Remove edge {}", edge);
-    }*/
-
-    /*
-     * Remove OpenFlow edge
+     * Remove SNMP edge
      */
     private void removeEdge(NodeConnector nodeConnector, boolean stillEnabled) {
-        /*//snmp4sdn: OF's need
-        pendingMap.remove(nodeConnector);
-        readyListLo.remove(nodeConnector);
-        readyListHi.remove(nodeConnector);
-
-        if (stillEnabled) {
-            // keep discovering
-            if (!waitingList.contains(nodeConnector)) {
-                waitingList.add(nodeConnector);
-            }
-        } else {
-            // stop it
-            waitingList.remove(nodeConnector);
-        }*/
-
         Edge edge = null;
         Set<NodeConnector> edgeKeySet = edgeMap.keySet();
         if ((edgeKeySet != null) && (edgeKeySet.contains(nodeConnector))) {
@@ -921,46 +321,15 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         }
 
         else {
-            /*//snmp4sdn: OF's need// *
-            // * Save Production edge into different DB keyed by the Edge port
-            // * /
-            if (type == UpdateType.ADDED) {
-                prodMap.put(dst, edge);
-            } else {
-                prodMap.remove(dst);
-            }*/
             //TODO
 
         }
     }
 
-    //snmp4sdn: OF's need
-    /*
-    private void moveToReadyListHi(NodeConnector nodeConnector) {
-        if (readyListLo.contains(nodeConnector)) {
-            readyListLo.remove(nodeConnector);
-        } else if (waitingList.contains(nodeConnector)) {
-            waitingList.remove(nodeConnector);
-        }
-        readyListHi.add(nodeConnector);
-    }*/
-
     private void registerWithOSGIConsole() {
         BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
         bundleContext.registerService(CommandProvider.class.getName(), this, null);
     }
-
-    //snmp4sdn: OF's need
-    /*
-    private int getDiscoveryConsistencyCheckInterval() {
-        return discoveryConsistencyCheckMultiple * discoveryBatchRestartTicks;
-    }*/
-
-    //snmp4sdn: OF's need
-    /*
-    private int getDiscoveryFinalTimeoutInterval() {
-        return (discoveryRetry + 1) * discoveryTimeoutTicks;
-    }*/
 
     @Override
     public String getHelp() {
@@ -996,345 +365,6 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         help.append("\t dsnp <all|nodeConnector>        - Disable LLDP snooping\n");
         return help.toString();
     }
-
-    //"seems to be removed in OF's code"
-    /*
-    public void _prlh(CommandInterpreter ci) {
-        ci.println("ReadyListHi\n");
-        for (NodeConnector nodeConnector : readyListHi) {
-            if (nodeConnector == null) {
-                continue;
-            }
-            ci.println(nodeConnector);
-        }
-    }
-
-    public void _prll(CommandInterpreter ci) {
-        ci.println("ReadyListLo\n");
-        for (NodeConnector nodeConnector : readyListLo) {
-            if (nodeConnector == null) {
-                continue;
-            }
-            ci.println(nodeConnector);
-        }
-    }
-
-    public void _pwl(CommandInterpreter ci) {
-        ci.println("WaitingList\n");
-        for (NodeConnector nodeConnector : waitingList) {
-            if (nodeConnector == null) {
-                continue;
-            }
-            ci.println(nodeConnector);
-        }
-    }
-
-    public void _ppl(CommandInterpreter ci) {
-        ci.println("pendingMap\n");
-        ci.println("          NodeConnector            Last rx LLDP (s)");
-        for (ConcurrentMap.Entry<NodeConnector, Integer> entry: pendingMap.entrySet()) {
-            ci.println(entry.getKey() + "\t\t" + entry.getValue());
-        }
-    }
-
-    public void _ptick(CommandInterpreter ci) {
-        ci.println("Current timer is " + discoveryTimerTick + " msec per tick");
-    }
-
-    public void _pcc(CommandInterpreter ci) {
-        if (discoveryConsistencyCheckEnabled) {
-            ci.println("ConsistencyChecker is currently enabled");
-        } else {
-            ci.println("ConsistencyChecker is currently disabled");
-        }
-        ci.println("Interval " + getDiscoveryConsistencyCheckInterval());
-        ci.println("Multiple " + discoveryConsistencyCheckMultiple);
-        ci.println("Number of times called " + discoveryConsistencyCheckCallingTimes);
-        ci.println("Corrected count " + discoveryConsistencyCheckCorrected);
-    }
-
-    public void _ptm(CommandInterpreter ci) {
-        ci.println("Final timeout ticks " + getDiscoveryFinalTimeoutInterval());
-        ci.println("Per timeout ticks " + discoveryTimeoutTicks);
-        ci.println("Number of retries after initial timeout " + discoveryRetry);
-    }
-
-    public void _psize(CommandInterpreter ci) {
-        ci.println("readyListLo size " + readyListLo.size() + "\n" + "readyListHi size " + readyListHi.size() + "\n"
-                + "waitingList size " + waitingList.size() + "\n" + "pendingMap size " + pendingMap.size() + "\n"
-                + "edgeMap size " + edgeMap.size() + "\n" + "prodMap size " + prodMap.size() + "\n" + "agingMap size "
-                + agingMap.size());
-    }
-
-    public void _page(CommandInterpreter ci) {
-        if (this.discoveryAgingEnabled) {
-            ci.println("Aging is enabled");
-        } else {
-            ci.println("Aging is disabled");
-        }
-        ci.println("Current aging time limit " + this.discoveryAgeoutTicks);
-        ci.println("\n");
-        ci.println("                           Edge                                 Aging ");
-        Collection<Edge> prodSet = prodMap.values();
-        if (prodSet == null) {
-            return;
-        }
-        for (Edge edge : prodSet) {
-            Integer aging = agingMap.get(edge.getHeadNodeConnector());
-            if (aging != null) {
-                ci.println(edge + "      " + aging);
-            }
-        }
-        ci.println("\n");
-        ci.println("              NodeConnector                                                 Edge ");
-        Set<NodeConnector> keySet = prodMap.keySet();
-        if (keySet == null) {
-            return;
-        }
-        for (NodeConnector nc : keySet) {
-            ci.println(nc + "      " + prodMap.get(nc));
-        }
-        return;
-    }
-
-    public void _sage(CommandInterpreter ci) {
-        String val = ci.nextArgument();
-        if (val == null) {
-            ci.println("Please enter aging time limit. Current value " + this.discoveryAgeoutTicks);
-            return;
-        }
-        try {
-            this.discoveryAgeoutTicks = Integer.parseInt(val);
-        } catch (Exception e) {
-            ci.println("Please enter a valid number");
-        }
-        return;
-    }
-
-    public void _eage(CommandInterpreter ci) {
-        this.discoveryAgingEnabled = true;
-        ci.println("Aging is enabled");
-        return;
-    }
-
-    public void _dage(CommandInterpreter ci) {
-        this.discoveryAgingEnabled = false;
-        ci.println("Aging is disabled");
-        return;
-    }
-
-    public void _scc(CommandInterpreter ci) {
-        String val = ci.nextArgument();
-        if (val == null) {
-            ci.println("Please enter CC multiple. Current multiple " + discoveryConsistencyCheckMultiple
-                    + " (interval " + getDiscoveryConsistencyCheckInterval() + ") calling times "
-                    + discoveryConsistencyCheckCallingTimes);
-            return;
-        }
-        try {
-            discoveryConsistencyCheckMultiple = Integer.parseInt(val);
-        } catch (Exception e) {
-            ci.println("Please enter a valid number");
-        }
-        return;
-    }
-
-    public void _ecc(CommandInterpreter ci) {
-        this.discoveryConsistencyCheckEnabled = true;
-        ci.println("ConsistencyChecker is enabled");
-        return;
-    }
-
-    public void _dcc(CommandInterpreter ci) {
-        this.discoveryConsistencyCheckEnabled = false;
-        ci.println("ConsistencyChecker is disabled");
-        return;
-    }
-
-    public void _psnp(CommandInterpreter ci) {
-        if (this.discoverySnoopingEnabled) {
-            ci.println("Discovery snooping is globally enabled");
-        } else {
-            ci.println("Discovery snooping is globally disabled");
-        }
-
-        ci.println("\nDiscovery snooping is locally disabled on these ports");
-        for (NodeConnector nodeConnector : discoverySnoopingDisableList) {
-            ci.println(nodeConnector);
-        }
-        return;
-    }
-
-    public void _esnp(CommandInterpreter ci) {
-        String val = ci.nextArgument();
-
-        if (val == null) {
-            ci.println("Usage: esnp <all|nodeConnector>");
-        } else if (val.equalsIgnoreCase("all")) {
-            this.discoverySnoopingEnabled = true;
-            ci.println("Discovery snooping is globally enabled");
-        } else {
-            NodeConnector nodeConnector = NodeConnector.fromString(val);
-            if (nodeConnector != null) {
-                discoverySnoopingDisableList.remove(nodeConnector);
-                ci.println("Discovery snooping is locally enabled on port " + nodeConnector);
-            } else {
-                ci.println("Entered invalid NodeConnector " + val);
-            }
-        }
-        return;
-    }
-
-    public void _dsnp(CommandInterpreter ci) {
-        String val = ci.nextArgument();
-
-        if (val == null) {
-            ci.println("Usage: dsnp <all|nodeConnector>");
-        } else if (val.equalsIgnoreCase("all")) {
-            this.discoverySnoopingEnabled = false;
-            ci.println("Discovery snooping is globally disabled");
-        } else {
-            NodeConnector nodeConnector = NodeConnector.fromString(val);
-            if (nodeConnector != null) {
-                discoverySnoopingDisableList.add(nodeConnector);
-                ci.println("Discovery snooping is locally disabled on port " + nodeConnector);
-            } else {
-                ci.println("Entered invalid NodeConnector " + val);
-            }
-        }
-        return;
-    }
-
-    public void _spause(CommandInterpreter ci) {
-        String val = ci.nextArgument();
-        String out = "Please enter pause period less than " + discoveryBatchRestartTicks + ". Current pause period is "
-                + discoveryBatchPausePeriod + " pause tick is " + discoveryBatchPauseTicks + ".";
-
-        if (val != null) {
-            try {
-                int pause = Integer.parseInt(val);
-                if (pause < discoveryBatchRestartTicks) {
-                    discoveryBatchPausePeriod = pause;
-                    discoveryBatchPauseTicks = discoveryBatchRestartTicks - discoveryBatchPausePeriod;
-                    return;
-                }
-            } catch (Exception e) {
-            }
-        }
-
-        ci.println(out);
-    }
-
-    public void _sdi(CommandInterpreter ci) {
-        String val = ci.nextArgument();
-        String out = "Please enter discovery interval greater than " + discoveryBatchPausePeriod
-                + ". Current value is " + discoveryBatchRestartTicks + ".";
-
-        if (val != null) {
-            try {
-                int restart = Integer.parseInt(val);
-                if (restart > discoveryBatchPausePeriod) {
-                    discoveryBatchRestartTicks = restart;
-                    discoveryBatchPauseTicks = discoveryBatchRestartTicks - discoveryBatchPausePeriod;
-                    return;
-                }
-            } catch (Exception e) {
-            }
-        }
-        ci.println(out);
-    }
-
-    public void _sports(CommandInterpreter ci) {
-        String val = ci.nextArgument();
-        if (val == null) {
-            ci.println("Please enter max ports per batch. Current value is " + discoveryBatchMaxPorts);
-            return;
-        }
-        try {
-            discoveryBatchMaxPorts = Integer.parseInt(val);
-        } catch (Exception e) {
-            ci.println("Please enter a valid number");
-        }
-        return;
-    }
-
-    public void _sretry(CommandInterpreter ci) {
-        String val = ci.nextArgument();
-        if (val == null) {
-            ci.println("Please enter number of retries. Current value is " + discoveryRetry);
-            return;
-        }
-        try {
-            discoveryRetry = Integer.parseInt(val);
-        } catch (Exception e) {
-            ci.println("Please enter a valid number");
-        }
-        return;
-    }
-
-    public void _stm(CommandInterpreter ci) {
-        String val = ci.nextArgument();
-        String out = "Please enter timeout tick value less than " + discoveryBatchRestartTicks + ". Current value is "
-                + discoveryTimeoutTicks;
-        if (val != null) {
-            try {
-                int timeout = Integer.parseInt(val);
-                if (timeout < discoveryBatchRestartTicks) {
-                    discoveryTimeoutTicks = timeout;
-                    return;
-                }
-            } catch (Exception e) {
-            }
-        }
-
-        ci.println(out);
-    }
-
-    public void _addsw(CommandInterpreter ci) {
-        String val = ci.nextArgument();
-        Long sid;
-        try {
-            sid = Long.parseLong(val);
-            Node node = NodeCreator.createOFNode(sid);
-            addDiscovery(node);
-        } catch (Exception e) {
-            ci.println("Please enter a valid number");
-        }
-        return;
-    }
-
-    public void _remsw(CommandInterpreter ci) {
-        String val = ci.nextArgument();
-        Long sid;
-        try {
-            sid = Long.parseLong(val);
-            Node node = NodeCreator.createOFNode(sid);
-            removeDiscovery(node);
-        } catch (Exception e) {
-            ci.println("Please enter a valid number");
-        }
-        return;
-    }
-
-    public void _pthrot(CommandInterpreter ci) {
-        if (this.throttling) {
-            ci.println("Throttling is enabled");
-        } else {
-            ci.println("Throttling is disabled");
-        }
-    }
-
-    public void _ethrot(CommandInterpreter ci) {
-        this.throttling = true;
-        ci.println("Throttling is enabled");
-        return;
-    }
-
-    public void _dthrot(CommandInterpreter ci) {
-        this.throttling = false;
-        ci.println("Throttling is disabled");
-        return;
-    }*///snmp4sdn. end of "seems to be removed in OF's code"
 
     @Override
     public void updateNode(Node node, UpdateType type, Set<Property> props) {
@@ -1447,25 +477,6 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         }
     }
 
-    //snmp4sdn: OF's need
-    /*
-    private void initDiscoveryPacket() {
-        // Create LLDP ChassisID TLV
-        chassisIdTlv = new LLDPTLV();
-        chassisIdTlv.setType(LLDPTLV.TLVType.ChassisID.getValue());
-
-        // Create LLDP PortID TLV
-        portIdTlv = new LLDPTLV();
-        portIdTlv.setType(LLDPTLV.TLVType.PortID.getValue());
-
-        // Create LLDP TTL TLV
-        byte[] ttl = new byte[] { (byte) 0, (byte) 120 };
-        ttlTlv = new LLDPTLV();
-        ttlTlv.setType(LLDPTLV.TLVType.TTL.getValue()).setLength((short) ttl.length).setValue(ttl);
-
-        customTlv = new LLDPTLV();
-    }*/
-
     /**
      * Function called by the dependency manager when all the required
      * dependencies are satisfied
@@ -1474,26 +485,11 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
     void init() {
         logger.trace("Init called");
 
-        //transmitQ = new LinkedBlockingQueue<NodeConnector>();//snmp4sdn. OF's code
         transmitQ = new LinkedBlockingQueue<Node>();//snmp4sdn
 
-        /*//snmp4sdn. OF's need
-        readyListHi = new CopyOnWriteArrayList<NodeConnector>();
-        readyListLo = new CopyOnWriteArrayList<NodeConnector>();
-        waitingList = new CopyOnWriteArrayList<NodeConnector>();
-        pendingMap = new ConcurrentHashMap<NodeConnector, Integer>();
-        agingMap = new ConcurrentHashMap<NodeConnector, Integer>();
-        prodMap = new ConcurrentHashMap<NodeConnector, Edge>();*/
         edgeMap = new ConcurrentHashMap<NodeConnector, Edge>();
-        //discoverySnoopingDisableList = new CopyOnWriteArrayList<NodeConnector>();//snmp4sdn. OF's need
-
-        /*//snmp4sdn: OF's need
-        discoveryTimer = new Timer("DiscoveryService");
-        discoveryTimerTask = new DiscoveryTimerTask();*/
 
         transmitThread = new Thread(new DiscoveryTransmit(transmitQ));
-
-        //initDiscoveryPacket();//snmp4sdn: OF's need
 
         registerWithOSGIConsole();
     }
@@ -1506,17 +502,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
      */
     void destroy() {
         transmitQ = null;
-        /*//snmp4sdn. OF's need
-        readyListHi = null;
-        readyListLo = null;
-        waitingList = null;
-        pendingMap = null;
-        agingMap = null;
-        prodMap = null;*/
         edgeMap = null;
-        /*//snmp4sdn. OF's need
-        discoveryTimer = null;
-        discoveryTimerTask = null;*/
         transmitThread = null;
     }
 
@@ -1526,7 +512,6 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
      *
      */
     void start() {
-        //discoveryTimer.schedule(discoveryTimerTask, discoveryTimerTick, discoveryTimerTick);//snmp4sdn. OF's need
         transmitThread.start();
     }
 
@@ -1546,7 +531,6 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
      */
     void stop() {
         shuttingDown = true;
-        //discoveryTimer.cancel();//snmp4sdn. OF's need
         transmitThread.interrupt();
     }
 
@@ -1563,7 +547,6 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
     public void nodeConnectorUpdated(String containerName, NodeConnector p, UpdateType t) {
         switch (t) {
         case ADDED:
-            //moveToReadyListHi(p);//snmp4sdn. OF's need.
             ////////////TODO
             break;
         default:

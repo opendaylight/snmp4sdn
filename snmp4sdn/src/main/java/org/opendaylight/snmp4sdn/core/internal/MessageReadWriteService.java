@@ -58,8 +58,6 @@ public class MessageReadWriteService implements IMessageReadWrite {
         this.factory = new BasicFactory();
         this.inBuffer = ByteBuffer.allocateDirect(bufferSize);
         this.outBuffer = ByteBuffer.allocateDirect(bufferSize);
-        /*this.clientSelectionKey = this.socket.register(this.selector,
-                SelectionKey.OP_READ);*///s4s. we don't need socket
         this.cmethUtil = cmethUtil;
     }
 
@@ -71,35 +69,7 @@ public class MessageReadWriteService implements IMessageReadWrite {
      * @throws Exception
      */
     @Override
-    public void asyncSend(/*OFMessage msg*/SNMPMessage msg) throws IOException {
-        /*
-        synchronized (outBuffer) {
-            int msgLen = msg.getLengthU();
-            if (outBuffer.remaining() < msgLen) {
-                // increase the buffer size so that it can contain this message
-                ByteBuffer newBuffer = ByteBuffer.allocateDirect(outBuffer
-                        .capacity() + msgLen);
-                outBuffer.flip();
-                newBuffer.put(outBuffer);
-                outBuffer = newBuffer;
-            }
-        }
-        synchronized (outBuffer) {
-            msg.writeTo(outBuffer);
-
-            if (!socket.isOpen()) {
-                return;
-            }
-
-            outBuffer.flip();
-            socket.write(outBuffer);
-            outBuffer.compact();
-            if (outBuffer.position() > 0) {
-                this.clientSelectionKey = this.socket.register(this.selector,
-                        SelectionKey.OP_WRITE, this);
-            }
-            logger.trace("Message sent: {}", msg);
-        }*/
+    public void asyncSend(SNMPMessage msg) throws IOException {
         if(msg.getType() == SNMPType.FLOW_MOD){
             SNMPFlowMod msgMod = (SNMPFlowMod)msg;
             new SNMPHandler(cmethUtil).sendBySNMP(msgMod.getFlow(), msgMod.getCommand(), msg.getTargetSwitchID());
@@ -117,22 +87,7 @@ public class MessageReadWriteService implements IMessageReadWrite {
      */
     @Override
     public void resumeSend() throws IOException {
-        /*synchronized (outBuffer) {
-            if (!socket.isOpen()) {
-                return;
-            }
-
-            outBuffer.flip();
-            socket.write(outBuffer);
-            outBuffer.compact();
-            if (outBuffer.position() > 0) {
-                this.clientSelectionKey = this.socket.register(this.selector,
-                        SelectionKey.OP_WRITE, this);
-            } else {
-                this.clientSelectionKey = this.socket.register(this.selector,
-                        SelectionKey.OP_READ, this);
-            }
-        }*///seems useless for snmp4sdn
+        ///seems useless for snmp4sdn
         //if you would like to know who called here: in SwitchHandler.java's startHandlerThread(), called its resumeSend(), then go to here
     }
 
@@ -144,12 +99,12 @@ public class MessageReadWriteService implements IMessageReadWrite {
      * @throws Exception
      */
     @Override
-    public List</*OFMessage msg*/SNMPMessage> readMessages() throws IOException {
+    public List<SNMPMessage> readMessages() throws IOException {
         if (!socket.isOpen()) {
             return null;
         }
 
-        List</*OFMessage msg*/SNMPMessage> msgs = null;
+        List<SNMPMessage> msgs = null;
         int bytesRead = -1;
         bytesRead = socket.read(inBuffer);
         if (bytesRead < 0) {
@@ -157,7 +112,6 @@ public class MessageReadWriteService implements IMessageReadWrite {
         }
 
         inBuffer.flip();
-        //msgs = factory.parseMessages(inBuffer);//s4s. mark here, should deal with here, later
         if (inBuffer.hasRemaining()) {
             inBuffer.compact();
         } else {
