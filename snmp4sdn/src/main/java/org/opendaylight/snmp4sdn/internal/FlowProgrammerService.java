@@ -217,8 +217,6 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         if (controller != null) {
             ISwitch sw = controller.getSwitch((Long) node.getID());
             if (sw != null) {
-                /*FlowConverter x = new FlowConverter(flow);
-                OFMessage msg = x.getOFFlowMod(OFFlowMod.OFPFC_ADD, null);*///s4s. OF's code
                 SNMPMessage msg = new SNMPFlowMod(SNMPFlowMod.ETHPFC_ADD, flow.clone());//s4s
                 msg.setTargetSwitchID((Long) node.getID());//s4s
 
@@ -263,7 +261,6 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         if (controller != null) {
             ISwitch sw = controller.getSwitch((Long) node.getID());
             if (sw != null) {
-
                 /* //OF's code require Flow converted to OFMessage; similarly, snmp4sdn use SNMPMessage
                 OFMessage msg1 = null, msg2 = null;
 
@@ -281,7 +278,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                 }
                 */
 
-                //s4s's work, similar to above OF's work: 'check data correctness' and 'type convertion'
+                //s4s's work, similar to OF's work: 'check data correctness' and 'type convertion'
                 if(!checkSameSrcDest(oldFlow, newFlow)){
                     return new Status(StatusCode.NOTACCEPTABLE, errorString("send", action,
                             "Inconsistency of oldFlow and newFlow (src/dest mac inconsistent), or flow's action OUTPUT port not set"));

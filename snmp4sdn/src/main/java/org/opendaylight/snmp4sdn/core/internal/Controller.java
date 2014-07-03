@@ -62,7 +62,6 @@ import java.util.Vector;
 public class Controller implements IController, CommandProvider {
     private static final Logger logger = LoggerFactory
             .getLogger(Controller.class);
-    //private ControllerIO controllerIO;//s4s: is replaced by snmpListener
     private SNMPListener snmpListener;//s4s:to replace controllerIO
     private Thread switchEventThread;
     private ConcurrentHashMap<Long, ISwitch> switches;
@@ -169,13 +168,6 @@ public class Controller implements IController, CommandProvider {
         switchEventThread = new Thread(new EventHandler(), "SwitchEvent Thread");
         switchEventThread.start();
 
-        // spawn a thread to start to listen on the open flow port
-        /*controllerIO = new ControllerIO(this);
-        try {
-            controllerIO.start();
-        } catch (IOException ex) {
-            logger.error("Caught exception while starting:", ex);
-        }*///s4s. ControllerIO.java shows it just in charge of holding the socket. We don't need socket
         //s4s
         cmethUtil = new CmethUtil();
         snmpListener = new SNMPListener(this, cmethUtil);
@@ -199,11 +191,6 @@ public class Controller implements IController, CommandProvider {
         }
         switchEventThread.interrupt();
         snmpListener.stopListening();
-        /*try {
-            controllerIO.shutDown();
-        } catch (IOException ex) {
-            logger.error("Caught exception while stopping:", ex);
-        }*///s4s: controllerIO is abandonded in s4s
     }
 
     /**
@@ -254,40 +241,25 @@ public class Controller implements IController, CommandProvider {
         }
     }
 
-    public void handleNewConnection(/*Selector selector,//s4s:OF's need
-            SelectionKey serverSelectionKey*/Long sid) {//s4s: in OF, this function is called in ControllerIO, now in s4s it is called in SNMPListener
-        //ServerSocketChannel ssc = (ServerSocketChannel) serverSelectionKey.channel();//s4s:OF's need
-        //SocketChannel sc = null;//s4s:OF's need
-        //try {//s4s: OF's
-            //sc = ssc.accept();//s4s:OF's need
-            // create new switch
-            int i = this.switchInstanceNumber.addAndGet(1);
-            String instanceName = "SwitchHandler-" + i;
-            SwitchHandler switchHandler = new SwitchHandler(this, /*sc,*///s4s:OF's need
-                    instanceName);
-            switchHandler.setId(sid);
-            switchHandler.start();
-            /*if (sc.isConnected()) {
-                logger.info("Switch:{} is connected to the Controller",
-                        sc.socket().getRemoteSocketAddress()
-                        .toString().split("/")[1]);
-            }*///s4s:OF's
-            logger.info("Switch({}) try to connected to the Controller", HexString.toHexString(sid));
+    public void handleNewConnection(Long sid) {
+        int i = this.switchInstanceNumber.addAndGet(1);
+        String instanceName = "SwitchHandler-" + i;
+        SwitchHandler switchHandler = new SwitchHandler(this, /*sc,*///s4s:OF's need
+                instanceName);
+        switchHandler.setId(sid);
+        switchHandler.start();
+        logger.info("Switch({}) try to connected to the Controller", HexString.toHexString(sid));
 
-            takeSwitchEventAdd(switchHandler);//s4s: in OF, this function is called in SwitchHandler, now we put it here directly
-        /*} catch (IOException e) {
-            return;
-        }*///s4s: OF's
+        takeSwitchEventAdd(switchHandler);//s4s: in OF, this function is called in SwitchHandler, now we put it here directly
+        
     }
 
     private void disconnectSwitch(ISwitch sw) {
-        //if (((SwitchHandler) sw).isOperational()) {//s4s: no need to check isOperational
-            Long sid = sw.getId();
-            if (this.switches.remove(sid, sw)) {
-                logger.info("switch {} is Disconnected", HexString.toHexString(sid));
-                notifySwitchDeleted(sw);
-            }
-        //}//s4s: no need to check isOperational
+        Long sid = sw.getId();
+        if (this.switches.remove(sid, sw)) {
+            logger.info("switch {} is Disconnected", HexString.toHexString(sid));
+            notifySwitchDeleted(sw);
+        }
         ((SwitchHandler) sw).stop();
         sw = null;
     }
@@ -514,21 +486,6 @@ public class Controller implements IController, CommandProvider {
         //(new SNMPHandler(cmethUtil)).addVLAN(node, new Long(Long.parseLong(vlanID)), vlanName);//skip the VLANService wrapper, call SNMPHandler directly
         (new VLANService()).addVLAN(node, new Long(Long.parseLong(vlanID)), vlanName);
     }
-
-    /*public void _s4sSetVLANPortsTest(CommandInterpreter ci){
-        Node node = null;
-        List<NodeConnector> nodeConns = new ArrayList<NodeConnector>();
-        try{
-            node = new Node("SNMP", new Long(1));
-            nodeConns.add(new NodeConnector("SNMP", new Short((short)1), node));
-            nodeConns.add(new NodeConnector("SNMP", new Short((short)6), node));
-            nodeConns.add(new NodeConnector("SNMP", new Short((short)12), node));
-        }catch(Exception e){
-            logger.error("in _s4sAddVLAN(): create node or nodeconnector error -- " + e);
-        }
-        
-        (new SNMPHandler(cmethUtil)).setVLANPorts(node, new Long(6), nodeConns);
-    }*/
 
     public void _s4sSetVLANPorts(CommandInterpreter ci){
         String sw_mac = null, vID = null, portList = null;

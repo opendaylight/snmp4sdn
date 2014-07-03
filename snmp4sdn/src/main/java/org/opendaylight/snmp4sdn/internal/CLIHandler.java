@@ -195,7 +195,6 @@ public class CLIHandler{
         }
         return new Status(StatusCode.INTERNALERROR);
     }
-
 /*
     public void readFlowRequest(Flow flow, Long sw_macAddr){
         logger.trace("enter CLIHandler.readFlowRequest()");
@@ -215,7 +214,7 @@ public class CLIHandler{
         MatchField fieldVlan = match.getField(MatchType.DL_VLAN);
         short vlan = (fieldVlan == null)? null : ((Short)(fieldVlan.getValue())).shortValue();
 
-        //ethernet_type 
+        //ethernet_type
         MatchField fieldEthType= match.getField(MatchType.DL_TYPE);
         short ethType = (fieldEthType == null)? null : ((Short)fieldNwSrc.getValue()).shortValue();
 
@@ -236,6 +235,7 @@ public class CLIHandler{
         short destPort = (fieldDestPort == null)? null : ((Short)(fieldDestPort.getValue())).shortValue();
     }
 */
+
     public void addFlow(String command){
         
     }
