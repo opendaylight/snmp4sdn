@@ -15,6 +15,7 @@ package org.opendaylight.snmp4sdn.internal;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,6 +29,10 @@ import org.opendaylight.snmp4sdn.core.IController;
 import org.opendaylight.snmp4sdn.core.IMessageListener;
 import org.opendaylight.snmp4sdn.core.ISwitch;
 import org.opendaylight.snmp4sdn.core.ISwitchStateListener;
+import org.opendaylight.controller.sal.action.Action;
+import org.opendaylight.controller.sal.action.Drop;
+import org.opendaylight.controller.sal.action.Output;
+import org.opendaylight.controller.sal.action.SupportedFlowActions;
 import org.opendaylight.controller.sal.core.Actions;
 import org.opendaylight.controller.sal.core.Buffers;
 import org.opendaylight.controller.sal.core.Capabilities;
@@ -441,7 +446,8 @@ public class InventoryServiceShim implements IContainerListener,
             props.add(c);
         }
         int act = sw.getActions();
-        Actions a = new Actions(act);
+        //Actions a = new Actions(act);
+        SupportedFlowActions a = new SupportedFlowActions(getFlowActions(act));//replace the previous line with this line, to adpat to certain changes for information validation in ODL. Note that "getFlowActions(act)" should be "FlowConverter.getFlowActions(act)", FlowConverter is not ready currently
         if (a != null) {
             props.add(a);
         }
@@ -545,6 +551,29 @@ public class InventoryServiceShim implements IContainerListener,
                 nodeContainerMap.remove(node);
             }
         }*///s4s IContainerAware
+    }
+
+    //copy from FlowConverter.java, and disable some code as those marked
+    public static List<Class<? extends Action>> getFlowActions(int ofActionBitmask) {
+        List<Class<? extends Action>> list = new ArrayList<Class<? extends Action>>();
+
+        /*for (int i = 0; i < Integer.SIZE; i++) {
+            int index = 1 << i;
+            if ((index & ofActionBitmask) > 0) {
+                if (actionMap.containsKey(index)) {
+                    list.add(actionMap.get(index));
+                }
+            }
+        }*/
+
+        // Add implicit SAL actions
+        //list.add(Controller.class);
+        //list.add(SwPath.class);
+        //list.add(HwPath.class);
+        list.add(Drop.class);
+        list.add(Output.class);//s4s: newly add
+
+        return list;
     }
 
 }
