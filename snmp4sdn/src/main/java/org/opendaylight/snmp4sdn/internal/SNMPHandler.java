@@ -280,12 +280,13 @@ public class SNMPHandler{
     public Status sendBySNMP(Flow flow, int modType, Long sw_macAddr){
         logger.debug("enter SNMPHandler.sendBySNMP()");
 
+        String swIP = cmethUtil.getIpAddr(sw_macAddr);
+        if(swIP == null){
+            logger.error("node with mac" + sw_macAddr + "doesn't exist!");
+            return null;
+        }
+
         if(isDummy){
-            String switchIP = cmethUtil.getIpAddr(sw_macAddr);
-            if(switchIP == null){
-                logger.error("node with mac" + sw_macAddr + "doesn't exist!");
-                return null;
-            }
             logger.info("dummy return SUCCESS");
             return new Status(StatusCode.SUCCESS, null);
         }
@@ -397,14 +398,15 @@ public class SNMPHandler{
     public FlowOnNode readFlowRequest(Flow flow, Node node){
         logger.debug("enter SNMPHandler.readFlowRequest()");
 
+        Long swMacAddr = (Long) node.getID();
+        String swIP = cmethUtil.getIpAddr(swMacAddr);
+        if(swIP == null){
+            logger.error("node with mac" + swMacAddr + "doesn't exist!");
+            return null;
+        }
+
         if(isDummy){
-            Long sw_macAddr = (Long) node.getID();
-            String switchIP = cmethUtil.getIpAddr(sw_macAddr);
-            if(switchIP == null){
-                logger.error("node with mac" + sw_macAddr + "doesn't exist!");
-                return null;
-            }
-            logger.info("dummy return the input flow as the result FlowOnNode");
+            logger.info("dummy return the input flow as FlowOnNode");
             return new FlowOnNode(flow);
         }
 
@@ -453,13 +455,14 @@ public class SNMPHandler{
     public List<FlowOnNode>  readAllFlowRequest(Node node){
         logger.debug("enter SNMPHandler.readAllFlowRequest()");
 
+        Long swMacAddr = (Long) node.getID();
+        String swIP = cmethUtil.getIpAddr(swMacAddr);
+        if(swIP == null){
+            logger.error("node with mac" + swMacAddr + "doesn't exist!");
+            return null;
+        }
+
         if(isDummy){
-            Long sw_macAddr = (Long) node.getID();
-            String switchIP = cmethUtil.getIpAddr(sw_macAddr);
-            if(switchIP == null){
-                logger.error("node with mac" + sw_macAddr + "doesn't exist!");
-                return null;
-            }
             logger.info("dummy return empty List<FlowOnNode>");
             return new ArrayList<FlowOnNode>();
         }
