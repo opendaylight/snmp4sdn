@@ -37,5 +37,6 @@
     <!--<module>integrationtest</module> //no need to add. run by eclipse junit test-->
     <module>third-party/snmpj</module>
     <module>third-party/expect4j</module>
+    <module>features</module>
   </modules>
 </project>
