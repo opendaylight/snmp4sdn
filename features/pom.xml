@@ -39,11 +39,25 @@
           <version>${sal.version}</version>
           <classifier>features</classifier>
           <type>xml</type>
+          <exclusions>
+              <exclusion>
+                  <!-- declare the exclusion here -->
+                  <groupId>org.ops4j.pax.exam</groupId>
+                  <artifactId>pax-exam-container-native</artifactId>
+              </exclusion>
+          </exclusions>
       </dependency>
       <dependency>
           <groupId>org.opendaylight.snmp4sdn</groupId>
           <artifactId>snmp4sdn</artifactId>
           <version>${project.version}</version>
+          <exclusions>
+               <exclusion>
+               <!-- declare the exclusion here -->
+               <groupId>org.ops4j.pax.exam</groupId>
+               <artifactId>pax-exam-container-native</artifactId>
+               </exclusion>
+          </exclusions>
       </dependency>
 
     <!-- test to validate features.xml -->
@@ -52,6 +66,13 @@
       <artifactId>features-test</artifactId>
       <version>${feature.test.version}</version>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+        <!-- declare the exclusion here -->
+        <groupId>org.ops4j.pax.exam</groupId>
+        <artifactId>pax-exam-container-native</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- dependency for opendaylight-karaf-empty for use by testing -->
     <dependency>
@@ -59,6 +80,13 @@
       <artifactId>opendaylight-karaf-empty</artifactId>
       <version>${karaf.empty.version}</version>
       <type>zip</type>
+      <exclusions>
+        <exclusion>
+        <!-- declare the exclusion here -->
+        <groupId>org.ops4j.pax.exam</groupId>
+        <artifactId>pax-exam-container-native</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- Uncomment this if you get an error : java.lang.NoSuchMethodError: org.slf4j.helpers.MessageFormatter.format(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)Lorg/slf4j/helpers/FormattingTuple;
     <dependency>
