@@ -10,7 +10,7 @@
 <features name="odl-snmp4sdn-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
-   
+
     <repository>mvn:org.opendaylight.controller/features-adsal/${sal.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.snmp4sdn/features-snmp4sdn/${project.version}/xml/features</repository>
 
