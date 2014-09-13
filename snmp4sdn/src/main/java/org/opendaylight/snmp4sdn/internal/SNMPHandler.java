@@ -27,7 +27,7 @@ import org.opendaylight.controller.sal.utils.StatusCode;
 
 import org.opendaylight.snmp4sdn.protocol.util.HexString;
 import org.opendaylight.snmp4sdn.protocol.SNMPFlowMod;
-import org.opendaylight.snmp4sdn.internal.VLANTable;
+import org.opendaylight.snmp4sdn.VLANTable;
 import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
 
 import org.slf4j.Logger;

@@ -48,6 +48,12 @@
               org.opendaylight.controller.sal.inventory,
               org.opendaylight.controller.sal.match,
               org.opendaylight.controller.sal.utils,
+              <!--org.opendaylight.controller.sal.vlan,//ad-sal. prg-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev140815,<!--md-sal-->
+              <!--com.google.common.collect,//md-sal
+              com.google.common.util.concurrent,//md-sal -->
+              org.opendaylight.yangtools.yang.common,<!--md-sal-->
+              org.opendaylight.yangtools.yang.binding,<!--md-sal-->
               org.apache.commons.lang3.builder,
               org.apache.commons.lang3.tuple,
               org.apache.felix.dm,
@@ -104,6 +110,11 @@
       <artifactId>junit</artifactId>
       <version>4.8.1</version>
       <scope>test</scope>
+    </dependency>
+    <dependency><!--md-sal-->
+      <groupId>org.opendaylight.snmp4sdn.md</groupId>
+      <artifactId>vlanmd-model</artifactId>
+      <version>0.1.3-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>

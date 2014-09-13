@@ -12,7 +12,7 @@ import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
-import org.opendaylight.snmp4sdn.internal.VLANTable;
+import org.opendaylight.snmp4sdn.VLANTable;
 
 import java.util.List;
 
