@@ -39,7 +39,7 @@ public class CmethUtil implements CommandProvider{
             readDB("/home/christine/snmp4sdn/snmp4sdn/src/test/switch_login_db.csv");
     }
 
-    private void readDB(String dbPath){
+    public void readDB(String dbPath){
         logger.info("enter CmethUtil.readDB()");
         table.clear();
         logger.trace("DB cleared");
@@ -186,6 +186,24 @@ public class CmethUtil implements CommandProvider{
             ci.print(getSnmpCommunity(mac) + "\t");
             ci.print(getCliUsername(mac) + "\t");
             ci.println(getCliPassword(mac));
+        }
+     }
+
+     public void printDB(){
+         ConcurrentMap<Long, Vector> table = getEntries();
+         System.out.print("MAC address (sid)\t\t");
+         System.out.print("IP address\t");
+         System.out.print("SNMP community\t");
+         System.out.print("CLI username\t");
+         System.out.println("CLI password\t");
+         for (ConcurrentMap.Entry<Long, Vector> entry: table.entrySet()) {
+            Long mac = entry.getKey();
+            System.out.print(HexString.toHexString(mac) + "\t");
+            System.out.print("(" + mac + ")\t");
+            System.out.print(getIpAddr(mac) + "\t");
+            System.out.print(getSnmpCommunity(mac) + "\t");
+            System.out.print(getCliUsername(mac) + "\t");
+            System.out.println(getCliPassword(mac));
         }
      }
 }

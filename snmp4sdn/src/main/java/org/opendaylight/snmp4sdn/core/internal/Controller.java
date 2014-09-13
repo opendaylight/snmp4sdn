@@ -32,6 +32,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
+
+import org.opendaylight.snmp4sdn.ICore;//karaf
 import org.opendaylight.snmp4sdn.core.IController;
 import org.opendaylight.snmp4sdn.core.IMessageListener;
 import org.opendaylight.snmp4sdn.core.ISwitch;
@@ -59,7 +61,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.Vector;
 
-public class Controller implements IController, CommandProvider {
+public class Controller implements IController, ICore, CommandProvider {
     private static final Logger logger = LoggerFactory
             .getLogger(Controller.class);
     private SNMPListener snmpListener;//s4s:to replace controllerIO
@@ -320,6 +322,32 @@ public class Controller implements IController, CommandProvider {
     @Override
     public ISwitch getSwitch(Long switchId) {
         return this.switches.get(switchId);
+    }
+
+    @Override//karaf
+    public void readDB(String filepath){
+        cmethUtil.readDB(filepath);
+        cmethUtil.printDB();
+    }
+
+    @Override//karaf
+    public void topoDiscover(){
+        topologyDiscover();
+    }
+
+    @Override//karaf
+    public void addVLANSetPorts(String sw_mac, String vlanID, String vlanName, String portList){
+        s4sAddVLANandSetPorts(sw_mac, vlanID, vlanName, portList);
+    }
+
+    @Override//karaf
+    public void deleteVLAN(String sw_mac, String vlanID){   
+        s4sDeleteVLAN_execute(sw_mac, vlanID);
+    }
+
+    @Override//karaf
+    public void printVLANTable(String sw_mac){
+        s4sPrintVLANTable_execute(sw_mac);
     }
 
     public void _controllerShowSwitches(CommandInterpreter ci) {
