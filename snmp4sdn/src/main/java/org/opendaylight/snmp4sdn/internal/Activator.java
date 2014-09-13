@@ -63,6 +63,9 @@ import org.opendaylight.controller.sal.topology.IPluginOutTopologyService;
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.INodeConnectorFactory;//s4s test
 import org.opendaylight.controller.sal.utils.INodeFactory;//s4s test
+//import org.opendaylight.controller.sal.vlan.IPluginInVLANService;//s4s//ad-sal
+//import org.opendaylight.snmp4sdn.IVLANService;//no-sal
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev140815.VlanService;//md-sal
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,7 +125,8 @@ public class Activator extends ComponentActivatorAbstractBase {
     public Object[] getImplementations() {
         Object[] res = { TopologyServices.class, DataPacketServices.class,
                 InventoryService.class, ReadService.class,
-                FlowProgrammerNotifier.class };
+                FlowProgrammerNotifier.class,
+                VLANService.class};
         return res;
     }
 
@@ -256,6 +260,16 @@ public class Activator extends ComponentActivatorAbstractBase {
                     .setCallbacks("setIPluginOutConnectionService",
                             "unsetIPluginOutConnectionService")
                     .setRequired(true));*///s4s cs
+        }
+        if (imp.equals(VLANService.class)) {
+            //c.setInterface(IPluginInVLANService.class.getName(), null);//ad-sal
+            //c.setInterface(IVLANService.class.getName(), null);//no-sal
+            c.setInterface(VlanService.class.getName(), null);//md-sal
+
+            c.add(createServiceDependency()
+                    .setService(IController.class)
+                    .setCallbacks("setController", "unsetController")
+                    .setRequired(true));
         }
     }
 
