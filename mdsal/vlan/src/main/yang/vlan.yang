@@ -1,0 +1,82 @@
+  module vlan {
+
+    yang-version 1;
+
+    namespace
+      "urn:opendaylight:snmp4sdn:md:vlan";
+
+    prefix vlan;
+
+    organization "Netconf Central";
+
+    contact
+      "Yi-Ling Hsieh <ylhsieh@itri.org.tw>";
+
+    description
+      "YANG version of the SNMP4SDN VLAN Service MIB.";
+
+    revision "2014-08-15" {
+      description
+        "SNMP4SDN VLAN Service module in progress.";
+    }
+
+    rpc add-vlan {
+      description
+        "add vlan";
+      input {
+        leaf nodeID {
+          type int64;
+        }
+        leaf vlanID {
+          type int32;
+        }
+        leaf vlanName {
+          type string {
+            length "0 .. 20";//TODO: max length of vlan name?
+          }
+        }
+      }
+    } //rpc add-vlan
+
+    rpc set-vlan-ports {
+      description
+        "set vlan ports";
+      input {
+        leaf nodeID {
+          type int64;
+        }
+        leaf vlanID {
+          type int32;
+        }
+        leaf portList {
+          type string {
+            length "0 .. 200";//TODO: max length of portList string?
+          }
+        }
+      }
+    } //rpc set-vlan-ports
+
+    rpc delete-vlan {
+      description
+        "delete vlan";
+      input {
+        leaf nodeID {
+          type int64;
+        }
+        leaf vlanID {
+          type int32;
+        }
+      }
+    } //rpc delete-vlan
+
+    rpc print-vlan-table {
+      description
+        "print vlan table";
+      input {
+        leaf nodeID {
+          type int64;
+        }
+      }
+    } //rpc print-vlan-table
+
+  }  // module vlan
