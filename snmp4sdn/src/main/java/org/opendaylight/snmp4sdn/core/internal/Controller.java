@@ -44,7 +44,7 @@ import org.opendaylight.snmp4sdn.internal.ConfigService;
 import org.opendaylight.snmp4sdn.internal.SNMPHandler;
 import org.opendaylight.snmp4sdn.internal.SNMPListener;
 import org.opendaylight.snmp4sdn.internal.VLANService;
-import org.opendaylight.snmp4sdn.internal.VLANTable;
+import org.opendaylight.snmp4sdn.VLANTable;
 import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
 import org.opendaylight.snmp4sdn.protocol.SNMPMessage;
 import org.opendaylight.snmp4sdn.protocol.SNMPType;
