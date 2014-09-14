@@ -69,14 +69,6 @@
     <jacoco.version>0.5.3.201107060350</jacoco.version>
   </properties>
 
-  <pluginRepositories>
-    <pluginRepository>
-      <id>central</id>
-      <name>maven repo1</name>
-      <url>http://repo1.maven.org/maven2</url>
-    </pluginRepository>
-  </pluginRepositories>
-
   <profiles>
     <profile>
       <id>notduringrelease</id>
@@ -204,65 +196,85 @@
   </profiles>
 
   <repositories>
-    <!-- EBR release -->
-    <!-- http://repository.springsource.com/maven/bundles/release -->
+    <!-- Opendaylight public group -->
     <repository>
-      <id>ebr-bundles-release</id>
-      <name>ebr-bundles-release</name>
-      <url>${nexusproxy}/repositories/ebr-bundles-release/</url>
-    </repository>
-    <!-- EBR external -->
-    <!-- http://repository.springsource.com/maven/bundles/external -->
-    <repository>
-      <id>ebr-bundles-external</id>
-      <name>ebr-bundles-external</name>
-      <url>${nexusproxy}/repositories/ebr-bundles-external/</url>
-    </repository>
-    <repository>
-      <id>central</id>
-      <name>central</name>
-      <url>http://repo1.maven.org/maven2</url>
+      <id>opendaylight-public</id>
+      <name>opendaylight-public</name>
+      <url>${nexusproxy}/groups/public/</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
       <releases>
-          <enabled>true</enabled>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
       </releases>
-    </repository>
-    <!-- Pax mirror -->
-    <!-- https://oss.sonatype.org/content/repositories/ops4j-releases -->
-    <repository>
-      <id>ops4j-releases</id>
-      <name>ops4j-releases</name>
-      <url>${nexusproxy}/repositories/ops4j-releases/</url>
-    </repository>
-    <!-- Third Packages hosted in local maven because not available in
-         other places -->
-    <repository>
-      <id>thirdparty</id>
-      <name>thirdparty</name>
-      <url>${nexusproxy}/repositories/thirdparty/</url>
-    </repository>
-    <!-- Jboss mirror -->
-    <!-- https://repository.jboss.org/nexus/content/repositories/releases -->
-    <repository>
-      <id>jboss.releases</id>
-      <name>jboss.releases</name>
-      <url>${nexusproxy}/repositories/jboss.releases/</url>
     </repository>
     <!-- OpenDayLight Released artifact -->
     <repository>
       <id>opendaylight-release</id>
       <name>opendaylight-release</name>
-      <url>${nexusproxy}/repositories/opendaylight.release/</url>
+      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.release/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
     </repository>
     <!-- OpenDayLight Snapshot artifact -->
     <repository>
       <id>opendaylight-snapshot</id>
       <name>opendaylight-snapshot</name>
-      <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
+      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
     </repository>
   </repositories>
+
+  <pluginRepositories>
+    <!-- Opendaylight public group -->
+    <pluginRepository>
+      <id>opendaylight-public</id>
+      <name>opendaylight-public</name>
+      <url>${nexusproxy}/groups/public/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+    </pluginRepository>
+    <!-- OpenDayLight Released artifact -->
+    <pluginRepository>
+      <id>opendaylight-release</id>
+      <name>opendaylight-release</name>
+      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.release/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </pluginRepository>
+    <!-- OpenDayLight Snapshot artifact -->
+    <pluginRepository>
+      <id>opendaylight-snapshot</id>
+      <name>opendaylight-snapshot</name>
+      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </pluginRepository>
+  </pluginRepositories>
+
   <distributionManagement>
     <!-- OpenDayLight Released artifact -->
     <repository>
