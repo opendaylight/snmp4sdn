@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.snmp4sdn.internal;
+package org.opendaylight.snmp4sdn;
 
 import org.opendaylight.controller.sal.core.NodeConnector;
 
