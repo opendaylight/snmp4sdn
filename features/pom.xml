@@ -71,6 +71,18 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.snmp4sdn.md</groupId>
+            <artifactId>vlanmd-model</artifactId>
+            <version>${project.version}</version>
+            <!-- declare the exclusion here -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.ops4j.pax.exam</groupId>
+                    <artifactId>pax-exam-container-native</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
         <!-- dependency for opendaylight-karaf-empty for use by testing -->
         <dependency>
