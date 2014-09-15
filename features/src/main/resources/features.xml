@@ -21,6 +21,6 @@
             <feature version="${sal.version}">odl-adsal-core</feature>
             <bundle>mvn:org.opendaylight.snmp4sdn/snmp4sdn/${project.version}</bundle>
             <bundle>mvn:org.opendaylight.snmp4sdn/plugin-shell/${project.version}</bundle>
-            <bundle>mvn:org.opendaylight.snmp4sdn/md/vlanmd-model/${project.version}</bundle>
+            <bundle>mvn:org.opendaylight.snmp4sdn/vlanmd-model/${project.version}</bundle>
     </feature>
 </features>
