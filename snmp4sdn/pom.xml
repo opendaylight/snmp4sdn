@@ -67,6 +67,7 @@
             </Import-Package>
             <Export-Package>
               org.opendaylight.snmp4sdn.internal
+              org.opendaylight.snmp4sdn
             </Export-Package>
             <Embed-Dependency>
               org.openflow.openflowj,
