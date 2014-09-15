@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa82b9bf_b2f40c88",
+        "filename": "commons/snmp4sdn/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 918,
+      "author": {
+        "id": 2246
+      },
+      "writtenOn": "2014-09-15T19:46:32Z",
+      "side": 1,
+      "message": "remove white space",
+      "revId": "88f5449d5019f1daee9a2d9b81a86419ae79b225",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82b9bf_52f10094",
+        "filename": "features/src/main/resources/features.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 2246
+      },
+      "writtenOn": "2014-09-15T19:46:32Z",
+      "side": 1,
+      "message": "remove \\r",
+      "revId": "88f5449d5019f1daee9a2d9b81a86419ae79b225",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
