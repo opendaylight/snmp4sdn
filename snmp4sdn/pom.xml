@@ -112,7 +112,7 @@
       <scope>test</scope>
     </dependency>
     <dependency><!--md-sal-->
-      <groupId>org.opendaylight.snmp4sdn.md</groupId>
+      <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>vlanmd-model</artifactId>
       <version>0.1.3-SNAPSHOT</version>
     </dependency>
