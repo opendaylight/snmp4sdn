@@ -83,6 +83,36 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!--learn from sfc, add features 'features-yangtools' and 'features-mdsal'-->
+        <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>features-yangtools</artifactId>
+          <version>0.6.2-SNAPSHOT</version>
+          <classifier>features</classifier>
+          <type>xml</type>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>features-mdsal</artifactId>
+          <version>1.1-SNAPSHOT</version>
+          <classifier>features</classifier>
+          <type>xml</type>
+        </dependency>
+
+        <!-- test to validate features.xml -->
+       <dependency>
+         <groupId>org.opendaylight.yangtools</groupId>
+         <artifactId>features-test</artifactId>
+         <version>${feature.test.version}</version>
+         <scope>test</scope>
+         <exclusions>
+           <exclusion>
+           <!-- declare the exclusion here -->
+           <groupId>org.ops4j.pax.exam</groupId>
+           <artifactId>pax-exam-container-native</artifactId>
+           </exclusion>
+         </exclusions>
+       </dependency>
 
         <!-- dependency for opendaylight-karaf-empty for use by testing -->
         <dependency>
