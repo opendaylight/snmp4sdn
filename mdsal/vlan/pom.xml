@@ -26,7 +26,7 @@
 
     <properties>
       <yangtools.version>0.6.2-SNAPSHOT</yangtools.version><!--s4s. if using earlier version (even 0.6.2), will error: cannot find symbol "org.opendaylight.yangtools.yang.binding.YangModelBindingProvider"-->
-      <bundle.plugin.version>2.3.6<!--2.4.0--></bundle.plugin.version><!--copied from odl-parent-->
+      <bundle.plugin.version>2.4.0<!--2.4.0--></bundle.plugin.version><!--copied from odl-parent-->
     </properties>
 
     <build>
