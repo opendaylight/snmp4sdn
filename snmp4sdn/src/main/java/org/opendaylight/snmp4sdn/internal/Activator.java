@@ -28,6 +28,7 @@ import org.opendaylight.controller.protocol_plugin.openflow.ITopologyServiceShim
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.internal.Controller;*/
+    import org.opendaylight.snmp4sdn.ICore;//karaf
     import org.opendaylight.snmp4sdn.IDataPacketListen;
     import org.opendaylight.snmp4sdn.IDataPacketMux;
     import org.opendaylight.snmp4sdn.IDiscoveryListener;
@@ -314,6 +315,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), /*Node.NodeIDType.OPENFLOW*/"SNMP");
             c.setInterface(new String[] { IController.class.getName(),
                                           /*IPluginInConnectionService.class.getName()*///s4s cs
+                                          ICore.class.getName()//karaf
                                           },
                                           props);
         }
