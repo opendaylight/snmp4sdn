@@ -12,15 +12,10 @@ package org.opendaylight.snmp4sdn;
  * This interface defines an abstraction of the SNMP Controller that allows Karaf to call.
  *
  */
-public interface ICore {
+public interface IKarafCore {
 
     public void readDB(String filepath);
 
     public void topoDiscover();
 
-
-    //The following methods are for VLAN configuration. They will be discarded when the VLAN Serivice's MD-SAL is provided later.
-    public void addVLANSetPorts(String sw_mac, String vlanID, String vlanName, String portList);
-    public void deleteVLAN(String sw_mac, String vlanID);
-    public void printVLANTable(String sw_mac);
 }

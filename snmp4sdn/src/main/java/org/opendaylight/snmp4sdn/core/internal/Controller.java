@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 
-import org.opendaylight.snmp4sdn.ICore;//karaf
+import org.opendaylight.snmp4sdn.IKarafCore;//karaf
 import org.opendaylight.snmp4sdn.core.IController;
 import org.opendaylight.snmp4sdn.core.IMessageListener;
 import org.opendaylight.snmp4sdn.core.ISwitch;
@@ -43,8 +43,6 @@ import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.snmp4sdn.internal.ConfigService;
 import org.opendaylight.snmp4sdn.internal.SNMPHandler;
 import org.opendaylight.snmp4sdn.internal.SNMPListener;
-import org.opendaylight.snmp4sdn.internal.VLANService;
-import org.opendaylight.snmp4sdn.VLANTable;
 import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
 import org.opendaylight.snmp4sdn.protocol.SNMPMessage;
 import org.opendaylight.snmp4sdn.protocol.SNMPType;
@@ -61,7 +59,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.Vector;
 
-public class Controller implements IController, ICore, CommandProvider {
+public class Controller implements IController, IKarafCore, CommandProvider {
     private static final Logger logger = LoggerFactory
             .getLogger(Controller.class);
     private SNMPListener snmpListener;//s4s:to replace controllerIO
@@ -75,7 +73,7 @@ public class Controller implements IController, ICore, CommandProvider {
     private AtomicInteger switchInstanceNumber;
     private final int MAXQUEUESIZE = 50000;
     public CmethUtil cmethUtil;//s4s add
-
+    
     /*
      * this thread monitors the switchEvents queue for new incoming events from
      * switch
@@ -83,7 +81,7 @@ public class Controller implements IController, ICore, CommandProvider {
     private class EventHandler implements Runnable {
         @Override
         public void run() {
-            logger.trace("Controller.EventHandler start running");
+            logger.debug("Controller.EventHandler start running");
             while (true) {
                 try {
                     SwitchEvent ev = switchEvents.take();
@@ -324,6 +322,11 @@ public class Controller implements IController, ICore, CommandProvider {
         return this.switches.get(switchId);
     }
 
+    @Override
+    public CmethUtil getCmethUtil(){
+        return cmethUtil;
+    }
+
     @Override//karaf
     public void readDB(String filepath){
         cmethUtil.readDB(filepath);
@@ -333,21 +336,7 @@ public class Controller implements IController, ICore, CommandProvider {
     @Override//karaf
     public void topoDiscover(){
         topologyDiscover();
-    }
-
-    @Override//karaf
-    public void addVLANSetPorts(String sw_mac, String vlanID, String vlanName, String portList){
-        s4sAddVLANandSetPorts(sw_mac, vlanID, vlanName, portList);
-    }
-
-    @Override//karaf
-    public void deleteVLAN(String sw_mac, String vlanID){   
-        s4sDeleteVLAN_execute(sw_mac, vlanID);
-    }
-
-    @Override//karaf
-    public void printVLANTable(String sw_mac){
-        s4sPrintVLANTable_execute(sw_mac);
+        System.out.println("\nTopology discovery done");
     }
 
     public void _controllerShowSwitches(CommandInterpreter ci) {
@@ -490,167 +479,6 @@ public class Controller implements IController, ICore, CommandProvider {
         ((SwitchHandler)sw).handleMessages(portStatus);
     }
 
-    public void _s4sAddVLAN(CommandInterpreter ci){
-        String sw_mac = null, vlanID = null, vlanName = null;
-        
-        sw_mac = ci.nextArgument();
-        vlanID= ci.nextArgument();
-        vlanName = ci.nextArgument();
-
-        s4sAddVLAN_execute(sw_mac, vlanID, vlanName);
-   }
-   private void s4sAddVLAN_execute(String sw_mac, String vlanID, String vlanName){
-        if(sw_mac == null || vlanID == null || vlanName == null){
-            logger.error("\nPlease use command: s4sAddVLAN <switch's mac addr> <vlan id> <vlan name>");
-            return;
-        }
-        
-        Node node = null;
-        try{
-            node = new Node("SNMP", new Long(HexString.toLong(sw_mac)));
-        }catch(Exception e){
-            logger.error("in _s4sAddVLAN(): create node error -- " + e);
-        }
-        //(new SNMPHandler(cmethUtil)).addVLAN(node, new Long(Long.parseLong(vlanID)), vlanName);//skip the VLANService wrapper, call SNMPHandler directly
-        (new VLANService()).addVLAN(node, new Long(Long.parseLong(vlanID)), vlanName);
-    }
-
-    public void _s4sSetVLANPorts(CommandInterpreter ci){
-        String sw_mac = null, vID = null, portList = null;
-        
-        sw_mac = ci.nextArgument();
-        vID = ci.nextArgument();
-        portList = ci.nextArgument();
-
-        s4sSetVLANPorts_execute(sw_mac, vID, portList);
-    }
-    private void s4sSetVLANPorts_execute(String sw_mac, String vID, String portList){
-        Long vlanID;
-        Node node = null;
-        List<NodeConnector> nodeConns = new ArrayList<NodeConnector>();
-        String portsStr = null;
-
-        if(sw_mac == null || vID == null || portList == null){
-            logger.error("\nPlease use command: s4sSetVLANPorts <switch's mac addr> <vlan id> <ports to the vlan (sepereate by comma)>");
-            return;
-        }
-
-        //create node
-        try{
-            node = new Node("SNMP", new Long(HexString.toLong(sw_mac)));
-        }catch(Exception e){
-            logger.error("in _s4sAddVLAN(): create node error -- " + e);
-        }
-
-        //get vlandID
-        vlanID = new Long(vID);
-        
-        //create nodeConnectors
-        String[] ports = portList.split(",");
-        try{
-            for(int i = 0; i < ports.length; i++)
-                nodeConns.add(new NodeConnector("SNMP", Short.parseShort(ports[i]), node));
-        }catch(Exception e){
-            logger.error("in _s4sAddVLAN(): create node or nodeconnector error -- " + e);
-            logger.error("\nmaybe because this vlan already exits, please check.");
-        }
-
-
-        //(new SNMPHandler(cmethUtil)).setVLANPorts(node, vlanID, nodeConns);//skip the VLANService wrapper, call SNMPHandler directly
-        (new VLANService()).setVLANPorts(node, vlanID, nodeConns);
-    }
-
-    public void _s4sDeleteVLAN(CommandInterpreter ci){
-        String sw_mac = null, vlanID = null, vlanName = null;
-        
-        sw_mac = ci.nextArgument();
-        vlanID= ci.nextArgument();
-        
-        s4sDeleteVLAN_execute(sw_mac, vlanID);
-    }
-    
-     private void s4sDeleteVLAN_execute(String sw_mac, String vlanID){
-         if(sw_mac == null || vlanID == null){
-             logger.error("\nPlease use command: s4s, vlanNameVLAN <switch's mac addr> <vlan id>");
-             return;
-         }
-         
-         Node node = null;
-         try{
-             node = new Node("SNMP", new Long(HexString.toLong(sw_mac)));
-         }catch(Exception e){
-             logger.error("in _s4sDeleteVLAN(): create node error -- " + e);
-         }
-         //(new SNMPHandler(cmethUtil)).deleteVLAN(node, new Long(Long.parseLong(vlanID)));//skip the VLANService wrapper, call SNMPHandler directly
-         (new VLANService()).deleteVLAN(node, new Long(Long.parseLong(vlanID)));
-     }
-
-    public void _s4sPrintVLANTable(CommandInterpreter ci){
-        String sw_mac = ci.nextArgument();
-        s4sPrintVLANTable_execute(sw_mac);
-    }
-
-    private void s4sPrintVLANTable_execute(String sw_mac){
-        Long vlanID;
-        Node node = null;
-
-        if(sw_mac == null){
-            logger.error("\nPlease use command: s4sPrintVLANTable <switch's mac addr>");
-            return;
-        }
-
-        //create node
-        try{
-            node = new Node("SNMP", new Long(HexString.toLong(sw_mac)));
-        }catch(Exception e){
-            logger.error("in _s4sAddVLAN(): create node error -- " + e);
-        }
-
-        VLANTable table = null;
-        table = (new VLANService()).getVLANTable(node);
-        logger.info(table.toString());
-        
-    }
-
-    private void s4sAddVLANandSetPorts(String sw_mac, String vlanID, String vlanName, String portList){
-        s4sAddVLAN_execute(sw_mac, vlanID, vlanName);
-        s4sSetVLANPorts_execute(sw_mac, vlanID, portList);
-
-        logger.info("\nVLAN " + vlanID + "(name: " + vlanName + ") is added to switch (mac: " + sw_mac + ") with ports " + portList
-                        +"\n-----------------------------------------");
-    }
-
-    public void _s4sDemoVLAN (CommandInterpreter ci){
-        String sw_mac = ci.nextArgument();
-        String vlanID= ci.nextArgument();
-        String vlanName = ci.nextArgument();
-        String portList = ci.nextArgument();
-
-        if(sw_mac == null || vlanID == null || vlanName == null || portList == null){
-            logger.error("\nPlease use command: s4sDemoVLAN <switch's mac addr> <vlan id> <vlan name> <ports to the vlan (sepereate by comma)>");
-            return;
-        }
-        s4sAddVLAN_execute(sw_mac, vlanID, vlanName);
-        s4sSetVLANPorts_execute(sw_mac, vlanID, portList);
-
-        logger.info("\n--------------------------------------"
-                        + "\n[VLAN DEMO]"
-                        + "\nVLAN " + vlanID + "(name: " + vlanName + ") is added to switch (mac: " + sw_mac + ") with ports " + portList
-                        +"\n==================================");
-    }
-
-    public void _s4sAutoDemoVLAN (CommandInterpreter ci){
-        logger.info("\n==================================");
-        logger.info("\n===VLAN DEMO========================");
-
-        s4sAddVLANandSetPorts("00:00:90:94:e4:23:13:e0", "200", "vlan200", "1,3");//sw 32
-        s4sAddVLANandSetPorts("00:00:90:94:e4:23:0b:00", "200", "vlan200", "1,10");//sw 33
-        s4sAddVLANandSetPorts("00:00:90:94:e4:23:0b:20", "200", "vlan200", "3");//sw 34
-        s4sAddVLANandSetPorts("00:00:90:94:e4:23:0a:e0", "200", "vlan200", "1,7");//sw 35
-
-        logger.info("\n==================================");
-    }
-    
     @Override
     public String getHelp() {
         StringBuffer help = new StringBuffer();
@@ -666,7 +494,4 @@ public class Controller implements IController, ICore, CommandProvider {
         switches.put(sid, sw);
     }
 
-    public CmethUtil getCmethUtil(){//s4s add. just for convenient for test, actually we don't need this function
-        return cmethUtil;
-    }
 }

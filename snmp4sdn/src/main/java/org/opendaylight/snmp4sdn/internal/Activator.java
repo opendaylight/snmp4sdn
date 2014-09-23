@@ -28,7 +28,8 @@ import org.opendaylight.controller.protocol_plugin.openflow.ITopologyServiceShim
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.internal.Controller;*/
-    import org.opendaylight.snmp4sdn.ICore;//karaf
+    import org.opendaylight.snmp4sdn.IKarafCore;//karaf
+    import org.opendaylight.snmp4sdn.IKarafVLANService;//karaf
     import org.opendaylight.snmp4sdn.IDataPacketListen;
     import org.opendaylight.snmp4sdn.IDataPacketMux;
     import org.opendaylight.snmp4sdn.IDiscoveryListener;
@@ -65,7 +66,7 @@ import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.INodeConnectorFactory;//s4s test
 import org.opendaylight.controller.sal.utils.INodeFactory;//s4s test
 //import org.opendaylight.controller.sal.vlan.IPluginInVLANService;//s4s//ad-sal
-//import org.opendaylight.snmp4sdn.IVLANService;//no-sal
+import org.opendaylight.snmp4sdn.IVLANService;//no-sal
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev140815.VlanService;//md-sal
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,8 +127,7 @@ public class Activator extends ComponentActivatorAbstractBase {
     public Object[] getImplementations() {
         Object[] res = { TopologyServices.class, DataPacketServices.class,
                 InventoryService.class, ReadService.class,
-                FlowProgrammerNotifier.class,
-                VLANService.class};
+                FlowProgrammerNotifier.class};
         return res;
     }
 
@@ -262,16 +262,6 @@ public class Activator extends ComponentActivatorAbstractBase {
                             "unsetIPluginOutConnectionService")
                     .setRequired(true));*///s4s cs
         }
-        if (imp.equals(VLANService.class)) {
-            //c.setInterface(IPluginInVLANService.class.getName(), null);//ad-sal
-            //c.setInterface(IVLANService.class.getName(), null);//no-sal
-            c.setInterface(VlanService.class.getName(), null);//md-sal
-
-            c.add(createServiceDependency()
-                    .setService(IController.class)
-                    .setCallbacks("setController", "unsetController")
-                    .setRequired(true));
-        }
     }
 
     /**
@@ -289,7 +279,8 @@ public class Activator extends ComponentActivatorAbstractBase {
                 FlowProgrammerService.class, ReadServiceFilter.class,
                 DiscoveryService.class, DataPacketMuxDemux.class, InventoryService.class,
                 InventoryServiceShim.class, TopologyServiceShim.class,
-                NodeFactory.class, NodeConnectorFactory.class//s4s test: add this line
+                NodeFactory.class, NodeConnectorFactory.class,//s4s test: add this line
+                VLANService.class,
                 };
         return res;
     }
@@ -307,17 +298,35 @@ public class Activator extends ComponentActivatorAbstractBase {
      */
     @Override
     public void configureGlobalInstance(Component c, Object imp) {
-
+        if (imp.equals(VLANService.class)) {
+            //c.setInterface(IPluginInVLANService.class.getName(), null);//ad-sal
+            //c.setInterface(IVLANService.class.getName(), null);//no-sal
+            c.setInterface(VlanService.class.getName(), null);//md-sal
+            c.setInterface(IKarafVLANService.class.getName(), null);//karaf
+            /*c.setInterface(new String[] 
+                                    { VlanService.class.getName(),//md-sal
+                                        //IVLANService.class.getName(), //no-sal
+                                        IKarafVLANService.class.getName()
+                                    }
+                                , null);*/
+            c.add(createServiceDependency()
+                    .setService(IController.class, "(name=Controller)")
+                    .setCallbacks("setController", "unsetController")
+                    .setRequired(true));//karaf: don't enable this code, otherwise will error due to mutual dependency between VLANService and Controller
+        }
         if (imp.equals(Controller.class)) {
-            logger.debug("Activator configureGlobalInstance( ) is called");
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             props.put("name", "Controller");
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), /*Node.NodeIDType.OPENFLOW*/"SNMP");
             c.setInterface(new String[] { IController.class.getName(),
                                           /*IPluginInConnectionService.class.getName()*///s4s cs
-                                          ICore.class.getName()//karaf
+                                          IKarafCore.class.getName()//karaf
                                           },
                                           props);
+            /*c.add(createServiceDependency()
+                    .setService(IVLANService.class)
+                    .setCallbacks("setVLANService", "unsetVLANService")
+                    .setRequired(true));//karaf temp design*/
         }
 
         if (imp.equals(FlowProgrammerService.class)) {

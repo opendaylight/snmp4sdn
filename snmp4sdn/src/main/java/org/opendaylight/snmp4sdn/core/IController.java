@@ -15,6 +15,7 @@ package org.opendaylight.snmp4sdn.core;
 import java.util.Map;
 
 import org.opendaylight.snmp4sdn.protocol.SNMPType;
+import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
 
 /**
  * This interface defines an abstraction of the SNMP Controller that allows applications to control and manage the SNMP switches.
@@ -61,5 +62,7 @@ public interface IController {
      * @return ISwitch if present, null otherwise
      */
     public ISwitch getSwitch(Long switchId);
+
+    public CmethUtil getCmethUtil();
 
 }

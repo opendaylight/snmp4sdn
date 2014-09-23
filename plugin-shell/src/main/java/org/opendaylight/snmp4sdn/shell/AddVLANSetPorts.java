@@ -11,11 +11,12 @@ package org.opendaylight.snmp4sdn.shell;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.opendaylight.snmp4sdn.ICore;
+import org.opendaylight.snmp4sdn.IKarafVLANService;
+import org.opendaylight.controller.sal.utils.ServiceHelper;
 
 @Command(scope = "snmp4sdn", name = "AddVlanSetPorts", description="Add VLAN and set the VLAN ports on the switch")
 public class AddVLANSetPorts extends OsgiCommandSupport{
-    private ICore controller;
+    //private IKarafVLANService vlanService;
 
     @Argument(index=0, name="sw_mac", description="Target switch's MAC address", required=true, multiValued=false)
     String sw_mac = null;
@@ -28,11 +29,12 @@ public class AddVLANSetPorts extends OsgiCommandSupport{
 
     @Override
     protected Object doExecute() throws Exception {
-        controller.addVLANSetPorts(sw_mac, vlanID, vlanName, portList);
+        IKarafVLANService vlanService = (IKarafVLANService) ServiceHelper.getGlobalInstance(IKarafVLANService.class, this);
+        vlanService.addVLANSetPorts(sw_mac, vlanID, vlanName, portList);
         return null;
     }
 
-    public void setController(ICore controller){
-        this.controller = controller;
+    public void setVLANService(IKarafVLANService vs){
+        //this.vlanService = vs;
     }
 }

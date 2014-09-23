@@ -11,11 +11,12 @@ package org.opendaylight.snmp4sdn.shell;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
-import org.opendaylight.snmp4sdn.ICore;
+import org.opendaylight.snmp4sdn.IKarafVLANService;
+import org.opendaylight.controller.sal.utils.ServiceHelper;
 
 @Command(scope = "snmp4sdn", name = "DeleteVlan", description="Delete VLAN from the switch")
 public class DeleteVlan extends OsgiCommandSupport{
-    private ICore controller;
+    //private IKarafVLANService vlanService;
 
     @Argument(index=0, name="sw_mac", description="Target switch's MAC address", required=true, multiValued=false)
     String sw_mac = null;
@@ -24,11 +25,12 @@ public class DeleteVlan extends OsgiCommandSupport{
 
     @Override
     protected Object doExecute() throws Exception {
-        controller.deleteVLAN(sw_mac, vlanID);
+        IKarafVLANService vlanService = (IKarafVLANService) ServiceHelper.getGlobalInstance(IKarafVLANService.class, this);
+        vlanService.deleteVLAN(sw_mac, vlanID);
         return null;
     }
 
-    public void setController(ICore controller){
-        this.controller = controller;
+    public void setController(IKarafVLANService vs){
+        //this.vlanService = vs;
     }
 }

@@ -31,6 +31,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev140815.
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev140815.PrintVlanTableInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev140815.SetVlanPortsInput;
 
+import org.opendaylight.snmp4sdn.IKarafVLANService;//karaf
+
 //For md-sal RPC call
 import java.util.concurrent.Future;
 import org.opendaylight.yangtools.yang.common.RpcError;
@@ -41,12 +43,17 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 /*import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;*/
 
-import org.opendaylight.snmp4sdn.core.internal.Controller;
+//import org.opendaylight.snmp4sdn.core.internal.Controller;
 import org.opendaylight.snmp4sdn.core.IController;
 import org.opendaylight.snmp4sdn.internal.CLIHandler;
 import org.opendaylight.snmp4sdn.internal.SNMPHandler;
 import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
 import org.opendaylight.snmp4sdn.protocol.util.HexString;
+
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.eclipse.osgi.framework.console.CommandInterpreter;
+import org.eclipse.osgi.framework.console.CommandProvider;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -54,22 +61,44 @@ import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class VLANService implements /*IPluginInVLANService//custom ad-sal*/VlanService/*md-sal*/, IVLANService/*not to remove this interface, otherwise code vary a lot */, CommandProvider{
+public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ VlanService/*md-sal*/, IVLANService/*not to remove this interface, otherwise code vary a lot */, IKarafVLANService, CommandProvider{
     private static final Logger logger = LoggerFactory.getLogger(VLANService.class);
 
-    Controller controller = null;
+    //Controller controller = null;
+    IController controller = null;
     CLIHandler cli = null;
     CmethUtil cmethUtil = null;
 
     public void setController(IController core) {
-        this.controller = (Controller)core;
-        cmethUtil = controller.cmethUtil;//s4s add
+        /*this.controller = (Controller)core;
+        cmethUtil = controller.cmethUtil;//s4s add*/
+        this.controller = core;
     }
 
     public void unsetController(IController core) {
-        if (this.controller == (Controller)core) {
+        /*if (this.controller == (Controller)core) {
+            this.controller = null;
+        }*/
+        if (this.controller == core) {
             this.controller = null;
         }
+    }
+
+     /**
+     * Function called by the dependency manager when all the required
+     * dependencies are satisfied
+     *
+     */
+    public void init() {
+        cmethUtil = controller.getCmethUtil();
+        registerWithOSGIConsole();
+    }
+
+    private void registerWithOSGIConsole() {
+        BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass())
+                .getBundleContext();
+        bundleContext.registerService(CommandProvider.class.getName(), this,
+                null);
     }
 
     @Override//md-sal
@@ -131,6 +160,226 @@ public class VLANService implements /*IPluginInVLANService//custom ad-sal*/VlanS
         return null;
     }
 
+
+    /******For Karaf and OSGi CLI commands requesting VLANService*********/
+
+    @Override//karaf
+    public void addVLANSetPorts(String sw_mac, String vlanID, String vlanName, String portList){
+        logger.info("VLANService.addVLANSetPorts() is called by Karaf");
+        s4sAddVLANandSetPorts(sw_mac, vlanID, vlanName, portList);
+    }
+
+    @Override//karaf
+    public void deleteVLAN(String sw_mac, String vlanID){   
+        logger.info("VLANService.deleteVLAN() is called by Karaf");
+        boolean isSuccess = s4sDeleteVLAN_execute(sw_mac, vlanID);
+        if(isSuccess)
+            System.out.println("Success to delete VLAN " + vlanID + " on switch " + sw_mac);
+        else
+            System.out.println("Fail to delete VLAN " + vlanID + " on switch " + sw_mac);
+    }
+
+    @Override//karaf
+    public void printVLANTable(String sw_mac){
+        logger.info("VLANService.printVLANTable() is called by Karaf");
+        s4sPrintVLANTable_execute(sw_mac);
+    }
+
+    public void _s4sAddVLAN(CommandInterpreter ci){
+        String sw_mac = null, vlanID = null, vlanName = null;
+        
+        sw_mac = ci.nextArgument();
+        vlanID= ci.nextArgument();
+        vlanName = ci.nextArgument();
+
+        s4sAddVLAN_execute(sw_mac, vlanID, vlanName);
+   }
+   private boolean s4sAddVLAN_execute(String sw_mac, String vlanID, String vlanName){
+        if(sw_mac == null || vlanID == null || vlanName == null){
+            System.out.println("\nPlease use command: s4sAddVLAN <switch's mac addr> <vlan id> <vlan name>");
+            return false;
+        }
+        
+        Node node = null;
+        try{
+            node = new Node("SNMP", new Long(HexString.toLong(sw_mac)));
+        }catch(Exception e){
+            logger.error("in s4sAddVLAN_execute(): given switch mac \"" + sw_mac + "\", create node error -- " + e);
+            return false;
+        }
+        //(new SNMPHandler(cmethUtil)).addVLAN(node, new Long(Long.parseLong(vlanID)), vlanName);//skip the VLANService wrapper, call SNMPHandler directly
+        Status status = addVLAN(node, new Long(Long.parseLong(vlanID)), vlanName);
+        if(status.isSuccess())
+            return true;
+        else
+            return false;
+    }
+
+    public void _s4sSetVLANPorts(CommandInterpreter ci){
+        String sw_mac = null, vID = null, portList = null;
+        
+        sw_mac = ci.nextArgument();
+        vID = ci.nextArgument();
+        portList = ci.nextArgument();
+
+        s4sSetVLANPorts_execute(sw_mac, vID, portList);
+    }
+    private boolean s4sSetVLANPorts_execute(String sw_mac, String vID, String portList){
+        Long vlanID;
+        Node node = null;
+        List<NodeConnector> nodeConns = new ArrayList<NodeConnector>();
+        String portsStr = null;
+
+        if(sw_mac == null || vID == null || portList == null){
+            logger.error("\nPlease use command: s4sSetVLANPorts <switch's mac addr> <vlan id> <ports to the vlan (sepereate by comma)>");
+            return false;
+        }
+
+        //create node
+        try{
+            node = new Node("SNMP", new Long(HexString.toLong(sw_mac)));
+        }catch(Exception e){
+            logger.error("in s4sSetVLANPorts_execute(): given switch mac \"" + sw_mac + "\", create node error -- " + e);
+            return false;
+        }
+
+        //get vlandID
+        vlanID = new Long(vID);
+        
+        //create nodeConnectors
+        String[] ports = portList.split(",");
+        try{
+            for(int i = 0; i < ports.length; i++)
+                nodeConns.add(new NodeConnector("SNMP", Short.parseShort(ports[i]), node));
+        }catch(Exception e){
+            logger.error("in s4sSetVLANPorts_execute(): create node or nodeconnector error -- " + e);
+            return false;
+        }
+
+        //(new SNMPHandler(cmethUtil)).setVLANPorts(node, vlanID, nodeConns);//skip the VLANService wrapper, call SNMPHandler directly
+        Status status = setVLANPorts(node, vlanID, nodeConns);
+        if(status.isSuccess())
+            return true;
+        else
+            return false;
+    }
+
+    public void _s4sDeleteVLAN(CommandInterpreter ci){
+        String sw_mac = null, vlanID = null, vlanName = null;
+        
+        sw_mac = ci.nextArgument();
+        vlanID= ci.nextArgument();
+        //null string check will be done in following procedure...
+        
+        s4sDeleteVLAN_execute(sw_mac, vlanID);
+    }
+    
+     private boolean s4sDeleteVLAN_execute(String sw_mac, String vlanID){
+         if(sw_mac == null || vlanID == null){
+             logger.error("\nPlease use command: s4s, vlanNameVLAN <switch's mac addr> <vlan id>");
+             return false;
+         }
+         
+         Node node = null;
+         try{
+             node = new Node("SNMP", new Long(HexString.toLong(sw_mac)));
+         }catch(Exception e){
+             logger.error("in s4sDeleteVLAN_execute(): given switch mac \"" + sw_mac + "\", create node error -- " + e);
+             return false;
+         }
+
+         //(new SNMPHandler(cmethUtil)).deleteVLAN(node, new Long(Long.parseLong(vlanID)));//skip the VLANService wrapper, call SNMPHandler directly
+         Status status = deleteVLAN(node, new Long(Long.parseLong(vlanID)));
+         if(status.isSuccess())
+             return true;
+         else
+            return false;
+     }
+
+    public void _s4sPrintVLANTable(CommandInterpreter ci){
+        String sw_mac = ci.nextArgument();
+        s4sPrintVLANTable_execute(sw_mac);
+    }
+
+    private void s4sPrintVLANTable_execute(String sw_mac){
+        Long vlanID;
+        Node node = null;
+
+        if(sw_mac == null){
+            logger.error("\nPlease use command: s4sPrintVLANTable <switch's mac addr>");
+            return;
+        }
+
+        //create node
+        try{
+            node = new Node("SNMP", new Long(HexString.toLong(sw_mac)));
+        }catch(Exception e){
+            logger.error("in s4sPrintVLANTable_execute(): given switch mac \"" + sw_mac + "\", create node error -- " + e);
+            return;
+        }
+
+        VLANTable table = null;
+        table = getVLANTable(node);
+        if(table == null){
+            logger.error("in s4sPrintVLANTable_execute(): given switch mac \"" + sw_mac + "\", get null VLANTable(), so can't print");
+            return;
+        }
+        System.out.println();
+        System.out.println("Switch (mac: " + sw_mac + ") has VLANs:");
+        System.out.println("VLAN(vlan_id): {port_list}");
+        System.out.println("-------------------------");
+        System.out.println(table.toString());
+        
+    }
+
+    private void s4sAddVLANandSetPorts(String sw_mac, String vlanID, String vlanName, String portList){
+        boolean flag1 = false;
+        boolean flag2 = false;
+        boolean flag = false;
+
+        flag1 = s4sAddVLAN_execute(sw_mac, vlanID, vlanName);
+        flag2 = s4sSetVLANPorts_execute(sw_mac, vlanID, portList);
+        flag = flag1 && flag2;
+
+        if(flag)
+            System.out.println("\nVLAN " + vlanID + " (name: " + vlanName + ") is added to switch (mac: " + sw_mac + ") with ports " + portList);
+        else
+            System.out.println("\nFail to set VLAN " + vlanID + " (name: " + vlanName + ") to switch (mac: " + sw_mac + ") with ports " + portList);
+    }
+
+    public void _s4sDemoVLAN (CommandInterpreter ci){
+        String sw_mac = ci.nextArgument();
+        String vlanID= ci.nextArgument();
+        String vlanName = ci.nextArgument();
+        String portList = ci.nextArgument();
+
+        if(sw_mac == null || vlanID == null || vlanName == null || portList == null){
+            System.out.println("\nPlease use command: s4sDemoVLAN <switch's mac addr> <vlan id> <vlan name> <ports to the vlan (sepereate by comma)>");
+            return;
+        }
+        s4sAddVLAN_execute(sw_mac, vlanID, vlanName);
+        s4sSetVLANPorts_execute(sw_mac, vlanID, portList);
+
+        System.out.println("\n--------------------------------------"
+                        + "\n[VLAN DEMO]"
+                        + "\nVLAN " + vlanID + "(name: " + vlanName + ") is added to switch (mac: " + sw_mac + ") with ports " + portList
+                        +"\n==================================");
+    }
+
+    public void _s4sAutoDemoVLAN (CommandInterpreter ci){
+        System.out.println("\n==================================");
+        System.out.println("\n===VLAN DEMO========================");
+
+        s4sAddVLANandSetPorts("00:00:90:94:e4:23:13:e0", "200", "vlan200", "1,3");//sw 32
+        s4sAddVLANandSetPorts("00:00:90:94:e4:23:0b:00", "200", "vlan200", "1,10");//sw 33
+        s4sAddVLANandSetPorts("00:00:90:94:e4:23:0b:20", "200", "vlan200", "3");//sw 34
+        s4sAddVLANandSetPorts("00:00:90:94:e4:23:0a:e0", "200", "vlan200", "1,7");//sw 35
+
+        System.out.println("\n==================================");
+    }
+
+    /******end of CLI (Karaf and OSGi)*********/
+    
     @Override
     public Status addVLAN(Node node, Long vlanID){
         Status status = checkNodeIpValid(node);
@@ -194,7 +443,6 @@ public class VLANService implements /*IPluginInVLANService//custom ad-sal*/VlanS
     }
 
     private Status checkNodeIpValid(Node node){
-        CmethUtil cmethUtil = controller.getCmethUtil();
         String sw_ipAddr = cmethUtil.getIpAddr((Long)node.getID());
         if(sw_ipAddr == null)
             return new Status(StatusCode.NOTFOUND, "IP address of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
