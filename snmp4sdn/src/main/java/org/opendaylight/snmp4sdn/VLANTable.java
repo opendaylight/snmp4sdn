@@ -45,7 +45,7 @@ public class VLANTable{
         String ans = "";
         for(int i = 0; i < table.size(); i ++){
             entry = (VLANTableEntry)(table.get(i));
-            ans = "VLAN(" + entry.getVlanID() + "): {";
+            ans += "VLAN(" + entry.getVlanID() + "): {";
             List<NodeConnector> ports = entry.getPorts();
             for(int j = 0; j < ports.size(); j++)
                 ans += (Short)(ports.get(j).getID()) + ",";

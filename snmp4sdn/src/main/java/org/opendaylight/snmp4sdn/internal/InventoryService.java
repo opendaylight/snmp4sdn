@@ -83,7 +83,8 @@ public class InventoryService implements IInventoryShimInternalListener,
         Dictionary props = c.getServiceProperties();
         if (props != null) {
             containerName = (String) props.get("containerName");
-            isDefaultContainer = containerName.equals(GlobalConstants.DEFAULT
+            if(containerName != null)
+                isDefaultContainer = containerName.equals(GlobalConstants.DEFAULT
                     .toString());
         }
 
