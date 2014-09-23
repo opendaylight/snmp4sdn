@@ -1036,10 +1036,7 @@ public class SNMPHandler{
                 String snmpOIDstr = snmpOID.toString();
                 String vlanIDstr = snmpOIDstr.substring(snmpOIDstr.lastIndexOf(".") + 1);
                 Long vlanID = Long.valueOf(vlanIDstr);
-                if(vlanID == 1) continue;
-                else{
-                    ports = getVLANPorts(createSNMPNode(sw_macAddr), vlanID);
-                }
+                ports = getVLANPorts(createSNMPNode(sw_macAddr), vlanID);
 
                 table.addEntry(vlanID, ports);
                 //logger.debug("Retrieved OID: " + snmpOID + " (so port num=" + portNum + "), value: " + valueStr);
