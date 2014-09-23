@@ -246,22 +246,22 @@ public class SNMPHandler{
             SNMPOctetString portOStr =  new SNMPOctetString(convPort);
             SNMPInteger typeInt =  new SNMPInteger(type);
 
-            logger.warn("switch ({})'s OID: {}", destMac, macOid);
-            logger.warn("type: {}", typeInt.toString());
+            logger.info("switch ({})'s OID: {}", destMac, macOid);
+            logger.info("type: {}", typeInt.toString());
 
             if(type == 2){//delete entry
                 SNMPVarBindList newVars = comInterface.setMIBEntry(typeOid, typeInt);
-                logger.warn("set OID {}: as new value of {} = {}", typeOid, typeInt.getClass().getName(), typeInt);
+                logger.info("set OID {}: as new value of {} = {}", typeOid, typeInt.getClass().getName(), typeInt);
             }
             else if(type == 3){//add or modify entry
-                logger.warn("port: {}", portOStr.toString());
+                logger.info("port: {}", portOStr.toString());
 
                 String[] oids = {typeOid, portOid};
                 SNMPObject [] newValues = {typeInt, portOStr};
                 SNMPVarBindList newVars = comInterface.setMIBEntry(oids, newValues); //comInterface.setMIBEntry() can either input array or variable, like here or below
 
                 for(int i = 0; i < oids.length; i++){
-                    logger.warn("set OID {}: new value of {} = {}", oids[i], newValues[i].getClass().getName(), newValues[i]);
+                    logger.info("set OID {}: new value of {} = {}", oids[i], newValues[i].getClass().getName(), newValues[i]);
                 }
             }
             else{
@@ -849,19 +849,19 @@ public class SNMPHandler{
             portNum = ((Short)(nc.getID())).intValue() - 1;
             portList[portNum] = 1;
         }
-        System.out.print("port list: ");
+        String listStr = "port list: ";
         for(int k = 0; k < 48; k++)
-            System.out.print(portList[k]);
-        System.out.println();
+            listStr = listStr + portList[k];
+        logger.info(listStr);
         for(int j = 0; j < 48 - 7; j += 8){
             int seg = portList[j] * 128 + portList[j + 1] * 64 + portList[j + 2] * 32 + portList[j + 3] * 16
                           + portList[j + 4] * 8 + portList[j + 5] * 4 + portList[j + 6] * 2 + portList[j + 7];
             /*int seg = portList[j] << 7 + portList[j + 1] << 6 + portList[j + 2] << 5 + portList[j + 3] << 4
                           + portList[j + 4] << 3 + portList[j + 5] << 2 + portList[j + 6] << 1 + portList[j + 7];*/
-            logger.info("answer[" + j + "~" + (j+7) + "]=" + seg);    
+            logger.info("port list [" + j + "~" + (j+7) + "] = " + seg);    
             answer[index++] = (new Integer(seg)).byteValue();
         }
-        System.out.println("answer=" + HexString.toHexString(answer));
+        logger.info("port list as hex string=" + HexString.toHexString(answer));
         return answer;
     }
 
@@ -914,8 +914,8 @@ public class SNMPHandler{
             SNMPVarBindList newVar = comInterface.setMIBEntry(oid, value);
             ///System.out.println("set OID " + oid + ": new value of " + value.getClass().getName() + " = " + value);
         }catch(Exception e){
-            System.out.println("deleteVLANFromSwitch, error: " + e);
-            System.out.println("(maybe because this vlan already exists)");
+            logger.info("deleteVLANFromSwitch, error: " + e);
+            logger.info("(maybe because this vlan already exists)");
             return false;
         }
         return true;
@@ -943,7 +943,7 @@ public class SNMPHandler{
             int ports[] = convertPortBytesToList(portBytes);
 
             String portsStr = HexString.toHexString(portBytes);
-            System.out.println("to retieve switch (" + switchIP +"'s local chassis (OID: " + requestOID + "), get value: " + portsStr);
+            logger.info("to retieve switch (" + switchIP +"'s local chassis (OID: " + requestOID + "), get value: " + portsStr);
 
             //convert ports (ex. 1010011001000... to {1,3,6,7,10})
             int ansTmp[] = new int[48];
@@ -960,14 +960,14 @@ public class SNMPHandler{
         }
         catch(Exception e)
         {
-            System.out.println("Exception during SNMP getVLANPorts: " + e);
+            logger.error("Exception during SNMP getVLANPorts: " + e);
             return null;//meaning fail
         }
     }
 
     private int[] convertPortBytesToList(byte portBytes[]){
         if(portBytes.length != 6){
-            System.out.println("convertPortBytesToList(), input portBytes's length != 6!");
+            logger.error("convertPortBytesToList(), input portBytes's length != 6!");
             System.exit(0);
         }
         
@@ -1049,7 +1049,7 @@ public class SNMPHandler{
         }
         catch(Exception e)
         {
-            System.out.println("In readLLDPLocalPortIDEntries(), Exception during SNMP getMIBEntry:  " + e + "\n");
+            logger.error("In readLLDPLocalPortIDEntries(), Exception during SNMP getMIBEntry:  " + e + "\n");
             return null;
         }
     }
