@@ -15,6 +15,8 @@ package org.opendaylight.snmp4sdn.internal;//s4s
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,11 +28,13 @@ import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Output;
+import org.opendaylight.snmp4sdn.IKarafFlowProgrammerService;//karaf
 import org.opendaylight.snmp4sdn.IFlowProgrammerNotifier;//s4s
 import org.opendaylight.snmp4sdn.IInventoryShimExternalListener;//s4s
 import org.opendaylight.snmp4sdn.core.IController;//s4s
 //import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;//s4s //receive()
 import org.opendaylight.snmp4sdn.core.ISwitch;//s4s
+import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.IContainerAware;
 import org.opendaylight.controller.sal.core.IContainerListener;
@@ -44,6 +48,7 @@ import org.opendaylight.controller.sal.flowprogrammer.IPluginInFlowProgrammerSer
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchField;
 import org.opendaylight.controller.sal.match.MatchType;
+import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -75,7 +80,7 @@ import org.opendaylight.snmp4sdn.internal.SNMPHandler;//s4s add
  */
 public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         /*IMessageListener,*/ IContainerListener, IInventoryShimExternalListener,//s4s actully IInventoryShimExternalListener seems useless
-        CommandProvider, IContainerAware {
+        CommandProvider, IContainerAware, IKarafFlowProgrammerService {
     private static final Logger log = LoggerFactory
             .getLogger(FlowProgrammerService.class);
     private IController controller;
@@ -777,6 +782,141 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                 null);
     }
 
+/*********For Karaf/OSGi CLI commands*********/
+
+    private static Node createSNMPNode(long switchId) {
+        try {
+            return new Node("SNMP", new Long(switchId));
+        } catch (ConstructionException e1) {
+            log.error("",e1);
+            return null;
+        }
+    }
+
+    private static NodeConnector createSNMPNodeConnector(short portId, Node node) {
+        if (node.getType().equals("SNMP")) {
+            try {
+                return new NodeConnector("SNMP",
+                        new Short(portId), node);
+            } catch (ConstructionException e1) {
+                log.error("",e1);
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private static Flow createFlow(Long nodeId, short vlanId, String dstMacStr, short outport){
+        byte dstMac[] = HexString.fromHexString(dstMacStr);
+        short ethertype = EtherTypes.IPv4.shortValue();
+        short vlan = vlanId;
+
+        Match match = new Match();
+        match.setField(MatchType.DL_DST, dstMac);
+        match.setField(MatchType.DL_VLAN, vlan);
+        match.setField(MatchType.DL_TYPE, ethertype);
+        
+        Node node = createSNMPNode(nodeId);
+        NodeConnector oport = createSNMPNodeConnector(outport, node);
+        
+        List<Action> actions = new ArrayList<Action>();
+        actions.add(new Output(oport));
+        Flow flow = new Flow(match, actions);
+        
+        return flow;
+    }
+    
+    private Status s4sAddFlow_execute(String switch_mac, String vlanIdStr, String dstMacStr, String portNumStr){
+        Long nodeId;
+        try{
+            nodeId = HexString.toLong(switch_mac);
+        }catch(Exception e1){
+            return new Status(StatusCode.NOTACCEPTABLE, "Invalid switch mac " + switch_mac + ": " + e1);
+        }
+
+        Short vlanID;
+        try{
+            vlanID = Short.valueOf(vlanIdStr);
+        }catch(Exception e1){
+            return new Status(StatusCode.NOTACCEPTABLE, "Invalid VLAN ID " + vlanIdStr + ": " + e1);
+        }
+        short vlanId = vlanID.shortValue();
+
+        Short portNum;
+        try{
+            portNum = Short.valueOf(portNumStr);
+        }catch(Exception e1){
+            return new Status(StatusCode.NOTACCEPTABLE, "Invalid port number " + portNumStr + ": " + e1);
+        }
+        short port = portNum.shortValue();
+
+        Node node = createSNMPNode(nodeId);
+        Flow flow = createFlow(nodeId, vlanId, dstMacStr, portNum);
+        return addFlow(node, flow);
+    }
+
+    private Status s4sDeleteFlow_execute(String switch_mac, String vlanIdStr, String dstMacStr, String portNumStr){
+        Long nodeId;
+        try{
+            nodeId = HexString.toLong(switch_mac);
+        }catch(Exception e1){
+            return new Status(StatusCode.NOTACCEPTABLE, "Invalid switch mac " + switch_mac + ": " + e1);
+        }
+
+        Short vlanID;
+        try{
+            vlanID = Short.valueOf(vlanIdStr);
+        }catch(Exception e1){
+            return new Status(StatusCode.NOTACCEPTABLE, "Invalid VLAN ID " + vlanIdStr + ": " + e1);
+        }
+        short vlanId = vlanID.shortValue();
+
+        Short portNum;
+        try{
+            portNum = Short.valueOf(portNumStr);
+        }catch(Exception e1){
+            return new Status(StatusCode.NOTACCEPTABLE, "Invalid port number " + portNumStr + ": " + e1);
+        }
+        short port = portNum.shortValue();
+
+        Node node = createSNMPNode(nodeId);
+        Flow flow = createFlow(nodeId, vlanId, dstMacStr, portNum);
+        return removeFlow(node, flow);
+    }
+
+    public Status _s4sAddFlow(CommandInterpreter ci){
+        //TODO: format check
+        String switch_mac = ci.nextArgument();
+        String vlanIdStr = ci.nextArgument();
+        String dstMacStr = ci.nextArgument();
+        String portNumStr = ci.nextArgument();
+
+        return s4sAddFlow_execute(switch_mac, vlanIdStr, dstMacStr, portNumStr); 
+    }
+
+    public Status _s4sDeleteFlow(CommandInterpreter ci){
+        //TODO: format check
+        String switch_mac = ci.nextArgument();
+        String vlanIdStr = ci.nextArgument();
+        String dstMacStr = ci.nextArgument();
+        String portNumStr = ci.nextArgument();
+
+        return s4sDeleteFlow_execute(switch_mac, vlanIdStr, dstMacStr, portNumStr); 
+    }
+
+    @Override //karaf
+    public Status krfAddFlow(String switch_mac, String vlanIdStr, String dstMacStr, String portNumStr){
+        return s4sAddFlow_execute(switch_mac, vlanIdStr, dstMacStr, portNumStr); 
+    }
+
+    @Override //karaf
+    public Status krfDeleteFlow(String switch_mac, String vlanIdStr, String dstMacStr, String portNumStr){
+        return s4sDeleteFlow_execute(switch_mac, vlanIdStr, dstMacStr, portNumStr); 
+    }
+
+/*********end of Karaf/OSGi CLI commands*********/
+
+    
 ///* //s4s mark 13
     @Override
     public String getHelp() {

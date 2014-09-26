@@ -27,5 +27,13 @@
             <!--<property name="vlanService" ref="iVLANServiceRef"/>--><!--see the IKarafVLANService line above-->
           </action>
         </command>
+        <command>
+          <action class="org.opendaylight.snmp4sdn.shell.AddFlow">
+          </action>
+        </command>
+        <command>
+          <action class="org.opendaylight.snmp4sdn.shell.DeleteFlow">
+          </action>
+        </command>
     </command-bundle>
 </blueprint>

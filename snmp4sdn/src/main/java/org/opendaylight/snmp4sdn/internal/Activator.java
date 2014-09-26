@@ -29,6 +29,7 @@ import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.internal.Controller;*/
     import org.opendaylight.snmp4sdn.IKarafCore;//karaf
+    import org.opendaylight.snmp4sdn.IKarafFlowProgrammerService;//karaf
     import org.opendaylight.snmp4sdn.IKarafVLANService;//karaf
     import org.opendaylight.snmp4sdn.IDataPacketListen;
     import org.opendaylight.snmp4sdn.IDataPacketMux;
@@ -338,7 +339,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.setInterface(
                     new String[] { IPluginInFlowProgrammerService.class.getName(), /*IMessageListener.class.getName(),*/
                             IContainerListener.class.getName(), IInventoryShimExternalListener.class.getName(),
-                            IContainerAware.class.getName() }, props);
+                            IContainerAware.class.getName(), IKarafFlowProgrammerService.class.getName() }, props);
 
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
