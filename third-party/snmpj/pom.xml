@@ -12,7 +12,7 @@
 
   <groupId>org.opendaylight.snmp4sdn</groupId>
   <artifactId>org.snmpj</artifactId>
-  <version>1.4.5-SNAPSHOT</version>
+  <version>1.4.5-Helium</version>
   <name>SNMP Java</name>
   <description>A Java implemention of the SNMP protocol</description>
 
