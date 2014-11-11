@@ -14,7 +14,7 @@
   </prerequisites>
   <groupId>org.opendaylight.snmp4sdn</groupId>
   <artifactId>commons.parent</artifactId>
-  <version>0.1.4-SNAPSHOT</version>
+  <version>0.1.4-Helium-SR1</version>
   <packaging>pom</packaging>
 
   <scm>
