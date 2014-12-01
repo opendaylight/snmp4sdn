@@ -65,7 +65,6 @@
     <javassist.version>3.17.1-GA</javassist.version>
     <sample-toaster.version>1.0</sample-toaster.version>
     <releaseplugin.version>2.3.2</releaseplugin.version>
-    <commons.lang.version>3.1</commons.lang.version>
     <jacoco.version>0.5.3.201107060350</jacoco.version>
   </properties>
 
@@ -733,7 +732,6 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>${commons.lang.version}</version>
     </dependency>
     <dependency>
       <groupId>virgomirror</groupId>
