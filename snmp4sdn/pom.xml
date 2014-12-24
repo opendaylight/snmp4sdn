@@ -28,6 +28,11 @@
     <tag>HEAD</tag>
   </scm>
 
+  <properties>
+    <yangtools.version>0.6.1</yangtools.version>
+    <mdsal.version>1.0</mdsal.version>
+  </properties>
+
   <build>
     <plugins>
       <plugin>
@@ -50,10 +55,14 @@
               org.opendaylight.controller.sal.utils,
               <!--org.opendaylight.controller.sal.vlan,//ad-sal. prg-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev140815,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815,<!--md-sal-->
               <!--com.google.common.collect,//md-sal
               com.google.common.util.concurrent,//md-sal -->
               org.opendaylight.yangtools.yang.common,<!--md-sal-->
               org.opendaylight.yangtools.yang.binding,<!--md-sal-->
+              org.opendaylight.controller.sal.binding.api,<!--md-sal copy from ping example-->
+              org.opendaylight.controller.sal.common.util,<!--md-sal copy from ping example-->
+              com.google.common.util.concurrent,<!--md-sal copy from ping example-->
               org.apache.commons.lang3.builder,
               org.apache.commons.lang3.tuple,
               org.apache.felix.dm,
@@ -70,6 +79,7 @@
               org.opendaylight.snmp4sdn
             </Export-Package>
             <Embed-Dependency>
+              org.opendaylight.snmp4sdn.internal,<!--should not export?-->
               org.openflow.openflowj,
               org.snmpj
             </Embed-Dependency>
@@ -112,10 +122,36 @@
       <version>4.8.1</version>
       <scope>test</scope>
     </dependency>
-    <dependency><!--md-sal-->
+    <!--following are md-sal-->
+    <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>vlanmd-model</artifactId>
       <version>0.2.0-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.snmp4sdn</groupId>
+      <artifactId>configmd-model</artifactId>
+      <version>0.1.3-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+     <groupId>org.opendaylight.controller</groupId>
+     <artifactId>sal-binding-api</artifactId>
+     <version>${mdsal.version}</version>
+   </dependency>
+   <dependency>
+     <groupId>org.opendaylight.controller</groupId>
+     <artifactId>sal-common-util</artifactId>
+     <version>${mdsal.version}</version>
+   </dependency>
+   <dependency>
+     <groupId>org.opendaylight.yangtools</groupId>
+     <artifactId>yang-common</artifactId>
+     <version>${yangtools.version}</version>
+   </dependency>
+   <dependency>
+     <groupId>org.opendaylight.yangtools</groupId>
+     <artifactId>yang-binding</artifactId>
+     <version>${yangtools.version}</version>
+   </dependency>
   </dependencies>
 </project>
