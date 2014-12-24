@@ -36,7 +36,7 @@ import org.opendaylight.snmp4sdn.IKarafVLANService;//karaf
 //For md-sal RPC call
 import java.util.concurrent.Future;
 import org.opendaylight.yangtools.yang.common.RpcError;
-import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+//import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 //TODO: com.google.common import error in karaf
