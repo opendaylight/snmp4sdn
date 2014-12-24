@@ -1220,6 +1220,10 @@ retrievalLoop:
         return this.receiveBufferSize;
     }
 
+    public String getHostAddress(){
+        return hostAddress.getHostAddress();
+    }
+
 
 
 }
