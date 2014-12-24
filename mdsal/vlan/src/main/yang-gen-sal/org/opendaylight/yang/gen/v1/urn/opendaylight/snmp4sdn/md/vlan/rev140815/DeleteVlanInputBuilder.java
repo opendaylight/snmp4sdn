@@ -8,7 +8,6 @@ import org.opendaylight.yangtools.yang.binding.Augmentation;
 
 /**
  * Class that builds {@link org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev140815.DeleteVlanInput} instances.
- * 
  * @see org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev140815.DeleteVlanInput
  */
 public class DeleteVlanInputBuilder {

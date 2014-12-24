@@ -6,7 +6,7 @@ import org.opendaylight.yangtools.yang.binding.Augmentable;
 
 /**
  * <p>This class represents the following YANG schema fragment defined in module <b>vlan</b>
- * <br />(Source path: <i>META-INF\yang\vlan.yang</i>):
+ * <br />(Source path: <i>META-INF/yang/vlan.yang</i>):
  * <pre>
  * container input {
  *     leaf nodeID {
@@ -16,7 +16,6 @@ import org.opendaylight.yangtools.yang.binding.Augmentable;
  * </pre>
  * The schema path to identify an instance is
  * <i>vlan/print-vlan-table/input</i>
- * 
  * <p>To create instances of this class use {@link org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev140815.PrintVlanTableInputBuilder}.
  * @see org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev140815.PrintVlanTableInputBuilder
  */

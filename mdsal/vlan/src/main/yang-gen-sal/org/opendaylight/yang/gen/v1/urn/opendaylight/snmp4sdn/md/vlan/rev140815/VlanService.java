@@ -10,7 +10,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev140815.
 
 /**
  * Interface for implementing the following YANG RPCs defined in module <b>vlan</b>
- * <br />(Source path: <i>META-INF\yang\vlan.yang</i>):
+ * <br />(Source path: <i>META-INF/yang/vlan.yang</i>):
  * <pre>
  * rpc add-vlan {
  *     "add vlan";

@@ -1,0 +1,103 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <!--This pom is modified from Toaster sample, and then fix some problem with reference to clustering-test-app sample-->
+
+    <parent>
+      <groupId>org.opendaylight.snmp4sdn</groupId>
+      <artifactId>commons.snmp4sdn</artifactId>
+      <version>0.1.3-SNAPSHOT</version>
+      <relativePath>../../commons/snmp4sdn</relativePath>
+    </parent>
+   <!-- <parent>
+      <artifactId>model-parent</artifactId>
+      <groupId>org.opendaylight.controller.model</groupId>
+      <version>1.1-SNAPSHOT</version>
+      <relativePath></relativePath>
+    </parent>-->
+
+    <groupId>org.opendaylight.snmp4sdn</groupId>
+    <artifactId>configmd-model</artifactId>
+    <version>0.1.3-SNAPSHOT</version>
+    <packaging>bundle</packaging>
+    <scm>
+      <connection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</connection>
+      <developerConnection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</developerConnection>
+      <url>https://wiki.opendaylight.org/view/SNMP4SDN:Main</url>
+    </scm>
+
+    <properties>
+      <yangtools.version>0.6.2-SNAPSHOT</yangtools.version><!--s4s. if using earlier version (even 0.6.2), will error: cannot find symbol "org.opendaylight.yangtools.yang.binding.YangModelBindingProvider"-->
+      <bundle.plugin.version>2.4.0</bundle.plugin.version><!--copied from odl-parent-->
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin><!--s4s.copy this <plugin> from clustering-test-app sample-->
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>${bundle.plugin.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-Name>org.opendaylight.snmp4sdn.configmd-model</Bundle-Name>
+                        <Import-Package>*</Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin><!--s4s. there was error when building, "diamond operator is not supported in -source 1.6", so add this <plugin> with 1.7, then solved-->
+              <artifactId>maven-compiler-plugin</artifactId>
+              <configuration>
+                <source>1.7</source>
+                <target>1.7</target>
+              </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>yang-maven-plugin</artifactId>
+                <version>${yangtools.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate-sources</goal>
+                        </goals>
+                        <configuration>
+                            <yangFilesRootDir>src/main/yang</yangFilesRootDir>
+                            <codeGenerators>
+                                <generator>
+                                    <codeGeneratorClass>
+                                        org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
+                                    </codeGeneratorClass>
+                                    <outputBaseDir>
+                                        src/main/yang-gen-sal
+                                    </outputBaseDir>
+                                </generator>
+                            </codeGenerators>
+                            <inspectDependencies>true</inspectDependencies>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.opendaylight.yangtools</groupId>
+                        <artifactId>maven-sal-api-gen-plugin</artifactId>
+                        <version>${yangtools.version}</version>
+                        <type>jar</type>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>yang-binding</artifactId>
+            <version>${yangtools.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>yang-common</artifactId>
+            <version>${yangtools.version}</version>
+        </dependency>
+    </dependencies>
+</project>
