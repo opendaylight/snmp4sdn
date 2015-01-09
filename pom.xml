@@ -15,8 +15,10 @@
     <version>0.1.6-SNAPSHOT</version>
     <relativePath>commons/parent</relativePath>
   </parent>
+
   <artifactId>snmp4sdn_distribution</artifactId>
   <version>0.1.6-SNAPSHOT</version>
+  <name>snmp4sdn</name> <!-- Used by Sonar to set project name -->
   <packaging>pom</packaging>
 
   <scm>
