@@ -32,8 +32,6 @@
     <module>third-party/snmpj</module>
     <module>third-party/expect4j</module>
     <module>mdsal/vlan</module>
-    <module>mdsal/config</module>
-    <module>mdsal/caller/configmanager</module>
     <module>snmp4sdn</module>
     <!--<module>integrationtest</module> //no need to add. run by eclipse junit test-->
     <module>plugin-shell</module>

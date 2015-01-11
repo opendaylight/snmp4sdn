@@ -65,10 +65,6 @@ public class CLIHandler{
         return new Status(StatusCode.INTERNALERROR);
     }
 
-    public Status enableSTP(){
-        return new Status(StatusCode.SUCCESS);
-    }
-
     public Status disableSTP(){
         try{
             logger.trace("disableSTP...");

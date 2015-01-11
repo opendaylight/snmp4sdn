@@ -72,9 +72,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev140815.
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;//md-sal
-import org.osgi.framework.BundleContext;//md-sal
-
 /**
  * Openflow protocol plugin Activator
  *
@@ -83,8 +80,6 @@ import org.osgi.framework.BundleContext;//md-sal
 public class Activator extends ComponentActivatorAbstractBase {
     protected static final Logger logger = LoggerFactory
             .getLogger(Activator.class);
-
-    private ConfigProvider config = new ConfigProvider();//md-sal
 
     /**
      * Function called when the activator starts just after some initializations
@@ -117,15 +112,8 @@ public class Activator extends ComponentActivatorAbstractBase {
          */
         Node.NodeIDType.unRegisterIDType("SNMP");
         NodeConnector.NodeConnectorIDType.unRegisterIDType("SNMP");
-
-        config.close();//md-sal
     }
 
-    @Override
-    public void start(BundleContext arg0) {//md-sal
-        super.start(arg0);
-        config.setContext(arg0);
-    }
 
     /**
      * Function that is used to communicate to dependency manager the list of
@@ -294,7 +282,6 @@ public class Activator extends ComponentActivatorAbstractBase {
                 InventoryServiceShim.class, TopologyServiceShim.class,
                 NodeFactory.class, NodeConnectorFactory.class,//s4s test: add this line
                 VLANService.class,
-                config//md-sal
                 };
         return res;
     }
@@ -312,15 +299,6 @@ public class Activator extends ComponentActivatorAbstractBase {
      */
     @Override
     public void configureGlobalInstance(Component c, Object imp) {
-        if (imp == config) {//md-sal
-            c.add(createServiceDependency().setService(BindingAwareBroker.class)
-                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
-            c.add(createServiceDependency()
-                    .setService(IController.class, "(name=Controller)")
-                    .setCallbacks("setController", "unsetController").setRequired(true));
-            logger.debug("snmp4sdn: Activator: configured  BindingAwareBroker and IController, for ConfigService");
-        }
-
         if (imp.equals(VLANService.class)) {
             //c.setInterface(IPluginInVLANService.class.getName(), null);//ad-sal
             //c.setInterface(IVLANService.class.getName(), null);//no-sal
