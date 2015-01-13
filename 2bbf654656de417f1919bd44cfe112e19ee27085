@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_99d1d759",
+        "filename": "mdsal/config/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 2759
+      },
+      "writtenOn": "2015-01-13T04:23:11Z",
+      "side": 1,
+      "message": "commons.snmp4sdn pom.xml file already declares the same SCM section. Through inheritance this pom file will get the same SCM declaration so there is no need to explicitly state it again unless you want to override and declare a different SCM configuration.\n\nRemoving this would make your pom.xml files a little more maintainable as it would remove configuration that is expected to be inherited.",
+      "revId": "2bbf654656de417f1919bd44cfe112e19ee27085",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
