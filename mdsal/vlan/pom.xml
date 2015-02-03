@@ -4,19 +4,19 @@
     <!--<parent>s4s. copy from clustering-test-app sample's ancancestoresstor
       <groupId>org.opendaylight.odlparent</groupId>
       <artifactId>odlparent</artifactId>
-      <version>1.4.4-Helium-SR2</version>
+      <version>1.4.5-SNAPSHOT</version>
     </parent>-->
 
     <parent>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>commons.snmp4sdn</artifactId>
-      <version>0.1.5-Helium-SR2</version>
+      <version>0.1.6-SNAPSHOT</version>
       <relativePath>../../commons/snmp4sdn</relativePath>
     </parent>
 
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>vlanmd-model</artifactId>
-    <version>0.1.5-Helium-SR2</version>
+    <version>0.1.6-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <scm>
       <connection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</connection>
@@ -25,7 +25,7 @@
     </scm>
 
     <properties>
-      <yangtools.version>0.6.4-Helium-SR2</yangtools.version><!--s4s. if using earlier version (even 0.6.2), will error: cannot find symbol "org.opendaylight.yangtools.yang.binding.YangModelBindingProvider"-->
+      <yangtools.version>0.6.5-SNAPSHOT</yangtools.version><!--s4s. if using earlier version (even 0.6.2), will error: cannot find symbol "org.opendaylight.yangtools.yang.binding.YangModelBindingProvider"-->
       <bundle.plugin.version>2.4.0<!--2.4.0--></bundle.plugin.version><!--copied from odl-parent-->
     </properties>
 
