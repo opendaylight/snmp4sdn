@@ -13,24 +13,24 @@
     <parent>
         <groupId>org.opendaylight.snmp4sdn</groupId>
         <artifactId>commons.snmp4sdn</artifactId>
-        <version>0.1.5-SNAPSHOT</version>
+        <version>0.1.5-Helium-SR2</version>
         <relativePath>../commons/snmp4sdn</relativePath>
     </parent>
 
     <artifactId>features-snmp4sdn</artifactId>
     <groupId>org.opendaylight.snmp4sdn</groupId>
-    <version>0.1.5-SNAPSHOT</version>
+    <version>0.1.5-Helium-SR2</version>
     <packaging>jar</packaging>
 
     <properties>
         <features.file>features.xml</features.file>
-        <branding.version>1.0.2-SNAPSHOT</branding.version>
-        <karaf.resources.version>1.4.4-SNAPSHOT</karaf.resources.version>
+        <branding.version>1.0.2-Helium-SR2</branding.version>
+        <karaf.resources.version>1.4.4-Helium-SR2</karaf.resources.version>
         <karaf.version>3.0.1</karaf.version>
-        <feature.test.version>0.6.4-SNAPSHOT</feature.test.version>
-        <karaf.empty.version>1.4.4-SNAPSHOT</karaf.empty.version>
+        <feature.test.version>0.6.4-Helium-SR2</feature.test.version>
+        <karaf.empty.version>1.4.4-Helium-SR2</karaf.empty.version>
         <surefire.version>2.16</surefire.version>
-        <sal.version>0.8.3-SNAPSHOT</sal.version><!--newly add by snmp4sdn-->
+        <sal.version>0.8.3-Helium-SR2</sal.version><!--newly add by snmp4sdn-->
     </properties>
     <dependencies>
         <dependency>
@@ -87,14 +87,14 @@
         <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>features-yangtools</artifactId>
-          <version>0.6.4-SNAPSHOT</version>
+          <version>0.6.4-Helium-SR2</version>
           <classifier>features</classifier>
           <type>xml</type>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>features-mdsal</artifactId>
-          <version>1.1.2-SNAPSHOT</version>
+          <version>1.1.2-Helium-SR2</version>
           <classifier>features</classifier>
           <type>xml</type>
         </dependency>
