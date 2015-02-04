@@ -1,0 +1,9 @@
+Verified+1: jenkins-snmp4sdn <jenkins-snmp4sdn@opendaylight.org>
+Code-Review+1: Thanh Ha <thanh.ha@linuxfoundation.org>
+Code-Review+2: Yi-Ling Hsieh <ylhsieh@itri.org.tw>
+Verified+1: Yi-Ling Hsieh <ylhsieh@itri.org.tw>
+Submitted-by: Yi-Ling Hsieh <ylhsieh@itri.org.tw>
+Submitted-at: Wed, 04 Feb 2015 05:53:10 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/14749
+Project: snmp4sdn
+Branch: refs/heads/stable/helium
