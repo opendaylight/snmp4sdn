@@ -6,25 +6,33 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
--->
-<features name="odl-snmp4sdn-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+--><!--${project.version} replaced by 0.1.3-SNAPSHOT-->
+<features name="odl-snmp4sdn" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
-   
-    <repository>mvn:org.opendaylight.controller/features-adsal/${sal.version}/xml/features</repository>
-    <repository>mvn:org.opendaylight.yangtools/features-yangtools/0.7.0-SNAPSHOT/xml/features</repository>
-    <repository>mvn:org.opendaylight.controller/features-mdsal/1.2.0-SNAPSHOT/xml/features</repository>
 
-    <feature name='odl-snmp4sdn-all' version='${project.version}' description='OpenDaylight :: SNMP4SDN :: All'>
-        <feature version='${project.version}'>odl-snmp4sdn-snmp4sdn</feature>
+    <repository>mvn:org.opendaylight.controller/features-adsal/0.8.3-Helium-SR2/xml/features</repository><!--${sal.version}-->
+    <repository>mvn:org.opendaylight.controller/features-base/0.4.4-Helium-SR2/xml/features</repository><!--${commons.opendaylight.version}-->
+    <!--<repository>mvn:org.opendaylight.yangtools/features-yangtools/0.6.2-SNAPSHOT/xml/features</repository>-->
+    <repository>mvn:org.opendaylight.controller/features-mdsal/1.1.2-Helium-SR2/xml/features</repository><!--${mdsal.version}-->
+    <repository>mvn:org.opendaylight.controller/features-restconf/1.1.2-Helium-SR2/xml/features</repository><!--${mdsal.version}-->
+    <!--NOT to add snmp4sdn repo, cause recursive loading--><!--<repository>mvn:org.opendaylight.snmp4sdn/features-snmp4sdn/${project.version}/xml/features</repository>-->
+
+    <feature name='odl-snmp4sdn-all' version='0.1.3-SNAPSHOT' description='OpenDaylight :: SNMP4SDN :: All'>
+        <feature version='0.1.3-SNAPSHOT'>odl-snmp4sdn-snmp4sdn</feature>
     </feature>
-    <feature name='odl-snmp4sdn-snmp4sdn' version='${project.version}' description='OpenDaylight :: SNMP4SDN :: Plugin'>
-            <feature version="${sal.version}">odl-adsal-core</feature>
-            <feature version='1.2.0-SNAPSHOT'>odl-mdsal-broker</feature>
-            <feature version='0.7.0-SNAPSHOT'>odl-yangtools-binding</feature>
-            <feature version='0.7.0-SNAPSHOT'>odl-yangtools-models</feature>
-            <bundle>mvn:org.opendaylight.snmp4sdn/snmp4sdn/${project.version}</bundle>
-            <bundle>mvn:org.opendaylight.snmp4sdn/plugin-shell/${project.version}</bundle>
-            <bundle>mvn:org.opendaylight.snmp4sdn/vlanmd-model/${project.version}</bundle>
+    <feature name='odl-snmp4sdn-snmp4sdn' version='0.1.3-SNAPSHOT' description='OpenDaylight :: SNMP4SDN :: Plugin'>
+            <!--these marked are in Helium first release-->
+            <!--<feature version="${sal.version}">odl-adsal-core</feature>
+            <feature version='0.6.2-SNAPSHOT'>odl-yangtools-binding</feature>
+            <feature version='0.6.2-SNAPSHOT'>odl-yangtools-models</feature>
+            <feature version='1.1-SNAPSHOT'>odl-mdsal-broker</feature>-->
+            <feature version='0.8.3-Helium-SR2'>odl-adsal-all</feature><!--${sal.version}-->
+            <feature version='0.4.4-Helium-SR2'>odl-adsal-northbound</feature><!--0.4.2-SNAPSHOT-->
+            <feature version='1.1.2-Helium-SR2'>odl-mdsal-apidocs</feature><!--${mdsal.version}-->
+            <feature version='1.1.2-Helium-SR2'>odl-restconf</feature><!--${mdsal.version}-->
+            <bundle>mvn:org.opendaylight.snmp4sdn/md-model/0.1.3-SNAPSHOT</bundle>
+            <bundle>mvn:org.opendaylight.snmp4sdn/snmp4sdn/0.1.3-SNAPSHOT</bundle>
+            <!--<bundle>mvn:org.opendaylight.snmp4sdn/plugin-shell/${project.version}</bundle>-->
     </feature>
 </features>

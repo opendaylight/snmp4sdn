@@ -38,7 +38,28 @@ public abstract class PortConverter {
     /**
      * Converts the Openflow port number to the equivalent NodeConnector.
      */
-    public static NodeConnector toNodeConnector(short port, Node node) {
+    public static NodeConnector toNodeConnector(/*short ofPort*/short port, Node node) {
+        /*s4s: OF's code
+        // Restore original OF unsigned 16 bits value for the comparison
+        int unsignedOFPort = NetUtils.getUnsignedShort(ofPort);
+        log.trace("Openflow port number signed: {} unsigned: {}", ofPort,
+                unsignedOFPort);
+        if (unsignedOFPort > maxOFPhysicalPort) {
+            if (ofPort == OFPort.OFPP_LOCAL.getValue()) {
+                return NodeConnectorCreator.createNodeConnector(
+                        NodeConnectorIDType.SWSTACK,
+                        NodeConnector.SPECIALNODECONNECTORID, node);
+            } else if (ofPort == OFPort.OFPP_NORMAL.getValue()) {
+                return NodeConnectorCreator.createNodeConnector(
+                        NodeConnectorIDType.HWPATH,
+                        NodeConnector.SPECIALNODECONNECTORID, node);
+            } else if (ofPort == OFPort.OFPP_CONTROLLER.getValue()) {
+                return NodeConnectorCreator.createNodeConnector(
+                        NodeConnectorIDType.CONTROLLER,
+                        NodeConnector.SPECIALNODECONNECTORID, node);
+            }
+        };//s4s -- create SNMP's
+        */
         return NodeConnectorCreator.createNodeConnector("SNMP", port, node);
     }
 

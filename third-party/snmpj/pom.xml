@@ -12,7 +12,7 @@
 
   <groupId>org.opendaylight.snmp4sdn</groupId>
   <artifactId>org.snmpj</artifactId>
-  <version>1.5.0-SNAPSHOT</version>
+  <version>1.5.0-SNAPSHOT</version><!--1.4.7-SNAPSHOT, before post-Helium update-->
   <name>SNMP Java</name>
   <description>A Java implemention of the SNMP protocol</description>
 
@@ -25,12 +25,12 @@
   <url>http://cl.cs.drexel.edu/people/sevy/snmp/</url>
   <packaging>bundle</packaging>
 
-  <scm>
+  <!--<scm>
     <connection>scm:git:https://git.opendaylight.org/gerrit/p/snmp4sdn.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</developerConnection>
-    <url>https://wiki.opendaylight.org/view/SNMP4SDN:Main</url>
     <tag>HEAD</tag>
-  </scm>
+    <url>https://git.opendaylight.org/gerrit/gitweb?p=snmp4sdn.git;a=summary</url>
+  </scm>-->
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

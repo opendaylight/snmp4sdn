@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * Copyright (c) 2013 Industrial Technology Research Institute of Taiwan and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opendaylight.snmp4sdn</groupId>
+    <artifactId>commons.snmp4sdn</artifactId><!--s4s: old value:commons-->
+    <version>0.1.3-SNAPSHOT</version>
+    <relativePath>../commons/snmp4sdn</relativePath><!--s4s: old value:../commons/opendaylight-->
+  </parent>
+
+  <!--<groupId>org.opendaylight.snmp4sdn</groupId>--><!--s4s:new add-->
+  <artifactId>snmp4sdn</artifactId>
+  <version>0.1.3-SNAPSHOT</version>
+  <packaging>bundle</packaging>
+
+  <scm>
+    <connection>scm:git:https://git.opendaylight.org/gerrit/p/snmp4sdn.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</developerConnection>
+    <url>https://wiki.opendaylight.org/view/SNMP4SDN:Main</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.3.6</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>
+              org.opendaylight.controller.sal.packet,
+              org.opendaylight.controller.sal.action,
+              org.opendaylight.controller.sal.discovery,
+              org.opendaylight.controller.sal.topology,
+              org.opendaylight.controller.sal.core,
+              org.opendaylight.controller.sal.flowprogrammer,
+              org.opendaylight.controller.sal.reader,
+              org.opendaylight.controller.sal.inventory,
+              org.opendaylight.controller.sal.match,
+              org.opendaylight.controller.sal.utils,
+              org.apache.commons.lang3.builder,
+              org.apache.commons.lang3.tuple,
+              org.apache.felix.dm,
+              org.slf4j,
+              org.eclipse.osgi.framework.console,
+              org.osgi.framework,
+              javax.net.ssl,
+              java.math,<!--s4s-->
+              java.net<!--s4s-->
+              <!--the following line is needed when expect4j is included in the "Embed-Dependency" section below; otherwise can't build-->
+              
+            </Import-Package>
+            <Export-Package>
+              org.opendaylight.snmp4sdn.internal
+              
+            </Export-Package>
+            <Embed-Dependency>
+              org.openflow.openflowj,
+              org.snmpj
+              ;scope=compile|runtime;inline=true <!--with this line, the jar needed by expect4j would be included in s4s plugin's jar-->
+            </Embed-Dependency>
+            <Embed-Transitive>
+              true
+            </Embed-Transitive>
+            <Bundle-Activator>
+              org.opendaylight.snmp4sdn.internal.Activator
+            </Bundle-Activator>
+          </instructions>
+          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal</artifactId>
+      <version>0.7.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller.thirdparty</groupId>
+      <artifactId>org.openflow.openflowj</artifactId>
+      <version>1.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.snmp4sdn</groupId>
+      <artifactId>org.snmpj</artifactId>
+      <version>1.4.5-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.snmp4sdn</groupId>
+      <artifactId>org.expect4j</artifactId>
+      <version>1.4-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.8.1</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

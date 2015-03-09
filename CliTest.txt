@@ -1,0 +1,10 @@
+peregrinedbh test unitTest_sw35only
+peregrinedbh show nodeIdAndVidToPort
+vlansync go
+s4sarp getentry 158969157061344  192.168.18.1
+vlanDbTable show vcList
+vlanSync showLastDiff
+cfgARP getEntry 158969157061344  192.168.18.1
+aclMgr clearTable 158969157061344
+fdbMgr getEntry 158969157061344 1 90:94:e4:23:0a:e0
+fdbMgr getTable 158969157061344
