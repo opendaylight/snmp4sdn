@@ -32,24 +32,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
-
-import org.opendaylight.snmp4sdn.IKarafCore;//karaf
 import org.opendaylight.snmp4sdn.core.IController;
 import org.opendaylight.snmp4sdn.core.IMessageListener;
 import org.opendaylight.snmp4sdn.core.ISwitch;
 import org.opendaylight.snmp4sdn.core.ISwitchStateListener;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.snmp4sdn.internal.ConfigService;
+//import org.opendaylight.snmp4sdn.internal.ConfigService;
 import org.opendaylight.snmp4sdn.internal.SNMPHandler;
 import org.opendaylight.snmp4sdn.internal.SNMPListener;
+import org.opendaylight.snmp4sdn.internal.VLANService;
+import org.opendaylight.snmp4sdn.ICore;//karaf
+
+//import org.opendaylight.snmp4sdn.VLANTable;//no-sal
+//import org.opendaylight.controller.sal.vlan.VLANTable;//ad-sal
+
 import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
 import org.opendaylight.snmp4sdn.protocol.SNMPMessage;
 import org.opendaylight.snmp4sdn.protocol.SNMPType;
 import org.opendaylight.snmp4sdn.protocol.SNMPPhysicalPort;
 import org.opendaylight.snmp4sdn.protocol.SNMPPortStatus;
 import org.opendaylight.snmp4sdn.protocol.SNMPPortStatus.SNMPPortReason;
-import org.openflow.util.HexString;
+import org.opendaylight.snmp4sdn.protocol.util.HexString;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
@@ -59,9 +63,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.Vector;
 
-public class Controller implements IController, IKarafCore, CommandProvider {
+public class Controller implements IController, ICore, CommandProvider {
     private static final Logger logger = LoggerFactory
             .getLogger(Controller.class);
+    //private ControllerIO controllerIO;//s4s: is replaced by snmpListener
     private SNMPListener snmpListener;//s4s:to replace controllerIO
     private Thread switchEventThread;
     private ConcurrentHashMap<Long, ISwitch> switches;
@@ -73,7 +78,7 @@ public class Controller implements IController, IKarafCore, CommandProvider {
     private AtomicInteger switchInstanceNumber;
     private final int MAXQUEUESIZE = 50000;
     public CmethUtil cmethUtil;//s4s add
-    
+
     /*
      * this thread monitors the switchEvents queue for new incoming events from
      * switch
@@ -81,7 +86,7 @@ public class Controller implements IController, IKarafCore, CommandProvider {
     private class EventHandler implements Runnable {
         @Override
         public void run() {
-            logger.debug("Controller.EventHandler start running");
+            logger.trace("Controller.EventHandler start running");
             while (true) {
                 try {
                     SwitchEvent ev = switchEvents.take();
@@ -143,16 +148,19 @@ public class Controller implements IController, IKarafCore, CommandProvider {
         this.messageListeners = new ConcurrentHashMap<SNMPType, IMessageListener>();
         this.switchStateListener = null;
         this.switchInstanceNumber = new AtomicInteger(0);
-        registerWithOSGIConsole();//s4s. in unit test, doesn't need. but need it when system test
+        registerWithOSGIConsole();//s4s. in junit test, doesn't need. but need it when system test
+        cmethUtil = new CmethUtil();
+        cmethUtil.init();
     }
     public void init_forTest() {//s4s. same content as init(), but the last line is canceled
-        logger.info("Controller: Initializing!");
+        logger.info("snmp4sdn's Controller: Initializing! (for junit test)");
         this.switches = new ConcurrentHashMap<Long, ISwitch>();
         this.switchEvents = new LinkedBlockingQueue<SwitchEvent>(MAXQUEUESIZE);
         this.messageListeners = new ConcurrentHashMap<SNMPType, IMessageListener>();
         this.switchStateListener = null;
         this.switchInstanceNumber = new AtomicInteger(0);
-        //registerWithOSGIConsole();//s4s. in unit test, doesn't need. but need it when system test
+        //registerWithOSGIConsole();//s4s. in junit test, doesn't need. but need it when system test
+        cmethUtil = new CmethUtil();
     }
 
     /**
@@ -168,12 +176,21 @@ public class Controller implements IController, IKarafCore, CommandProvider {
         switchEventThread = new Thread(new EventHandler(), "SwitchEvent Thread");
         switchEventThread.start();
 
+        // spawn a thread to start to listen on the open flow port
+        /*controllerIO = new ControllerIO(this);
+        try {
+            controllerIO.start();
+        } catch (IOException ex) {
+            logger.error("Caught exception while starting:", ex);
+        }*///s4s. ControllerIO.java shows it just in charge of holding the socket. We don't need socket
         //s4s
-        cmethUtil = new CmethUtil();
+
         snmpListener = new SNMPListener(this, cmethUtil);
         snmpListener.start();
 
-        topologyDiscover();//s4s: get switches from CmethUtil (i.e. a file), then for each of the switches, read their LLDP, and resolve all these LLDP data, then form the topology of the switches and their ports
+        //junit test
+        //topologyDiscover();//s4s: get switches from CmethUtil (i.e. a file), then for each of the switches, read their LLDP, and resolve all these LLDP data, then form the topology of the switches and their ports
+
     }
 
     /**
@@ -191,6 +208,12 @@ public class Controller implements IController, IKarafCore, CommandProvider {
         }
         switchEventThread.interrupt();
         snmpListener.stopListening();
+
+        /*try {
+            controllerIO.shutDown();
+        } catch (IOException ex) {
+            logger.error("Caught exception while stopping:", ex);
+        }*///s4s: controllerIO is abandonded in s4s
     }
 
     /**
@@ -241,25 +264,41 @@ public class Controller implements IController, IKarafCore, CommandProvider {
         }
     }
 
-    public void handleNewConnection(Long sid) {
-        int i = this.switchInstanceNumber.addAndGet(1);
-        String instanceName = "SwitchHandler-" + i;
-        SwitchHandler switchHandler = new SwitchHandler(this, /*sc,*///s4s:OF's need
-                instanceName);
-        switchHandler.setId(sid);
-        switchHandler.start();
-        logger.info("Switch({}) try to connected to the Controller", HexString.toHexString(sid));
+    public ISwitch handleNewConnection(/*Selector selector,//s4s:OF's need
+            SelectionKey serverSelectionKey*/Long sid) {//s4s: in OF, this function is called in ControllerIO, now in s4s it is called in SNMPListener
+        //ServerSocketChannel ssc = (ServerSocketChannel) serverSelectionKey.channel();//s4s:OF's need
+        //SocketChannel sc = null;//s4s:OF's need
+        //try {//s4s: OF's
+            //sc = ssc.accept();//s4s:OF's need
+            // create new switch
+            int i = this.switchInstanceNumber.addAndGet(1);
+            String instanceName = "SwitchHandler-" + i;
+            SwitchHandler switchHandler = new SwitchHandler(this, /*sc,*///s4s:OF's need
+                    instanceName);
+            switchHandler.setId(sid);
+            switchHandler.start();
+            /*if (sc.isConnected()) {
+                logger.info("Switch:{} is connected to the Controller",
+                        sc.socket().getRemoteSocketAddress()
+                        .toString().split("/")[1]);
+            }*///s4s:OF's
+            logger.info("Add switch({}) to the Controller", HexString.toHexString(sid));
 
-        takeSwitchEventAdd(switchHandler);//s4s: in OF, this function is called in SwitchHandler, now we put it here directly
-        
+            takeSwitchEventAdd(switchHandler);//s4s: in OF, this function is called in SwitchHandler, now we put it here directly
+            return switchHandler;
+        /*} catch (IOException e) {
+            return;
+        }*///s4s: OF's
     }
 
     private void disconnectSwitch(ISwitch sw) {
-        Long sid = sw.getId();
-        if (this.switches.remove(sid, sw)) {
-            logger.info("switch {} is Disconnected", HexString.toHexString(sid));
-            notifySwitchDeleted(sw);
-        }
+        //if (((SwitchHandler) sw).isOperational()) {//s4s: no need to check isOperational
+            Long sid = sw.getId();
+            if (this.switches.remove(sid, sw)) {
+                logger.info("switch {} is Disconnected", HexString.toHexString(sid));
+                notifySwitchDeleted(sw);
+            }
+        //}//s4s: no need to check isOperational
         ((SwitchHandler) sw).stop();
         sw = null;
     }
@@ -322,11 +361,6 @@ public class Controller implements IController, IKarafCore, CommandProvider {
         return this.switches.get(switchId);
     }
 
-    @Override
-    public CmethUtil getCmethUtil(){
-        return cmethUtil;
-    }
-
     @Override//karaf
     public void readDB(String filepath){
         cmethUtil.readDB(filepath);
@@ -336,8 +370,22 @@ public class Controller implements IController, IKarafCore, CommandProvider {
     @Override//karaf
     public void topoDiscover(){
         topologyDiscover();
-        System.out.println("\nTopology discovery done");
     }
+
+    /*@Override//karaf
+    public void addVLANSetPorts(String sw_mac, String vlanID, String vlanName, String portList){
+        s4sAddVLANandSetPorts(sw_mac, vlanID, vlanName, portList);
+    }
+
+    @Override//karaf
+    public void deleteVLAN(String sw_mac, String vlanID){   
+        s4sDeleteVLAN_execute(sw_mac, vlanID);
+    }
+
+    @Override//karaf
+    public void printVLANTable(String sw_mac){
+        s4sPrintVLANTable_execute(sw_mac);
+    }*/
 
     public void _controllerShowSwitches(CommandInterpreter ci) {
         Set<Long> sids = switches.keySet();
@@ -414,19 +462,35 @@ public class Controller implements IController, IKarafCore, CommandProvider {
                 Thread.sleep(2000);
         }catch(Exception e){;}
 
-        ConcurrentMap<Long, Vector> entries = cmethUtil.getEntries();
+        ConcurrentMap<Long, Vector> entries = cmethUtil.getEntries();//TODO: query DB instead
         for(ConcurrentMap.Entry<Long, Vector> entry : entries.entrySet()){
             Long sid = entry.getKey();
             handleAddingSwitchAndItsPorts(sid);
         }
+
+        //topologyDiscoverEdges();
+    }
+
+    private void topologyDiscoverEdges(){
+        logger.debug("\n\nBegin Topology resoving by retrieving LLDP data from switches\n\n");
+        switchStateListener.doTopoDiscover();
+        logger.debug("\n\nFinish Topology resoving by retrieving LLDP data from switches\n\n");
     }
 
     public void _s4sTopoDiscover(CommandInterpreter ci){
         topologyDiscover();
     }
 
+    public void _s4sTopoDiscoverEdges(CommandInterpreter ci){
+        topologyDiscoverEdges();
+    }
+
     private void handleAddingSwitchAndItsPorts(Long sid){
-        handleAddingSwitch(sid);
+        ISwitch sw = handleAddingSwitch(sid);
+        if(sw == null){
+            logger.debug("handleAddingSwitch(sid:{}) fails, so skip to proceed scanAndAddPort(sid:{})", sid, sid);
+            return;
+        }
         while(this.switches.get(sid) == null){
             logger.trace("snmp4sdn-controller.handleAddingSwitch({}) not yet done", sid);
             try{
@@ -440,13 +504,24 @@ public class Controller implements IController, IKarafCore, CommandProvider {
     private ISwitch handleAddingSwitch(Long sid){
         ISwitch sw = switches.get(sid);
         if(sw != null){
-            logger.info("--> switch (ip: {}, sid: {}) already join in controller",  cmethUtil.getIpAddr(sid), HexString.toHexString(sid));
+            logger.debug("In Controller.handleAddingSwitch(), switch (ip: {}, sid: {}) is already added in controller",  cmethUtil.getIpAddr(sid), HexString.toHexString(sid));
         }
         else{
-            logger.info("--> a new switch (ip: {}, sid: {}) join in controller", cmethUtil.getIpAddr(sid), HexString.toHexString(sid));
-            handleNewConnection(sid);
+            //logger.debug("In Controller.handleAddingSwitch(), try to add a new switch (ip: {}, sid: {}) to controller", cmethUtil.getIpAddr(sid), HexString.toHexString(sid));
+            if(!checkNodeExists(sid)){
+                logger.debug("ERROR: The node {} does not exists in network (decided by we can't read its LLDP chassis)", sid);
+                return null;
+            }
+            sw = handleNewConnection(sid);
         }
         return sw;
+    }
+
+    private boolean checkNodeExists(Long sid){
+        String chassis = (new SNMPHandler(cmethUtil)).getLLDPChassis(sid);
+        if(chassis == null)
+            return false;
+        return true;
     }
 
     private void scanAndAddPort(Long sid){
@@ -479,6 +554,12 @@ public class Controller implements IController, IKarafCore, CommandProvider {
         ((SwitchHandler)sw).handleMessages(portStatus);
     }
 
+    /*public void _s4sTestCLI(CommandInterpreter ci){
+        System.out.println("enter _s4sTestCLI 1");
+        new ConfigService().TestCLI();
+        System.out.println("enter _s4sTestCLI 2");
+    }*/
+
     @Override
     public String getHelp() {
         StringBuffer help = new StringBuffer();
@@ -494,4 +575,7 @@ public class Controller implements IController, IKarafCore, CommandProvider {
         switches.put(sid, sw);
     }
 
+    public CmethUtil getCmethUtil(){//s4s add. just for convenient for test, actually we don't need this function
+        return cmethUtil;
+    }
 }
