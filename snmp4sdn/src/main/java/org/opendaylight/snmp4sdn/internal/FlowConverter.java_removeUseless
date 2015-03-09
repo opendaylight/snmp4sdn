@@ -1,0 +1,231 @@
+/*
+ * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+
+package org.opendaylight.snmp4sdn.internal;
+
+import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6FlowMod;
+import org.opendaylight.controller.protocol_plugin.openflow.vendorextension.v6extension.V6Match;
+import org.opendaylight.controller.sal.action.Action;
+import org.opendaylight.controller.sal.action.ActionType;
+import org.opendaylight.controller.sal.action.Controller;
+import org.opendaylight.controller.sal.action.Drop;
+import org.opendaylight.controller.sal.action.Enqueue;
+import org.opendaylight.controller.sal.action.Flood;
+import org.opendaylight.controller.sal.action.FloodAll;
+import org.opendaylight.controller.sal.action.HwPath;
+import org.opendaylight.controller.sal.action.Loopback;
+import org.opendaylight.controller.sal.action.Output;
+import org.opendaylight.controller.sal.action.PopVlan;
+import org.opendaylight.controller.sal.action.SetDlDst;
+import org.opendaylight.controller.sal.action.SetDlSrc;
+import org.opendaylight.controller.sal.action.SetNwDst;
+import org.opendaylight.controller.sal.action.SetNwSrc;
+import org.opendaylight.controller.sal.action.SetNwTos;
+import org.opendaylight.controller.sal.action.SetTpDst;
+import org.opendaylight.controller.sal.action.SetTpSrc;
+import org.opendaylight.controller.sal.action.SetVlanId;
+import org.opendaylight.controller.sal.action.SetVlanPcp;
+import org.opendaylight.controller.sal.action.SwPath;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.flowprogrammer.Flow;
+import org.opendaylight.controller.sal.match.Match;
+import org.opendaylight.controller.sal.match.MatchField;
+import org.opendaylight.controller.sal.match.MatchType;
+import org.opendaylight.controller.sal.utils.NetUtils;
+import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
+/*import org.openflow.protocol.OFFlowMod;
+import org.openflow.protocol.OFMatch;
+import org.openflow.protocol.OFMessage;
+import org.openflow.protocol.OFPacketOut;
+import org.openflow.protocol.OFPort;
+import org.openflow.protocol.OFVendor;
+import org.openflow.protocol.action.OFAction;
+import org.openflow.protocol.action.OFActionDataLayer;
+import org.openflow.protocol.action.OFActionDataLayerDestination;
+import org.openflow.protocol.action.OFActionDataLayerSource;
+import org.openflow.protocol.action.OFActionNetworkLayerAddress;
+import org.openflow.protocol.action.OFActionNetworkLayerDestination;
+import org.openflow.protocol.action.OFActionNetworkLayerSource;
+import org.openflow.protocol.action.OFActionNetworkTypeOfService;
+import org.openflow.protocol.action.OFActionOutput;
+import org.openflow.protocol.action.OFActionStripVirtualLan;
+import org.openflow.protocol.action.OFActionTransportLayer;
+import org.openflow.protocol.action.OFActionTransportLayerDestination;
+import org.openflow.protocol.action.OFActionTransportLayerSource;
+import org.openflow.protocol.action.OFActionVirtualLanIdentifier;
+import org.openflow.protocol.action.OFActionVirtualLanPriorityCodePoint;
+import org.openflow.util.U16;
+import org.openflow.util.U32;*/
+
+import org.opendaylight.snmp4sdn.protocol.SNMPFlowMod;//s4s add
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+/**
+ * Utility class for converting a SAL Flow into the OF flow and vice-versa
+ */
+public class FlowConverter {
+    protected static final Logger logger = LoggerFactory
+            .getLogger(FlowConverter.class);
+
+    /*
+     * The value 0xffff (OFP_VLAN_NONE) is used to indicate
+     * that no VLAN ID is set for OF Flow.
+     */
+    private static final short OFP_VLAN_NONE = (short) 0xffff;
+
+    private Flow flow; // SAL Flow
+    private OFMatch ofMatch; // OF 1.0 match or OF 1.0 + IPv6 extension match
+    private List<OFAction> actionsList; // OF 1.0 actions
+    private int actionsLength;
+    private boolean isIPv6;
+
+    public FlowConverter(OFMatch ofMatch, List<OFAction> actionsList) {
+        this.ofMatch = ofMatch;
+        this.actionsList = actionsList;
+        this.actionsLength = 0;
+        this.flow = null;
+        this.isIPv6 = ofMatch instanceof V6Match;
+    }
+
+    public FlowConverter(Flow flow) {
+        this.ofMatch = null;
+        this.actionsList = null;
+        this.actionsLength = 0;
+        this.flow = flow;
+        this.isIPv6 = flow.isIPv6();
+    }
+
+    /**
+     * Returns the match in OF 1.0 (OFMatch) form or OF 1.0 + IPv6 extensions
+     * form (V6Match)
+     *
+     * @return
+     */
+    //public OFMatch getOFMatch() {
+        //s4s. content removed
+    //}
+
+    /**
+     * Returns the list of actions in OF 1.0 form
+     *
+     * @return
+     */
+    //public List<OFAction> getOFActions() {
+        //s4s. content removed
+    //}
+
+    /**
+     * Utility to convert a SAL flow to an OF 1.0 (OFFlowMod) or to an OF 1.0 +
+     * IPv6 extension (V6FlowMod) Flow modifier Message
+     *
+     * @param sw
+     * @param command
+     * @param port
+     * @return
+     */
+    public SNMPMessage getSNMPFlowMod(short command, OFPort port) {
+        SNMPMessage fm = (isIPv6) ? new V6FlowMod() : new SNMPFlowMod();
+        if (this.ofMatch == null) {
+            getOFMatch();
+        }
+        if (this.actionsList == null) {
+            getOFActions();
+        }
+        if (!isIPv6) {
+            ((SNMPFlowMod) fm).setMatch(this.ofMatch);
+            ((SNMPFlowMod) fm).setActions(this.actionsList);
+            ((SNMPFlowMod) fm).setPriority(flow.getPriority());
+            ((SNMPFlowMod) fm).setCookie(flow.getId());
+            ((SNMPFlowMod) fm).setBufferId(OFPacketOut.BUFFER_ID_NONE);
+            ((SNMPFlowMod) fm).setLength(U16.t(SNMPFlowMod.MINIMUM_LENGTH
+                    + actionsLength));
+            ((SNMPFlowMod) fm).setIdleTimeout(flow.getIdleTimeout());
+            ((SNMPFlowMod) fm).setHardTimeout(flow.getHardTimeout());
+            ((SNMPFlowMod) fm).setCommand(command);
+            if (port != null) {
+                ((SNMPFlowMod) fm).setOutPort(port);
+            }
+            if (command == SNMPFlowMod.SNMPFC_ADD || command == SNMPFlowMod.SNMPFC_MODIFY
+                    || command == SNMPFlowMod.SNMPFC_MODIFY_STRICT) {
+                // Instruct switch to let controller know when flow is removed
+                ((SNMPFlowMod) fm).setFlags((short) 1);
+            }
+        } else {
+            ((V6FlowMod) fm).setVendor();
+            ((V6FlowMod) fm).setMatch((V6Match) ofMatch);
+            ((V6FlowMod) fm).setActions(this.actionsList);
+            ((V6FlowMod) fm).setPriority(flow.getPriority());
+            ((V6FlowMod) fm).setCookie(flow.getId());
+            ((V6FlowMod) fm).setLength(U16.t(OFVendor.MINIMUM_LENGTH
+                    + ((V6Match) ofMatch).getIPv6ExtMinHdrLen()
+                    + ((V6Match) ofMatch).getIPv6MatchLen()
+                    + ((V6Match) ofMatch).getPadSize() + actionsLength));
+            ((V6FlowMod) fm).setIdleTimeout(flow.getIdleTimeout());
+            ((V6FlowMod) fm).setHardTimeout(flow.getHardTimeout());
+            ((V6FlowMod) fm).setCommand(command);
+            if (port != null) {
+                ((V6FlowMod) fm).setOutPort(port);
+            }
+            if (command == SNMPFlowMod.SNMPFC_ADD || command == SNMPFlowMod.SNMPFC_MODIFY
+                    || command == SNMPFlowMod.SNMPFC_MODIFY_STRICT) {
+                // Instruct switch to let controller know when flow is removed
+                ((V6FlowMod) fm).setFlags((short) 1);
+            }
+        }
+        logger.trace("Openflow Match: {} Openflow Actions: {}", ofMatch,
+                actionsList);
+        logger.trace("Openflow Mod Message: {}", fm);
+        return fm;
+    }
+
+    //public Flow getFlow(Node node) {
+        //s4s. content removed
+    //}
+
+    private static final Map<Integer, Class<? extends Action>> actionMap = new HashMap<Integer, Class<? extends Action>>() {
+        private static final long serialVersionUID = 1L;
+        {
+            put(1 << 0, Output.class);
+            put(1 << 1, SetVlanId.class);
+            put(1 << 2, SetVlanPcp.class);
+            put(1 << 3, PopVlan.class);
+            put(1 << 4, SetDlSrc.class);
+            put(1 << 5, SetDlDst.class);
+            put(1 << 6, SetNwSrc.class);
+            put(1 << 7, SetNwDst.class);
+            put(1 << 8, SetNwTos.class);
+            put(1 << 9, SetTpSrc.class);
+            put(1 << 10, SetTpDst.class);
+            put(1 << 11, Enqueue.class);
+        }
+    };
+
+    /**
+     * Returns the supported flow actions for the netwrok node given the bitmask
+     * representing the actions the Openflow 1.0 switch supports
+     *
+     * @param ofActionBitmask
+     *            OF 1.0 action bitmask
+     * @return The correspondent list of SAL Action classes
+     */
+    //public static List<Class<? extends Action>> getFlowActions(int ofActionBitmask) {
+        //s4s. content removed
+    //}
+}
