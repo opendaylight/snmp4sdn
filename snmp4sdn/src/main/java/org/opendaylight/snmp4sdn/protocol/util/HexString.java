@@ -12,7 +12,6 @@ This code reused the code of OpenFlow Java package. The authors' efforts are app
 
 package org.opendaylight.snmp4sdn.protocol.util;
 
-
 import java.math.BigInteger;
 
 public class HexString {

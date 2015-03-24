@@ -28,9 +28,7 @@ import org.opendaylight.controller.protocol_plugin.openflow.ITopologyServiceShim
 import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
 import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
 import org.opendaylight.controller.protocol_plugin.openflow.core.internal.Controller;*/
-    import org.opendaylight.snmp4sdn.IKarafCore;//karaf
-    import org.opendaylight.snmp4sdn.IKarafFlowProgrammerService;//karaf
-    import org.opendaylight.snmp4sdn.IKarafVLANService;//karaf
+    import org.opendaylight.snmp4sdn.ICore;//karaf
     import org.opendaylight.snmp4sdn.IDataPacketListen;
     import org.opendaylight.snmp4sdn.IDataPacketMux;
     import org.opendaylight.snmp4sdn.IDiscoveryListener;
@@ -67,20 +65,35 @@ import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.INodeConnectorFactory;//s4s test
 import org.opendaylight.controller.sal.utils.INodeFactory;//s4s test
 //import org.opendaylight.controller.sal.vlan.IPluginInVLANService;//s4s//ad-sal
-import org.opendaylight.snmp4sdn.IVLANService;//no-sal
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev140815.VlanService;//md-sal
+//import org.opendaylight.snmp4sdn.IConfigService;//no-sal
+//import org.opendaylight.snmp4sdn.IVLANService;//no-sal
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;//md-sal
+import org.osgi.framework.BundleContext;//md-sal
+
 /**
- * Openflow protocol plugin Activator
+ * SNMP4SDN plugin Activator
  *
  *
  */
-public class Activator extends ComponentActivatorAbstractBase {
+
+ /* ==== NOTE =====
+ * VLAN Service has two instances in current Activator code: VLANService.class and VlanProvider.
+ * Remaining VLANService.class is just for compatible with earlier code in Helium. 
+ * After md-sal vlan is completely ready, VLANService.class part would be removed.
+ */
+ 
+public class Activator extends ComponentActivatorAbstractBase/*, AbstractBindingAwareProvidermd-sal*/ {
     protected static final Logger logger = LoggerFactory
             .getLogger(Activator.class);
 
+    private ConfigProvider config = new ConfigProvider();//md-sal
+    private FdbProvider fdb = new FdbProvider();//md-sal
+    private AclProvider acl = new AclProvider();//md-sal
+    private VlanProvider vlan = new VlanProvider();//md-sal//vlanmd
+ 
     /**
      * Function called when the activator starts just after some initializations
      * are done by the ComponentActivatorAbstractBase.
@@ -112,8 +125,21 @@ public class Activator extends ComponentActivatorAbstractBase {
          */
         Node.NodeIDType.unRegisterIDType("SNMP");
         NodeConnector.NodeConnectorIDType.unRegisterIDType("SNMP");
+
+        config.close();//md-sal
+        fdb.close();//md-sal
+        acl.close();//md-sal
+        vlan.close();//md-sal//vlanmd
     }
 
+    @Override
+    public void start(BundleContext arg0) {//md-sal
+        super.start(arg0);
+        config.setContext(arg0);
+        fdb.setContext(arg0);
+        acl.setContext(arg0);
+        vlan.setContext(arg0);//vlanmd
+    }
 
     /**
      * Function that is used to communicate to dependency manager the list of
@@ -128,7 +154,9 @@ public class Activator extends ComponentActivatorAbstractBase {
     public Object[] getImplementations() {
         Object[] res = { TopologyServices.class, DataPacketServices.class,
                 InventoryService.class, ReadService.class,
-                FlowProgrammerNotifier.class};
+                FlowProgrammerNotifier.class,
+                VLANService.class
+                };
         return res;
     }
 
@@ -263,6 +291,15 @@ public class Activator extends ComponentActivatorAbstractBase {
                             "unsetIPluginOutConnectionService")
                     .setRequired(true));*///s4s cs
         }
+        if (imp.equals(VLANService.class)) {
+            //c.setInterface(IPluginInVLANService.class.getName(), null);//ad-sal
+            //c.setInterface(IVLANService.class.getName(), null);//no-sal
+
+            c.add(createServiceDependency()
+                    .setService(IController.class)
+                    .setCallbacks("setController", "unsetController")
+                    .setRequired(true));
+        }
     }
 
     /**
@@ -281,7 +318,11 @@ public class Activator extends ComponentActivatorAbstractBase {
                 DiscoveryService.class, DataPacketMuxDemux.class, InventoryService.class,
                 InventoryServiceShim.class, TopologyServiceShim.class,
                 NodeFactory.class, NodeConnectorFactory.class,//s4s test: add this line
-                VLANService.class,
+                //ConfigService.class,//ad-sal or no-sal
+                config,//md-sal
+                fdb,//md-sal
+                acl,//md-sal
+                vlan//md-sal//vlanmd
                 };
         return res;
     }
@@ -299,35 +340,51 @@ public class Activator extends ComponentActivatorAbstractBase {
      */
     @Override
     public void configureGlobalInstance(Component c, Object imp) {
-        if (imp.equals(VLANService.class)) {
-            //c.setInterface(IPluginInVLANService.class.getName(), null);//ad-sal
-            //c.setInterface(IVLANService.class.getName(), null);//no-sal
-            c.setInterface(VlanService.class.getName(), null);//md-sal
-            c.setInterface(IKarafVLANService.class.getName(), null);//karaf
-            /*c.setInterface(new String[] 
-                                    { VlanService.class.getName(),//md-sal
-                                        //IVLANService.class.getName(), //no-sal
-                                        IKarafVLANService.class.getName()
-                                    }
-                                , null);*/
+        logger.debug("snmp4sdn: Activator configureGlobalInstance( ) is called");
+
+        //md-sal (the following two item)
+        if (imp == config) {
+            c.add(createServiceDependency().setService(BindingAwareBroker.class)
+                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
-                    .setCallbacks("setController", "unsetController")
-                    .setRequired(true));//karaf: don't enable this code, otherwise will error due to mutual dependency between VLANService and Controller
+                    .setCallbacks("setController", "unsetController").setRequired(true));
+            logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and IController, for ConfigService");
         }
+        if (imp == fdb) {
+            c.add(createServiceDependency().setService(BindingAwareBroker.class)
+                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(IController.class, "(name=Controller)")
+                    .setCallbacks("setController", "unsetController").setRequired(true));
+            logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and IController, for FdbService");
+        }
+        if (imp == acl) {
+            c.add(createServiceDependency().setService(BindingAwareBroker.class)
+                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(IController.class, "(name=Controller)")
+                    .setCallbacks("setController", "unsetController").setRequired(true));
+            logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and IController, for AclService");
+        }
+        if (imp == vlan) {//vlanmd
+            c.add(createServiceDependency().setService(BindingAwareBroker.class)
+                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(IController.class, "(name=Controller)")
+                    .setCallbacks("setController", "unsetController").setRequired(true));
+            logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and IController, for VlanService");
+        }
+
         if (imp.equals(Controller.class)) {
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             props.put("name", "Controller");
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), /*Node.NodeIDType.OPENFLOW*/"SNMP");
             c.setInterface(new String[] { IController.class.getName(),
                                           /*IPluginInConnectionService.class.getName()*///s4s cs
-                                          IKarafCore.class.getName()//karaf
+                                          ICore.class.getName()//karaf
                                           },
                                           props);
-            /*c.add(createServiceDependency()
-                    .setService(IVLANService.class)
-                    .setCallbacks("setVLANService", "unsetVLANService")
-                    .setRequired(true));//karaf temp design*/
         }
 
         if (imp.equals(FlowProgrammerService.class)) {
@@ -339,7 +396,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.setInterface(
                     new String[] { IPluginInFlowProgrammerService.class.getName(), /*IMessageListener.class.getName(),*/
                             IContainerListener.class.getName(), IInventoryShimExternalListener.class.getName(),
-                            IContainerAware.class.getName(), IKarafFlowProgrammerService.class.getName() }, props);
+                            IContainerAware.class.getName() }, props);
 
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
@@ -510,7 +567,7 @@ public class Activator extends ComponentActivatorAbstractBase {
             c.setInterface(new String[] { IDiscoveryListener.class.getName(), IContainerListener.class.getName(),
                     IRefreshInternalProvider.class.getName(), IInventoryShimExternalListener.class.getName(),
                     IContainerAware.class.getName() }, null);
-          c.add(createServiceDependency()
+            c.add(createServiceDependency()
                     .setService(ITopologyServiceShimListener.class)
                     .setCallbacks("setTopologyServiceShimListener",
                             "unsetTopologyServiceShimListener")
@@ -539,5 +596,40 @@ public class Activator extends ComponentActivatorAbstractBase {
             props.put("protocolName", "SNMP");
             c.setInterface(INodeConnectorFactory.class.getName(), props);
         }
+        /*if (imp.equals(ConfigService.class)) {//for ad-sal or no-sal
+            //c.setInterface(new String[] { IConfigService.class.getName() }, null);
+
+            c.add(createServiceDependency()
+                    .setService(IController.class, "(name=Controller)")
+                    .setCallbacks("setController", "unsetController")
+                    .setRequired(true));
+        }*/
     }
+
+    //Following are for md-sal
+
+    /*VLANService vlanService;
+
+    public Activator() {
+        vlanService = new VLANService();
+    }
+
+    @Override
+    public Collection<? extends RpcService> getImplementations() {
+        return null;
+    }
+
+    @Override
+    public Collection<? extends ProviderFunctionality> getFunctionality() {
+        return null;
+    }
+
+    @Override
+    public void onSessionInitiated(ProviderContext session) {
+        session.addRpcImplementation(VLANService.class, vlanService);
+    }
+
+    @Override
+    protected void startImpl(BundleContext context) {
+    }*/
 }

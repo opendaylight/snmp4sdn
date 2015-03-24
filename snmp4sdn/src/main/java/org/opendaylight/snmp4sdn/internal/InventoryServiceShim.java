@@ -220,23 +220,30 @@ public class InventoryServiceShim implements IContainerListener,
             return;
         }
 
-    boolean isTrapMechnismCancled = true;//s4s: if true, trap mechanism is cancled
-    if(isTrapMechnismCancled){//s4s:directly do what the "notifyInventoryShimListener()-->notifyInventoryShimExternalListener()" at the else section below will do.
-        for (IInventoryShimExternalListener s : this.inventoryShimExternalListeners) {
-            //logger.trace("new port event: InventoryServiceShim.notifyInventoryShimExternalListener(), then now call to DiscoveryService.doEthSwDiscovery()");
-            if(s.getClass().getName().equals(DiscoveryService.class.getName()))
-                ((DiscoveryService)s).doEthSwDiscovery();
+        boolean solveEdgeListInconsistency = true;
+        if(solveEdgeListInconsistency){
+            // Add this node
+            addNode(sw);
+            return;
         }
-    }
-    else{
-        // Add all the nodeConnectors of this switch
-        Map<NodeConnector, Set<Property>> ncProps = InventoryServiceHelper
-                .SNMPSwitchToProps(sw);
-        for (Map.Entry<NodeConnector, Set<Property>> entry : ncProps.entrySet()) {
-            notifyInventoryShimListener(entry.getKey(), UpdateType.ADDED,
-                    entry.getValue());
+
+        boolean isTrapMechnismCancled = true;//s4s: if true, trap mechanism is cancled
+        if(isTrapMechnismCancled){//s4s:directly do what the "notifyInventoryShimListener()-->notifyInventoryShimExternalListener()" at the else section below will do.
+            for (IInventoryShimExternalListener s : this.inventoryShimExternalListeners) {
+                //logger.trace("new port event: InventoryServiceShim.notifyInventoryShimExternalListener(), then now call to DiscoveryService.doEthSwDiscovery()");
+                if(s.getClass().getName().equals(DiscoveryService.class.getName()))
+                    ((DiscoveryService)s).doEthSwDiscovery();
+            }
         }
-    }
+        else{
+            // Add all the nodeConnectors of this switch
+            Map<NodeConnector, Set<Property>> ncProps = InventoryServiceHelper
+                    .SNMPSwitchToProps(sw);
+            for (Map.Entry<NodeConnector, Set<Property>> entry : ncProps.entrySet()) {
+                notifyInventoryShimListener(entry.getKey(), UpdateType.ADDED,
+                        entry.getValue());
+            }
+        }
 
         // Add this node
         addNode(sw);
@@ -446,8 +453,8 @@ public class InventoryServiceShim implements IContainerListener,
             props.add(c);
         }
         int act = sw.getActions();
-        //Actions a = new Actions(act);
-        SupportedFlowActions a = new SupportedFlowActions(getFlowActions(act));//replace the previous line with this line, to adpat to certain changes for information validation in ODL. Note that "getFlowActions(act)" should be "FlowConverter.getFlowActions(act)", FlowConverter is not ready currently
+        //Actions a = new Actions(act);//s4s
+        SupportedFlowActions a = new SupportedFlowActions(getFlowActions(act));//s4s:replace the previous line with this line, to adpat to certain changes for information validation in ODL. Note that "getFlowActions(act)" should be "FlowConverter.getFlowActions(act)", FlowConverter is not ready currently
         if (a != null) {
             props.add(a);
         }
@@ -553,7 +560,7 @@ public class InventoryServiceShim implements IContainerListener,
         }*///s4s IContainerAware
     }
 
-    //copy from FlowConverter.java, and disable some code as those marked
+    //s4s:copy from FlowConverter.java, and disable some code as those marked
     public static List<Class<? extends Action>> getFlowActions(int ofActionBitmask) {
         List<Class<? extends Action>> list = new ArrayList<Class<? extends Action>>();
 
@@ -574,6 +581,14 @@ public class InventoryServiceShim implements IContainerListener,
         list.add(Output.class);//s4s: newly add
 
         return list;
+    }
+
+    public void doTopoDiscover(){
+        for (IInventoryShimExternalListener s : this.inventoryShimExternalListeners) {
+            //logger.trace("new port event: InventoryServiceShim.notifyInventoryShimExternalListener(), then now call to DiscoveryService.doEthSwDiscovery()");
+            if(s.getClass().getName().equals(DiscoveryService.class.getName()))
+                ((DiscoveryService)s).doEthSwDiscovery();
+        }
     }
 
 }

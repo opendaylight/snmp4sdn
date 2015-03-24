@@ -1,0 +1,132 @@
+module fdb {
+    yang-version 1;
+
+    namespace "urn:opendaylight:snmp4sdn:md:fdb";
+    prefix config;
+
+    import snmp4sdn-types {prefix types;}
+    //import types;
+
+    organization "Industrial Technology Research Institute of Taiwan";
+    contact "Yi-Ling Hsieh <ylhsieh@itri.org.tw>";
+
+    description "YANG version of the SNMP4SDN FDB Service MIB.";
+
+    revision "2015-01-26" {//TODO: update date
+        description
+            "SNMP4SDN FDB Service";
+    }
+
+    /*typedef result{//has defined 'typedef result' in other yang (snmp4sdn-types)
+        type enumeration{
+            enum "SUCCESS" {
+                value 1;
+            }
+            enum "FAIL" {
+                value 2;
+            }
+            enum "EMPTY" {
+                value 3;
+            }
+            enum "INVALID_PARAM" {
+                value 4;
+            }
+            enum "ALREADY_EXIST" {
+                value 5;
+            }
+            enum "NOT_EXIST" {
+                value 6;
+            }
+            enum "NOT_READY" {
+                value 7;
+            }
+            enum "INTERRUPT" {
+                value 8;
+             }
+        }
+    }*/
+
+    grouping fdb-entry {
+        leaf node-id {
+            type int64;
+        }
+        leaf dest-mac-addr {
+            type int64;
+        }
+        leaf vlan-id {
+            type int32;
+        }
+        leaf port {
+            type int16;
+        }
+    }
+
+    rpc set-fdb-entry {
+        description
+            "Set FDB entry";
+        input {
+            uses fdb-entry;
+        }
+        output {
+            leaf set-fdb-entry-result{
+                type types:result;
+            }
+        }
+    } //rpc set-fdb-entry
+
+    rpc del-fdb-entry {
+        description
+            "Delete FDB entry";
+        input {
+            leaf node-id {
+                type int64;
+            }
+            leaf dest-mac-addr {
+                type int64;
+            }
+            leaf vlan-id {
+                type int32;
+            }
+        }
+        output {
+            leaf del-fdb-entry-result{
+                type types:result;
+            }
+        }
+    } //rpc del-fdb-entry
+
+    rpc get-fdb-entry {
+        description
+            "Get FDB entry";
+        input {
+            leaf node-id {
+                type int64;
+            }
+            leaf dest-mac-addr {
+                type int64;
+            }
+            leaf vlan-id {
+                type int32;
+            }
+        }
+        output {
+            uses fdb-entry;
+        }
+    } //rpc get-fdb-entry
+
+    rpc get-fdb-table {
+        description
+            "Get FDB table";
+        input {
+            leaf node-id {
+              type int64;
+            }
+        }
+        output {
+            list fdb-table-entry{
+                uses fdb-entry;
+            }
+        }
+    } //rpc get-fdb-table
+
+  }  // module fdb
