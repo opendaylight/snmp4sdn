@@ -1,0 +1,35 @@
+
+/*
+ * This file defines error types.
+ */
+
+package org.opendaylight.snmp4sdn;
+
+public enum SNMP4SDNErrorCode {
+    SUCCESS,
+    FAIL,
+    EMPTY,
+    INVALID_PARAM,
+    ALREADY_EXIST,
+    NOT_EXIST,
+    NOT_READY,
+    INTERRUPT
+    /*SUCCESS("Success"),
+    FAIL("Fail"),
+    EMPTY("Empty"),
+    INVALID_PARAM("Invlid parameter"),
+    ALREADY_EXIST("Already exist"),
+    NOT_EXIST("Not exist"),
+    NOT_READY("Not ready"),
+    INTERRUPT("Interrupt")
+    */
+    /*S4S_ERR_CODE_SUCCESS,
+    S4S_ERR_CODE_FAIL,
+    S4S_ERR_CODE_EMPTY,
+    S4S_ERR_CODE_INVALID_PARAM,
+    S4S_ERR_CODE_ALREADY_EXIST,
+    S4S_ERR_CODE_NOT_EXIST,
+    S4S_ERR_CODE_NOT_READY,
+    S4S_ERR_CODE_INTERRUPT*/
+}
+

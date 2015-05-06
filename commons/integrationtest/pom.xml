@@ -12,18 +12,19 @@
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.snmp4sdn</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version><!--0.1.0-SNAPSHOT, before post-Helium update-->
     <relativePath>../snmp4sdn</relativePath>
   </parent>
 
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</connection>
+  <!--<scm>
+    <connection>scm:git:https://git.opendaylight.org/gerrit/p/snmp4sdn.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</developerConnection>
-    <url>https://wiki.opendaylight.org/view/SNMP4SDN:Main</url>
-  </scm>
+    <tag>HEAD</tag>
+    <url>https://git.opendaylight.org/gerrit/gitweb?p=snmp4sdn.git;a=summary</url>
+  </scm>-->
 
   <artifactId>commons.integrationtest</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.1.0-SNAPSHOT</version><!--0.0.1-SNAPSHOT, before post-Helium update-->
   <packaging>pom</packaging>
 
   <dependencies>
@@ -69,6 +70,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <version>${surefire.version}</version>
         <configuration>
           <skipTests>true</skipTests>
         </configuration>
@@ -94,7 +96,7 @@
           <dependency>
             <groupId>org.opendaylight.snmp4sdn</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
+            <version>0.1.0-SNAPSHOT</version><!--0.1.0-SNAPSHOT, before post-Helium update-->
           </dependency>
          </dependencies>
         <configuration>

@@ -139,7 +139,7 @@ public class TopologyServiceShim implements IDiscoveryListener,
                         }
                     }
 
-                    Thread.sleep(100);
+                    Thread.sleep(100);//TODO: just memo :) this thread queue the list of edge update to TopologyServices to SAL. May change the interval time with this sleep()
                 } catch (InterruptedException e1) {
                     logger.warn("TopologyNotify interrupted {}",
                             e1.getMessage());
@@ -490,7 +490,7 @@ public class TopologyServiceShim implements IDiscoveryListener,
             break;
         default:
             logger.debug(
-                    "notifyLocalEdgeMap: invalid {} for Edge {} in container {}",
+                    "ERROR: notifyLocalEdgeMap: invalid {} for Edge {} in container {}",
                     new Object[] { type.getName(), edge, container });
         }
 
@@ -743,16 +743,16 @@ public class TopologyServiceShim implements IDiscoveryListener,
     private void TopologyBulkUpdate(String containerName) {
         Map<NodeConnector, Pair<Edge, Set<Property>>> edgePropMap = null;
 
-        logger.debug("Try bulk update for container:{}", containerName);
+        logger.debug("TopologyBulkUpdate(): Try bulk update for container:{}", containerName);
         edgePropMap = edgeMap.get(containerName);
         if (edgePropMap == null) {
-            logger.debug("No edges known for container:{}", containerName);
+            logger.debug("WARNING: TopologyBulkUpdate(): No edges known for container:{}", containerName);
             return;
         }
         ITopologyServiceShimListener topologServiceShimListener = topologyServiceShimListeners
                 .get(containerName);
         if (topologServiceShimListener == null) {
-            logger.debug("No topology service shim listener for container:{}",
+            logger.debug("ERROR: TopologyBulkUpdate(): No topology service shim listener for container:{}",
                     containerName);
             return;
         }
@@ -769,7 +769,7 @@ public class TopologyServiceShim implements IDiscoveryListener,
         if (i > 0) {
             topologServiceShimListener.edgeUpdate(teuList);
         }
-        logger.debug("Sent {} updates", i);
+        logger.debug("TopologyBulkUpdate(): Sent {} updates", i);
     }
 
     @Override

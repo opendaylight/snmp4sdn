@@ -723,5 +723,7 @@ public class Expect4j {
     public void close() {
         logger.debug("Stopping processing of the reader/writer streams by the Expect4j instance" + this);
         consumer.stop();
+        logger.debug("Stopping the StreamPair, in which disconnect the TelnetClient" + this);
+        pair.close();
     }
 }

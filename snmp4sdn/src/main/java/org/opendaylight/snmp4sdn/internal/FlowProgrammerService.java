@@ -15,8 +15,6 @@ package org.opendaylight.snmp4sdn.internal;//s4s
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,13 +26,11 @@ import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Output;
-import org.opendaylight.snmp4sdn.IKarafFlowProgrammerService;//karaf
 import org.opendaylight.snmp4sdn.IFlowProgrammerNotifier;//s4s
 import org.opendaylight.snmp4sdn.IInventoryShimExternalListener;//s4s
 import org.opendaylight.snmp4sdn.core.IController;//s4s
 //import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;//s4s //receive()
 import org.opendaylight.snmp4sdn.core.ISwitch;//s4s
-import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.ContainerFlow;
 import org.opendaylight.controller.sal.core.IContainerAware;
 import org.opendaylight.controller.sal.core.IContainerListener;
@@ -48,7 +44,6 @@ import org.opendaylight.controller.sal.flowprogrammer.IPluginInFlowProgrammerSer
 import org.opendaylight.controller.sal.match.Match;
 import org.opendaylight.controller.sal.match.MatchField;
 import org.opendaylight.controller.sal.match.MatchType;
-import org.opendaylight.controller.sal.utils.EtherTypes;
 import org.opendaylight.controller.sal.utils.HexEncode;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
@@ -80,7 +75,7 @@ import org.opendaylight.snmp4sdn.internal.SNMPHandler;//s4s add
  */
 public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         /*IMessageListener,*/ IContainerListener, IInventoryShimExternalListener,//s4s actully IInventoryShimExternalListener seems useless
-        CommandProvider, IContainerAware, IKarafFlowProgrammerService {
+        CommandProvider, IContainerAware {
     private static final Logger log = LoggerFactory
             .getLogger(FlowProgrammerService.class);
     private IController controller;
@@ -173,41 +168,41 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
 
     @Override
     public Status addFlow(Node node, Flow flow) {
-        log.info("enter FlowProgrammerService.addFlow()");
+        log.trace("enter FlowProgrammerService.addFlow()");
         return addFlowInternal(node, flow, 0);//OF's
         //return my_modifyFlow(node, flow, 3); //s4s. modType 3 is type of 3, means "learned"
     }
 
     @Override
     public Status modifyFlow(Node node, Flow oldFlow, Flow newFlow) {
-        log.info("enter FlowProgrammerService.modifyFlow()");
+        log.trace("enter FlowProgrammerService.modifyFlow()");
         return modifyFlowInternal(node, oldFlow, newFlow, 0);
         //return my_modifyFlow(node, flow, 3); //s4s. modType 3 is type of 3, means "learned"
     }
 
     @Override
     public Status removeFlow(Node node, Flow flow) {
-        log.info("enter FlowProgrammerService.removeFlow()");
+        log.trace("enter FlowProgrammerService.removeFlow()");
         return removeFlowInternal(node, flow, 0);
         //return my_modifyFlow(node, flow, 2); //s4s. modType 2 is type of 2, means "invalid(delete)"
     }
 
     @Override
     public Status addFlowAsync(Node node, Flow flow, long rid) {
-        log.info("enter FlowProgrammerService.addFlowAsync()");
+        log.trace("enter FlowProgrammerService.addFlowAsync()");
         return addFlowInternal(node, flow, rid);//s4s
         //return new Status(StatusCode.SUCCESS);
     }
 
     @Override
     public Status modifyFlowAsync(Node node, Flow oldFlow, Flow newFlow, long rid) {
-        log.info("enter FlowProgrammerService.modifyFlowAsync()");
+        log.trace("enter FlowProgrammerService.modifyFlowAsync()");
         return modifyFlowInternal(node, oldFlow, newFlow, rid);
     }
 
     @Override
     public Status removeFlowAsync(Node node, Flow flow, long rid) {
-        log.info("enter FlowProgrammerService.removeFlowAsync()");
+        log.trace("enter FlowProgrammerService.removeFlowAsync()");
         return removeFlowInternal(node, flow, rid);
     }
 
@@ -222,7 +217,9 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         if (controller != null) {
             ISwitch sw = controller.getSwitch((Long) node.getID());
             if (sw != null) {
-                SNMPMessage msg = new SNMPFlowMod(SNMPFlowMod.ETHPFC_ADD, flow.clone());//s4s
+                /*FlowConverter x = new FlowConverter(flow);
+                OFMessage msg = x.getOFFlowMod(OFFlowMod.OFPFC_ADD, null);*///s4s. OF's code
+                SNMPMessage msg = new SNMPFlowMod(SNMPFlowMod.SNMPFC_ADD, flow.clone());//s4s
                 msg.setTargetSwitchID((Long) node.getID());//s4s
 
                 Object result;
@@ -266,74 +263,64 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         if (controller != null) {
             ISwitch sw = controller.getSwitch((Long) node.getID());
             if (sw != null) {
-                /* //OF's code require Flow converted to OFMessage; similarly, snmp4sdn use SNMPMessage
-                OFMessage msg1 = null, msg2 = null;
+                /*OFMessage*/SNMPMessage msg1 = null, msg2 = null;
 
                 // If priority and match portion are the same, send a
                 // modification message
-                if (oldFlow.getPriority() != newFlow.getPriority()
-                        || !oldFlow.getMatch().equals(newFlow.getMatch())) {
-                    msg1 = new FlowConverter(oldFlow).getOFFlowMod(
+                if (/*oldFlow.getPriority() != newFlow.getPriority() //s4s. OF msg has priority, Eth's doesn't
+                        ||*/ !oldFlow.getMatch().equals(newFlow.getMatch())) {
+                    /*msg1 = new FlowConverter(oldFlow).getOFFlowMod(
                             OFFlowMod.OFPFC_DELETE_STRICT, OFPort.OFPP_NONE);
                     msg2 = new FlowConverter(newFlow).getOFFlowMod(
-                            OFFlowMod.OFPFC_ADD, null);
+                            OFFlowMod.OFPFC_ADD, null);*///s4s. OF's code
+                    msg1 = new SNMPFlowMod(SNMPFlowMod.SNMPFC_DELETE_STRICT, oldFlow.clone());//s4s
+                    msg2 = new SNMPFlowMod(SNMPFlowMod.SNMPFC_ADD, newFlow.clone());//s4s
                 } else {
-                    msg1 = new FlowConverter(newFlow).getOFFlowMod(
-                            OFFlowMod.OFPFC_MODIFY_STRICT, null);
+                    /*msg1 = new FlowConverter(newFlow).getOFFlowMod(
+                            SNMPFlowMod.SNMPFC_MODIFY_STRICT, null);*///s4s. OF's code
+                    msg1 = new SNMPFlowMod(SNMPFlowMod.SNMPFC_MODIFY_STRICT, newFlow.clone());//s4s
                 }
-                */
-
-                //s4s's work, similar to OF's work: 'check data correctness' and 'type convertion'
-                if(!checkSameSrcDest(oldFlow, newFlow)){
-                    return new Status(StatusCode.NOTACCEPTABLE, errorString("send", action,
-                            "Inconsistency of oldFlow and newFlow (src/dest mac inconsistent), or flow's action OUTPUT port not set"));
-                }
-                //SNMPMessage msg1 = null, msg2 = null;//s4s. msg2 is useless in cmeth's code
-                SNMPMessage msg1 = new SNMPFlowMod(SNMPFlowMod.ETHPFC_MODIFY, newFlow.clone());//s4s
-                msg1.setTargetSwitchID((Long) node.getID());//s4s
-
-                // *
-                // * Synchronous message send
-                // * /
-                //action = (msg2 == null) ? "modify" : "delete";//s4s. OF's code
+                /*
+                 * Synchronous message send
+                 */
+                action = (msg2 == null) ? "modify" : "delete";
                 Object result;
                 if (rid == 0) {
-                    //*
-                    // * Synchronous message send. Each message is followed by a
-                    // * Barrier message.
-                    // * /
+                    /*
+                     * Synchronous message send. Each message is followed by a
+                     * Barrier message.
+                     */
                     result = sw.syncSend(msg1);
                 } else {
-                    // *
-                    // * Message will be sent asynchronously. A Barrier message
-                    // * will be inserted automatically to synchronize the
-                    // * progression.
-                    // * /
+                    /*
+                     * Message will be sent asynchronously. A Barrier message
+                     * will be inserted automatically to synchronize the
+                     * progression.
+                     */
                     result = asyncMsgSend(node, sw, msg1, rid);
                 }
 
                 Status rv = getStatusInternal(result, action, rid);
-                if (/*(msg2 == null) || */!rv.isSuccess()) {
+                if ((msg2 == null) || !rv.isSuccess()) {
                     return rv;
                 }
 
-                /* //s4s. OF's code
                 action = "add";
                 if (rid == 0) {
-                    // *
-                    // * Synchronous message send. Each message is followed by a
-                    // * Barrier message.
-                    // * /
+                    /*
+                     * Synchronous message send. Each message is followed by a
+                     * Barrier message.
+                     */
                     result = sw.syncSend(msg2);
                 } else {
-                    // *
-                    // * Message will be sent asynchronously. A Barrier message
-                    // * will be inserted automatically to synchronize the
-                    // * progression.
-                    // * /
-                    result = asyncMsgSend(node, sw, msg2, rid);
+                    /*
+                     * Message will be sent asynchronously. A Barrier message
+                     * will be inserted automatically to synchronize the
+                     * progression.
+                     */
+                    //result = asyncMsgSend(node, sw, msg2, rid);//s4s. OF's
+                    return new Status(StatusCode.UNSUPPORTED, "modifyFlow() with parameter \"rid\" as 1 is not supported in snmp4sdn");
                 }
-                */
                 return getStatusInternal(result, action, rid);
             } else {
                 return new Status(StatusCode.GONE, errorString("send", action,
@@ -357,7 +344,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
             if (sw != null) {
                 /*OFMessage msg = new FlowConverter(flow).getOFFlowMod(
                         OFFlowMod.OFPFC_DELETE_STRICT, OFPort.OFPP_NONE);*///s4s. OF's code
-                SNMPMessage msg = new SNMPFlowMod(SNMPFlowMod.ETHPFC_DELETE, flow.clone());//s4s
+                SNMPMessage msg = new SNMPFlowMod(SNMPFlowMod.SNMPFC_DELETE_STRICT, flow.clone());//s4s
                 msg.setTargetSwitchID((Long) node.getID());//s4s
 
                 Object result;
@@ -782,141 +769,6 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
                 null);
     }
 
-/*********For Karaf/OSGi CLI commands*********/
-
-    private static Node createSNMPNode(long switchId) {
-        try {
-            return new Node("SNMP", new Long(switchId));
-        } catch (ConstructionException e1) {
-            log.error("",e1);
-            return null;
-        }
-    }
-
-    private static NodeConnector createSNMPNodeConnector(short portId, Node node) {
-        if (node.getType().equals("SNMP")) {
-            try {
-                return new NodeConnector("SNMP",
-                        new Short(portId), node);
-            } catch (ConstructionException e1) {
-                log.error("",e1);
-                return null;
-            }
-        }
-        return null;
-    }
-
-    private static Flow createFlow(Long nodeId, short vlanId, String dstMacStr, short outport){
-        byte dstMac[] = HexString.fromHexString(dstMacStr);
-        short ethertype = EtherTypes.IPv4.shortValue();
-        short vlan = vlanId;
-
-        Match match = new Match();
-        match.setField(MatchType.DL_DST, dstMac);
-        match.setField(MatchType.DL_VLAN, vlan);
-        match.setField(MatchType.DL_TYPE, ethertype);
-        
-        Node node = createSNMPNode(nodeId);
-        NodeConnector oport = createSNMPNodeConnector(outport, node);
-        
-        List<Action> actions = new ArrayList<Action>();
-        actions.add(new Output(oport));
-        Flow flow = new Flow(match, actions);
-        
-        return flow;
-    }
-    
-    private Status s4sAddFlow_execute(String switch_mac, String vlanIdStr, String dstMacStr, String portNumStr){
-        Long nodeId;
-        try{
-            nodeId = HexString.toLong(switch_mac);
-        }catch(Exception e1){
-            return new Status(StatusCode.NOTACCEPTABLE, "Invalid switch mac " + switch_mac + ": " + e1);
-        }
-
-        Short vlanID;
-        try{
-            vlanID = Short.valueOf(vlanIdStr);
-        }catch(Exception e1){
-            return new Status(StatusCode.NOTACCEPTABLE, "Invalid VLAN ID " + vlanIdStr + ": " + e1);
-        }
-        short vlanId = vlanID.shortValue();
-
-        Short portNum;
-        try{
-            portNum = Short.valueOf(portNumStr);
-        }catch(Exception e1){
-            return new Status(StatusCode.NOTACCEPTABLE, "Invalid port number " + portNumStr + ": " + e1);
-        }
-        short port = portNum.shortValue();
-
-        Node node = createSNMPNode(nodeId);
-        Flow flow = createFlow(nodeId, vlanId, dstMacStr, portNum);
-        return addFlow(node, flow);
-    }
-
-    private Status s4sDeleteFlow_execute(String switch_mac, String vlanIdStr, String dstMacStr, String portNumStr){
-        Long nodeId;
-        try{
-            nodeId = HexString.toLong(switch_mac);
-        }catch(Exception e1){
-            return new Status(StatusCode.NOTACCEPTABLE, "Invalid switch mac " + switch_mac + ": " + e1);
-        }
-
-        Short vlanID;
-        try{
-            vlanID = Short.valueOf(vlanIdStr);
-        }catch(Exception e1){
-            return new Status(StatusCode.NOTACCEPTABLE, "Invalid VLAN ID " + vlanIdStr + ": " + e1);
-        }
-        short vlanId = vlanID.shortValue();
-
-        Short portNum;
-        try{
-            portNum = Short.valueOf(portNumStr);
-        }catch(Exception e1){
-            return new Status(StatusCode.NOTACCEPTABLE, "Invalid port number " + portNumStr + ": " + e1);
-        }
-        short port = portNum.shortValue();
-
-        Node node = createSNMPNode(nodeId);
-        Flow flow = createFlow(nodeId, vlanId, dstMacStr, portNum);
-        return removeFlow(node, flow);
-    }
-
-    public Status _s4sAddFlow(CommandInterpreter ci){
-        //TODO: format check
-        String switch_mac = ci.nextArgument();
-        String vlanIdStr = ci.nextArgument();
-        String dstMacStr = ci.nextArgument();
-        String portNumStr = ci.nextArgument();
-
-        return s4sAddFlow_execute(switch_mac, vlanIdStr, dstMacStr, portNumStr); 
-    }
-
-    public Status _s4sDeleteFlow(CommandInterpreter ci){
-        //TODO: format check
-        String switch_mac = ci.nextArgument();
-        String vlanIdStr = ci.nextArgument();
-        String dstMacStr = ci.nextArgument();
-        String portNumStr = ci.nextArgument();
-
-        return s4sDeleteFlow_execute(switch_mac, vlanIdStr, dstMacStr, portNumStr); 
-    }
-
-    @Override //karaf
-    public Status krfAddFlow(String switch_mac, String vlanIdStr, String dstMacStr, String portNumStr){
-        return s4sAddFlow_execute(switch_mac, vlanIdStr, dstMacStr, portNumStr); 
-    }
-
-    @Override //karaf
-    public Status krfDeleteFlow(String switch_mac, String vlanIdStr, String dstMacStr, String portNumStr){
-        return s4sDeleteFlow_execute(switch_mac, vlanIdStr, dstMacStr, portNumStr); 
-    }
-
-/*********end of Karaf/OSGi CLI commands*********/
-
-    
 ///* //s4s mark 13
     @Override
     public String getHelp() {
@@ -927,44 +779,6 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
         return help.toString();
     }
 //*/ //end of mark 13
-
-    public void _px2r(CommandInterpreter ci) {//s4s. OF's code, seems should delete
-        String st = ci.nextArgument();
-        if (st == null) {
-            ci.println("Please enter a valid node id");
-            return;
-        }
-
-        long sid;
-        try {
-            sid = HexEncode.stringToLong(st);
-        } catch (NumberFormatException e) {
-            ci.println("Please enter a valid node id");
-            return;
-        }
-
-        Map<Integer, Long> swxid2rid = this.xid2rid.get(sid);
-        if (swxid2rid == null) {
-            ci.println("The node id entered does not exist");
-            return;
-        }
-
-        ci.println("xid             rid");
-
-        Set<Integer> xidSet = swxid2rid.keySet();
-        if (xidSet == null) {
-            return;
-        }
-
-        for (Integer xid : xidSet) {
-            ci.println(xid + "       " + swxid2rid.get(xid));
-        }
-    }
-
-    public void _px2rc(CommandInterpreter ci) {//s4s. OF's code, seems should delete
-        ci.println("Max num of async messages sent prior to the Barrier message is "
-                + barrierMessagePriorCount);
-    }
 
     private boolean checkSameSrcDest(Flow flow1, Flow flow2){
         //for flow 1....
@@ -1011,6 +825,26 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
             return true;
         else
             return false;
+    }
+
+    public void _testAddFlow(CommandInterpreter ci) {//s4s. OF's code, seems should delete
+        String str = ci.nextArgument();
+        String generateType;
+        int nodeNum = 1;
+        if (str == null) {
+            ci.println("usage: testAddFlow <db|rand> [number of tests]");
+            return;
+        }
+        generateType = new String(str);
+        str = ci.nextArgument();
+        if(str != null)
+            nodeNum = Integer.parseInt(ci.nextArgument());
+        if(generateType.equals("db")){//generate nodes from database
+        }
+        else if(str.equals("rand")){//generate random nodes
+        }
+        for(int i = 0; i < nodeNum; i++){
+        }
     }
 
     @Override
