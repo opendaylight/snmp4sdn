@@ -34,7 +34,7 @@ public class FlowProgrammerNotifier implements IFlowProgrammerNotifier {
     }
 
     void init(Component c) {
-        logger.debug("INIT called!");
+        logger.debug("FlowProgrammerNotifier: INIT called!");
     }
 
     /**
@@ -44,7 +44,7 @@ public class FlowProgrammerNotifier implements IFlowProgrammerNotifier {
      *
      */
     void destroy() {
-        logger.debug("DESTROY called!");
+        logger.debug("FlowProgrammerNotifier: DESTROY called!");
     }
 
     /**
@@ -53,7 +53,7 @@ public class FlowProgrammerNotifier implements IFlowProgrammerNotifier {
      *
      */
     void start() {
-        logger.debug("START called!");
+        logger.debug("FlowProgrammerNotifier: START called!");
     }
 
     /**
@@ -63,7 +63,7 @@ public class FlowProgrammerNotifier implements IFlowProgrammerNotifier {
      *
      */
     void stop() {
-        logger.debug("STOP called!");
+        logger.debug("FlowProgrammerNotifier: STOP called!");
     }
 
     public void setPluginOutFlowProgrammerService(

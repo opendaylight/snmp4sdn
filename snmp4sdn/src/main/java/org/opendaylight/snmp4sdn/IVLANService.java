@@ -11,15 +11,15 @@ package org.opendaylight.snmp4sdn;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.sal.utils.StatusCode;
-import org.opendaylight.snmp4sdn.VLANTable;
+//import org.opendaylight.controller.sal.vlan.VLANTable;//ad-sal
+import org.opendaylight.snmp4sdn.VLANTable;//no-sal
 
 import java.util.List;
 
 /**
  * Interface that defines the methods to be implemented by vendors for configration
  */
-public interface IVLANService {
+public interface IVLANService {//TODO: if with AD-SAL or MD-SAL, this interface should be defined some other where, not in snmp4sdn's own code
 
     /**
      * Add a VLAN to a switch
@@ -27,7 +27,7 @@ public interface IVLANService {
      * @param XXX
      *            XXX
      */
-    public Status addVLAN(Node node, Long vlanID);
+    //public Status addVLAN(Node node, Integer vlanID);
 
 
     /**
@@ -36,7 +36,7 @@ public interface IVLANService {
      * @param XXX
      *            XXX
      */
-    public Status addVLAN(Node node, Long vlanID, String vlanName);
+    public Status addVLAN(Node node, Integer vlanID, String vlanName);
 
 
     /**
@@ -45,12 +45,12 @@ public interface IVLANService {
      * @param XXX
      *            XXX
      */
-    public Status setVLANPorts (Node node, Long vlanID, List<NodeConnector> nodeConns);
+    public Status setVLANPorts (Node node, Integer vlanID, List<NodeConnector> nodeConns);
 
 
-    public Status deleteVLAN(Node node, Long vlanID);
+    public Status deleteVLAN(Node node, Integer vlanID);
 
-    public List<NodeConnector> getVLANPorts(Node node, Long vlanID);
+    public List<NodeConnector> getVLANPorts(Node node, Integer vlanID);
 
     public VLANTable getVLANTable(Node node);
 

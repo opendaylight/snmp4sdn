@@ -110,11 +110,11 @@ public class SNMPListener implements SNMPv2TrapListener, Runnable{
 
     @Override
     public void processv2Trap(SNMPv2TrapPDU pdu, String communityName, InetAddress agentIPAddress){
-        logger.info("Got v2 trap:");
-        logger.info("  sender IP address: {}", agentIPAddress.getHostAddress());
-        logger.info("  community name:  {}", communityName);
+        logger.debug("Got v2 trap:");
+        logger.debug("  sender IP address: {}", agentIPAddress.getHostAddress());
+        logger.debug("  community name:  {}", communityName);
         logger.debug("  system uptime:      {}", pdu.getSysUptime().toString());
-        logger.info("  trap OID:              {}", pdu.getSNMPTrapOID().toString());
+        logger.debug("  trap OID:              {}", pdu.getSNMPTrapOID().toString());
         logger.debug("  var bind list:         {}", pdu.getVarBindList().toString());
         
         String switchIP = agentIPAddress.getHostAddress();
