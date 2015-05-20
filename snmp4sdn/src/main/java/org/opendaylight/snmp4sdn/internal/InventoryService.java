@@ -83,11 +83,15 @@ public class InventoryService implements IInventoryShimInternalListener,
         Dictionary props = c.getServiceProperties();
         if (props != null) {
             containerName = (String) props.get("containerName");
-            if(containerName != null)
-                isDefaultContainer = containerName.equals(GlobalConstants.DEFAULT
+            isDefaultContainer = containerName.equals(GlobalConstants.DEFAULT
                     .toString());
         }
 
+        nodeProps = new ConcurrentHashMap<Node, Map<String, Property>>();
+        nodeConnectorProps = new ConcurrentHashMap<NodeConnector, Map<String, Property>>();
+    }
+
+    void init_forTest(){//just for junit test. require the two line below such that program can go normally
         nodeProps = new ConcurrentHashMap<Node, Map<String, Property>>();
         nodeConnectorProps = new ConcurrentHashMap<NodeConnector, Map<String, Property>>();
     }
@@ -217,8 +221,10 @@ public class InventoryService implements IInventoryShimInternalListener,
         // update sal and discovery
         synchronized (pluginOutInventoryServices) {
             for (IPluginOutInventoryService service : pluginOutInventoryServices) {
-                //logger.trace("new port event-- InventoryService.updateNodeConnector() now inform SAL [node {}({}), port {}({}), type {}]", (Long)nodeConnector.getNode().getID(), nodeConnector.getNode().getType(), nodeConnector.getID(), nodeConnector.getType(), type.getName());
-                //logger.trace("\tthe SAL service's name: {}", service.getClass().getName());
+                /*logger.debug("updateNodeConnector(): report nodeConnector update to SAL");
+                logger.debug("updateNodeConnector(): nodeConnector: {}", nodeConnector);
+                logger.debug("updateNodeConnector(): type: {}", type.getName());*/
+                //logger.debug("updateNode(): properties: {}", props);
                 service.updateNodeConnector(nodeConnector, type, props);
             }
         }
@@ -309,6 +315,9 @@ public class InventoryService implements IInventoryShimInternalListener,
         if (!newProperties.isEmpty()) {
             synchronized (pluginOutInventoryServices) {
                 for (IPluginOutInventoryService service : pluginOutInventoryServices) {
+                    logger.debug("updateNode(): report node update to SAL");
+                    logger.debug("updateNode(): node: {}", node);
+                    logger.debug("updateNode(): properties: {}", properties);
                     service.updateNode(node, UpdateType.CHANGED, newProperties);
                 }
             }

@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-//import org.openflow.protocol.OFMessage;
+import org.openflow.protocol.OFMessage;
 import org.opendaylight.snmp4sdn.protocol.SNMPPhysicalPort;
 import org.openflow.protocol.OFStatisticsRequest;
 
@@ -89,7 +89,7 @@ public interface ISwitch {
      *            The OF message to be sent
      * @return The XID used
      */
-    public Integer asyncSend(SNMPMessage msg);
+    public Integer asyncSend(/*OFMessage*/SNMPMessage msg);
 
     /**
      * This method puts the message in an outgoing priority queue with normal
@@ -103,7 +103,7 @@ public interface ISwitch {
      *            The XID to be used in the message
      * @return The XID used
      */
-    public Integer asyncSend(SNMPMessage msg, int xid);
+    public Integer asyncSend(/*OFMessage*/SNMPMessage msg, int xid);
 
     /**
      * This method puts the message in an outgoing priority queue with high
@@ -116,7 +116,7 @@ public interface ISwitch {
      *            The OF message to be sent
      * @return The XID used
      */
-    public Integer asyncFastSend(SNMPMessage msg);
+    public Integer asyncFastSend(/*OFMessage*/SNMPMessage msg);
 
     /**
      * This method puts the message in an outgoing priority queue with high
@@ -128,7 +128,7 @@ public interface ISwitch {
      *            The OF message to be sent
      * @return The XID used
      */
-    public Integer asyncFastSend(SNMPMessage msg, int xid);
+    public Integer asyncFastSend(/*OFMessage*/SNMPMessage msg, int xid);
 
     /**
      * Sends the OF message followed by a Barrier Request with a unique XID
@@ -144,7 +144,7 @@ public interface ISwitch {
      *         indicate that the message has been denied by the switch which
      *         responded with OFError.
      */
-    public Object syncSend(SNMPMessage msg);
+    public Object syncSend(/*OFMessage*/SNMPMessage msg);
 
     /**
      * Returns a map containing all SNMPPhysicalPorts of this switch.
