@@ -16,6 +16,8 @@ import java.util.List;
 
 import org.openflow.protocol.OFMessage;
 
+import org.opendaylight.controller.sal.utils.Status;//s4s add
+
 import org.opendaylight.snmp4sdn.protocol.SNMPMessage;//s4s add
 
 
@@ -32,7 +34,8 @@ public interface IMessageReadWrite {
          * @param msg OF message to be sent
          * @throws Exception
          */
-        public void asyncSend(/*OFMessage msg*/SNMPMessage msg) throws Exception;
+        //public void asyncSend(OFMessage msg) throws Exception;//s4s. OF's
+        public Status asyncSend(SNMPMessage msg) throws Exception;//s4s
 
         /**
          * Resumes sending the remaining messages in the outgoing buffer

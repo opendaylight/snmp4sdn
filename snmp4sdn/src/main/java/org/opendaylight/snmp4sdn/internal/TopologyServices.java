@@ -131,6 +131,8 @@ public class TopologyServices implements ITopologyServiceShimListener,
     @Override
     public void edgeUpdate(List<TopoEdgeUpdate> topoedgeupdateList) {
         if (this.salTopoService != null) {
+            logger.debug("edgeUpdate(): report edge list to SAL");
+            logger.debug("edgeUpdate(): edge list: " + "\n" + edgeListToString(topoedgeupdateList));
             this.salTopoService.edgeUpdate(topoedgeupdateList);
         }
     }
@@ -153,5 +155,13 @@ public class TopologyServices implements ITopologyServiceShimListener,
         if (this.salTopoService != null) {
             this.salTopoService.edgeUtilBackToNormal(edge);
         }
+    }
+
+    private String edgeListToString(List<TopoEdgeUpdate> topoedgeupdateList){
+        String str = "";
+        for(TopoEdgeUpdate edgeUpd : topoedgeupdateList){
+            str += edgeUpd.getEdge().toString() + "\n";
+        }
+        return str;
     }
 }

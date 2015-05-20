@@ -6,25 +6,41 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  *
--->
-<features name="odl-snmp4sdn-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+--><!--${project.version} replaced by 0.1.3-SNAPSHOT-->
+<features name="odl-snmp4sdn" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
-   
-    <repository>mvn:org.opendaylight.controller/features-adsal/${sal.version}/xml/features</repository>
-    <repository>mvn:org.opendaylight.yangtools/features-yangtools/0.7.0-SNAPSHOT/xml/features</repository>
-    <repository>mvn:org.opendaylight.controller/features-mdsal/1.2.0-SNAPSHOT/xml/features</repository>
 
-    <feature name='odl-snmp4sdn-all' version='${project.version}' description='OpenDaylight :: SNMP4SDN :: All'>
-        <feature version='${project.version}'>odl-snmp4sdn-snmp4sdn</feature>
+    <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
+
+    <repository>mvn:org.opendaylight.controller/features-adsal/${sal.version}/xml/features</repository>
+    <repository>mvn:org.opendaylight.controller/features-nsf/${nsf.version}/xml/features</repository><!--for odl-adsal-northbound-->
+    <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
+    <repository>mvn:org.opendaylight.controller/features-restconf/${mdsal.version}/xml/features</repository>
+    <!--<repository>mvn:org.opendaylight.controller/features-base/${commons.opendaylight.version}/xml/features</repository>--><!--TODO: add this item because encoutered "missing features-base" in karaf. But I don't know it is who that needs features-base-->
+    <!--NOT to add snmp4sdn repo, cause recursive loading--><!--<repository>mvn:org.opendaylight.snmp4sdn/features-snmp4sdn/${project.version}/xml/features</repository>-->
+
+    <feature name='odl-snmp4sdn-all' version='0.2.0-SNAPSHOT' description='OpenDaylight :: SNMP4SDN :: All'>
+        <feature version='0.2.0-SNAPSHOT'>odl-snmp4sdn-snmp4sdn</feature>
     </feature>
-    <feature name='odl-snmp4sdn-snmp4sdn' version='${project.version}' description='OpenDaylight :: SNMP4SDN :: Plugin'>
+    <feature name='odl-snmp4sdn-snmp4sdn' version='0.2.0-SNAPSHOT' description='OpenDaylight :: SNMP4SDN :: Plugin'>
+            <!--these marked are in Helium first release-->
+            <!--<feature version="${sal.version}">odl-adsal-core</feature>
+            <feature version='0.6.2-SNAPSHOT'>odl-yangtools-binding</feature>
+            <feature version='0.6.2-SNAPSHOT'>odl-yangtools-models</feature>
+            <feature version='1.1-SNAPSHOT'>odl-mdsal-broker</feature>-->
             <feature version="${sal.version}">odl-adsal-core</feature>
-            <feature version='1.2.0-SNAPSHOT'>odl-mdsal-broker</feature>
-            <feature version='0.7.0-SNAPSHOT'>odl-yangtools-binding</feature>
-            <feature version='0.7.0-SNAPSHOT'>odl-yangtools-models</feature>
+            <feature version='${yangtools.version}'>odl-yangtools-binding</feature>
+            <feature version='${yangtools.version}'>odl-yangtools-models</feature>
+            <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
+
+            <feature version='${sal.version}'>odl-adsal-all</feature><!--TODO: may need not this, odl-adsal-core is enough?-->
+            <feature version='${nsf.version}'>odl-adsal-northbound</feature>
+            <feature version='${mdsal.version}'>odl-mdsal-apidocs</feature>
+            <feature version='${mdsal.version}'>odl-restconf</feature>
+
+            <bundle>mvn:org.opendaylight.snmp4sdn/md-model/${project.version}</bundle>
             <bundle>mvn:org.opendaylight.snmp4sdn/snmp4sdn/${project.version}</bundle>
             <bundle>mvn:org.opendaylight.snmp4sdn/plugin-shell/${project.version}</bundle>
-            <bundle>mvn:org.opendaylight.snmp4sdn/vlanmd-model/${project.version}</bundle>
     </feature>
 </features>

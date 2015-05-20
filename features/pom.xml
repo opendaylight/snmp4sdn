@@ -24,13 +24,12 @@
 
     <properties>
         <features.file>features.xml</features.file>
-        <branding.version>1.1.0-SNAPSHOT</branding.version>
-        <karaf.resources.version>1.5.0-SNAPSHOT</karaf.resources.version>
+        <branding.version>1.1.0-SNAPSHOT</branding.version><!--1.0.0-SNAPSHOT, before post-Helium update-->
+        <karaf.resources.version>1.5.0-SNAPSHOT</karaf.resources.version><!--1.4.2-SNAPSHOT, before post-Helium update-->
         <karaf.version>3.0.1</karaf.version>
-        <feature.test.version>1.5.0-SNAPSHOT</feature.test.version>
-        <karaf.empty.version>1.5.0-SNAPSHOT</karaf.empty.version>
+        <feature.test.version>1.5.0-SNAPSHOT</feature.test.version><!--as required in gerrit 16240-->
+        <karaf.empty.version>1.5.0-SNAPSHOT</karaf.empty.version><!--1.4.2-SNAPSHOT, before post-Helium update-->
         <surefire.version>2.16</surefire.version>
-        <sal.version>0.9.0-SNAPSHOT</sal.version><!--newly add by snmp4sdn-->
     </properties>
     <dependencies>
         <dependency>
@@ -39,18 +38,6 @@
             <version>${sal.version}</version>
             <classifier>features</classifier>
             <type>xml</type>
-            <!-- declare the exclusion here -->
-            <exclusions>
-                <exclusion>
-                    <groupId>org.ops4j.pax.exam</groupId>
-                    <artifactId>pax-exam-container-native</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.snmp4sdn</groupId>
-            <artifactId>snmp4sdn</artifactId>
-            <version>${project.version}</version>
             <!-- declare the exclusion here -->
             <exclusions>
                 <exclusion>
@@ -73,7 +60,7 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.snmp4sdn</groupId>
-            <artifactId>vlanmd-model</artifactId>
+            <artifactId>snmp4sdn</artifactId>
             <version>${project.version}</version>
             <!-- declare the exclusion here -->
             <exclusions>
@@ -83,29 +70,68 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--learn from sfc, add features 'features-yangtools' and 'features-mdsal'-->
+        <dependency>
+            <groupId>org.opendaylight.snmp4sdn</groupId>
+            <artifactId>md-model</artifactId>
+            <version>${project.version}</version>
+            <!-- declare the exclusion here -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.ops4j.pax.exam</groupId>
+                    <artifactId>pax-exam-container-native</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>features-yangtools</artifactId>
-          <version>0.7.0-SNAPSHOT</version>
+          <version>${yangtools.version}</version><!--post-Helium update to 0.7.0-SNAPSHOT--><!--0.6.2-SNAPSHOT, before post-Helium update-->
           <classifier>features</classifier>
           <type>xml</type>
         </dependency>
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>features-mdsal</artifactId>
-          <version>1.2.0-SNAPSHOT</version>
+          <version>${mdsal.version}</version><!--1.1-SNAPSHOT, before post-Helium update-->
           <classifier>features</classifier>
           <type>xml</type>
         </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>features-restconf</artifactId>
+          <version>${mdsal.version}</version>
+          <classifier>features</classifier>
+          <type>xml</type>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>features-nsf</artifactId><!--for feature "odl-adsal-northbound"-->
+          <version>${nsf.version}</version>
+          <classifier>features</classifier>
+          <type>xml</type>
+        </dependency>
+        <!--<dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>features-base</artifactId>
+          <version>${commons.opendaylight.version}</version>
+          <classifier>features</classifier>
+          <type>xml</type>
+        </dependency>-->
 
         <!-- test to validate features.xml -->
-       <dependency>
-         <groupId>org.opendaylight.odlparent</groupId>
-         <artifactId>features-test</artifactId>
-         <version>${feature.test.version}</version>
-         <scope>test</scope>
-       </dependency>
+        <dependency>
+          <groupId>org.opendaylight.odlparent</groupId><!--modify "yangtools" to "odlparent", as gerrit 16240-->
+          <artifactId>features-test</artifactId>
+          <version>${feature.test.version}</version>
+          <scope>test</scope>
+          <!--<exclusions>//remove this part, as gerrit 16240
+            <exclusion>
+            // declare the exclusion here
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-container-native</artifactId>
+            </exclusion>
+          </exclusions>-->
+        </dependency>
 
         <!-- dependency for opendaylight-karaf-empty for use by testing -->
         <dependency>
@@ -186,16 +212,16 @@
                         <karaf.distro.version>${karaf.empty.version}</karaf.distro.version>
                     </systemPropertyVariables>
                     <dependenciesToScan>
-                        <dependency>org.opendaylight.odlparent:features-test</dependency>
+                        <dependency>org.opendaylight.odlparent:features-test</dependency><!--modify "yangtools" to "odlparent", as gerrit 16240-->
                     </dependenciesToScan>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-    <scm>
-        <connection>scm:git:ssh://git.opendaylight.org:29418/SNMP4SDN.git</connection>
-        <developerConnection>scm:git:ssh://git.opendaylight.org:29418/SNMP4SDN.git</developerConnection>
-        <tag>HEAD</tag>
-        <url>https://git.opendaylight.org/gerrit/gitweb?p=SNMP4SDN.git;a=summary</url>
-    </scm>
+    <!--<scm>
+    <connection>scm:git:https://git.opendaylight.org/gerrit/p/snmp4sdn.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://git.opendaylight.org/gerrit/gitweb?p=snmp4sdn.git;a=summary</url>
+  </scm>-->
 </project>

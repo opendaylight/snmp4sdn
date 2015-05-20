@@ -1,0 +1,159 @@
+module vlan {
+
+    yang-version 1;
+
+    namespace
+        "urn:opendaylight:snmp4sdn:md:vlan";
+
+    prefix vlan;
+
+    import snmp4sdn-types {prefix types;}
+
+    organization "Netconf Central";
+
+    contact
+        "Yi-Ling Hsieh <ylhsieh@itri.org.tw>";
+
+    description
+        "YANG version of the SNMP4SDN VLAN Service MIB.";
+
+    revision "2015-05-15" {
+        description
+            "SNMP4SDN VLAN Service module in progress.";
+    }
+
+    grouping vlan-entry{
+        leaf vlan-id {
+            type int32;
+        }
+        leaf vlan-name {
+            type string;
+        }
+        leaf-list port-list {
+            type int16;
+        }
+    }
+
+    rpc add-vlan-and-set-ports {
+        description
+            "add vlan";
+        input {
+            leaf node-id {
+                type int64;
+            }
+            leaf vlan-id {
+                type int32;
+            }
+            leaf vlan-name {
+                type string {
+                    length "0 .. 20";//TODO: max length of vlan name?
+                }
+            }
+            leaf tagged-port-list {
+                type string {
+                    length "0 .. 200";//TODO: max length of portList string?
+                }
+            }
+            leaf untagged-port-list {
+                type string {
+                    length "0 .. 200";//TODO: max length of portList string?
+                }
+            }
+        }
+        output {
+            leaf add-vlan-and-set-ports-result{
+                type types:result;
+            }
+        }
+    } //rpc add-vlan-and-set-ports
+
+    rpc add-vlan {
+        description
+            "add vlan";
+        input {
+            leaf node-id {
+                type int64;
+            }
+            leaf vlan-id {
+                type int32;
+            }
+            leaf vlan-name {
+                type string {
+                    length "0 .. 20";//TODO: max length of vlan name?
+                }
+            }
+        }
+        output {
+            leaf add-vlan-result{
+                type types:result;
+            }
+        }
+    } //rpc add-vlan
+
+    rpc set-vlan-ports {
+        description
+            "set vlan ports";
+        input {
+            leaf node-id {
+                type int64;
+            }
+            leaf vlan-id {
+                type int32;
+            }
+            /*leaf port-list {
+                type string {
+                    length "0 .. 200";//TODO: max length of portList string?
+                }
+            }*///port-list is splitted into tagged-port-list and untagged-port-list
+            leaf tagged-port-list {
+                type string {
+                    length "0 .. 200";//TODO: max length of portList string?
+                }
+            }
+            leaf untagged-port-list {
+                type string {
+                    length "0 .. 200";//TODO: max length of portList string?
+                }
+            }
+        }
+        output {
+            leaf set-vlan-ports-result{
+                type types:result;
+            }
+        }
+    } //rpc set-vlan-ports
+
+    rpc delete-vlan {
+        description
+            "delete vlan";
+        input {
+            leaf node-id {
+                type int64;
+            }
+            leaf vlan-id {
+                type int32;
+            }
+        }
+        output {
+            leaf delete-vlan-result{
+                type types:result;
+            }
+        }
+    } //rpc delete-vlan
+
+    rpc get-vlan-table {
+        description
+            "get vlan table";
+        input {
+            leaf node-id {
+                type int64;
+            }
+          }
+        output {
+            list vlan-table-entry{
+                uses vlan-entry;
+            }
+        }
+    }
+
+}  // module vlan

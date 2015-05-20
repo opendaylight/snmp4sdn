@@ -31,4 +31,6 @@ public interface ISwitchStateListener {
      */
     public void switchDeleted(ISwitch sw);
 
+    public void doTopoDiscover();
+
 }

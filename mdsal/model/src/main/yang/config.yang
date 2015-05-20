@@ -1,0 +1,229 @@
+module config {
+    yang-version 1;
+    namespace "urn:opendaylight:snmp4sdn:md:config";
+    prefix config;
+
+    organization "Industrial Technology Research Institute of Taiwan";
+    contact "Yi-Ling Hsieh <ylhsieh@itri.org.tw>";
+
+    description "YANG version of the SNMP4SDN Config Service MIB.";
+
+    revision "2014-08-15" {//TODO: update date
+        description
+            "SNMP4SDN Config Service";
+    }
+
+    typedef stp-port-state{
+        type enumeration {
+            enum "DISABLED" {
+                value 1;
+            }
+            enum "BLOCKING" {
+                value 2;
+            }
+            enum "LISTENING" {
+                value 3;
+            }
+            enum "LEARNING" {
+                value 4;
+            }
+            enum "FORWARDING" {
+                value 5;
+            }
+            enum "BROKEN" {
+                value 6;
+            }
+        }
+    }
+
+    grouping arp-entry{
+        leaf ip-address{
+            type string;
+        }
+        leaf mac-address{
+            type int64;
+        }
+    }
+
+    typedef result{//TODO: define 'typedef result' in other yang so that it can be reuse (snmp4sdn-types.yang)
+        type enumeration{
+            enum "SUCCESS" {
+                value 1;
+            }
+            enum "FAIL" {
+                value 2;
+            }
+            enum "EMPTY" {
+                value 3;
+            }
+            enum "INVALID_PARAM" {
+                value 4;
+            }
+            enum "ALREADY_EXIST" {
+                value 5;
+            }
+            enum "NOT_EXIST" {
+                value 6;
+            }
+            enum "NOT_READY" {
+                value 7;
+            }
+            enum "INTERRUPT" {
+                value 8;
+             }
+        }
+    }
+
+    rpc set-stp-port-state {
+        description
+            "Set a port's STP state";
+        input {
+            leaf node-id {
+                type int64;//int64 as Long
+            }
+           leaf port {
+               type int16;//int16 as Short
+           }
+           leaf enable {
+               type boolean;
+           }
+        }
+        output {
+            leaf set-stp-port-state-result{
+                type result;
+            }
+        }
+    } //rpc set-stp-port-state
+
+    rpc get-stp-port-state {
+        description
+            "Get a port's STP state";
+        input {
+            leaf node-id {
+                type int64;
+            }
+            leaf port {
+                type int16;
+            }
+        }
+        output {
+            leaf stp-port-state{
+        	   type stp-port-state;
+            }
+        }
+    } //rpc get-stp-port-state
+
+    rpc get-stp-port-root {
+        description
+            "Get a port's STP root";
+        input {
+            leaf node-id {
+                type int64;
+            }
+            leaf port {
+                type int16;
+            }
+        }
+        output {
+            leaf root-node-id{
+                type int64;
+            }
+        }
+    } //rpc get-stp-port-root
+
+    rpc enable-stp {
+        description
+            "Enable STP on a switch";
+        input {
+            leaf node-id {
+                type int64;
+            }
+        }
+        output {
+            leaf enable-stp-result{
+                type result;
+            }
+        }
+    } //rpc enable-stp
+
+    rpc disable-stp {
+        description
+            "Disable STP on a switch";
+        input {
+            leaf node-id {
+                type int64;
+            }
+        }
+        output {
+            leaf disable-stp-result{
+                type result;
+            }
+        }
+    } //rpc enable-stp
+
+    rpc delete-arp-entry {
+        description
+            "Delete an ARP entry on a switch";
+        input {
+            leaf node-id {
+                type int64;
+            }
+            leaf ip-address{
+                type string;
+            }
+        }
+        output {
+            leaf delete-arp-entry-result{
+        	   type result;
+            }
+        }
+    } //rpc delete-arp-entry
+
+    rpc set-arp-entry {
+        description
+            "Set an ARP entry on a switch";
+        input {
+            leaf node-id {
+                type int64;
+            }
+            uses arp-entry;
+        }
+        output {
+            leaf set-arp-entry-result{
+                type result;
+            }
+        }
+    } //rpc set-arp-entry
+
+    rpc get-arp-entry {
+        description
+            "Get an ARP entry on a switch";
+        input {
+            leaf node-id{
+                type int64;
+            }
+            leaf ip-address{
+                type string;
+            }
+        }
+        output {
+            uses arp-entry;
+        }
+    } //rpc get-arp-entry
+
+    rpc get-arp-table {
+        description
+            "Get the ARP table on a switch";
+        input {
+            leaf node-id {
+                type int64;
+            }
+        }
+        output {
+            list arp-table-entry{
+                uses arp-entry;
+            }
+        }
+    } //rpc get-arp-table
+
+}  // module config
