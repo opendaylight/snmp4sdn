@@ -25,7 +25,7 @@ import org.openflow.util.U16;
 /**
  * Represents an ofp_packet_out message
  */
-public class SNMPPacketOut extends SNMPMessage {
+public class SNMPPacketOut extends /*OFMessage*/SNMPMessage/* implements OFActionFactoryAware*/ {
     public static int MINIMUM_LENGTH = 16;
     public static int BUFFER_ID_NONE = 0xffffffff;
 
@@ -38,7 +38,7 @@ public class SNMPPacketOut extends SNMPMessage {
 
     public SNMPPacketOut() {
         super();
-        this.type = SNMPType.PACKET_OUT;
+        this.type = /*OFType*/SNMPType.PACKET_OUT;
         this.length = U16.t(MINIMUM_LENGTH);
     }
 
@@ -54,7 +54,7 @@ public class SNMPPacketOut extends SNMPMessage {
      * Set buffer_id
      * @param bufferId
      */
-    public SNMPPacketOut setBufferId(int bufferId) {
+    public /*OFPacketOut*/SNMPPacketOut setBufferId(int bufferId) {
         this.bufferId = bufferId;
         return this;
     }
@@ -71,7 +71,7 @@ public class SNMPPacketOut extends SNMPMessage {
      * Sets the packet data
      * @param packetData
      */
-    public SNMPPacketOut setPacketData(byte[] packetData) {
+    public /*OFPacketOut*/SNMPPacketOut setPacketData(byte[] packetData) {
         this.packetData = packetData;
         return this;
     }
@@ -139,11 +139,15 @@ public class SNMPPacketOut extends SNMPMessage {
      * Sets the list of actions on this message
      * @param actions a list of ordered OFAction objects
      */
-    public SNMPPacketOut setActions(List<OFAction> actions) {
+    public /*OFPacketOut*/SNMPPacketOut setActions(List<OFAction> actions) {
         this.actions = actions;
         return this;
     }
 
+    /*@Override
+    public void setActionFactory(OFActionFactory actionFactory) {
+        this.actionFactory = actionFactory;
+    }*///s4s. do this later if needed
 
     @Override
     public void readFrom(ByteBuffer data) {
@@ -191,10 +195,10 @@ public class SNMPPacketOut extends SNMPMessage {
         if (!super.equals(obj)) {
             return false;
         }
-        if (!(obj instanceof SNMPPacketOut)) {
+        if (!(obj instanceof /*OFPacketOut*/SNMPPacketOut)) {
             return false;
         }
-        SNMPPacketOut other = (SNMPPacketOut) obj;
+        /*OFPacketOut*/SNMPPacketOut other = (/*OFPacketOut*/SNMPPacketOut) obj;
         if (actions == null) {
             if (other.actions != null) {
                 return false;
@@ -222,7 +226,7 @@ public class SNMPPacketOut extends SNMPMessage {
      */
     @Override
     public String toString() {
-        return "SNMPPacketOut [actionFactory=" + actionFactory + ", actions="
+        return "/*OFPacketOut*/SNMPPacketOut [actionFactory=" + actionFactory + ", actions="
                 + actions + ", actionsLength=" + actionsLength + ", bufferId=0x"
                 + Integer.toHexString(bufferId) + ", inPort=" + inPort + ", packetData="
                 + Arrays.toString(packetData) + "]";

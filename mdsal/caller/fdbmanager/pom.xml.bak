@@ -1,0 +1,104 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<!---->
+<!--Code base: configmanager-->
+<!---->
+  <modelVersion>4.0.0</modelVersion>
+  <parent><!--copy from snmp4sdn/snmp4sdn/pom.xml-->
+    <groupId>org.opendaylight.snmp4sdn</groupId>
+    <artifactId>commons.snmp4sdn</artifactId>
+    <version>0.1.3-SNAPSHOT</version>
+    <relativePath>../../../commons/snmp4sdn</relativePath>
+  </parent>
+  <artifactId>fdbmanager</artifactId><!--fdbmanager add-->
+  <packaging>bundle</packaging>
+  <version>0.1.3-SNAPSHOT</version>
+
+  <properties>
+    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
+    <yangtools.version>0.6.1</yangtools.version>
+    <mdsal.version>1.0</mdsal.version>
+  </properties>
+
+  <distributionManagement>
+    <!-- OpenDayLight Released artifact -->
+    <repository>
+      <id>opendaylight-release</id>
+      <url>${nexusproxy}/repositories/opendaylight.release/</url>
+    </repository>
+    <!-- OpenDayLight Snapshot artifact -->
+    <snapshotRepository>
+      <id>opendaylight-snapshot</id>
+      <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
+    </snapshotRepository>
+    <!-- Site deployment -->
+    <site>
+      <id>website</id>
+      <url>${sitedeploy}</url>
+    </site>
+  </distributionManagement>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.4.0</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>
+              <!--org.opendaylight.yang.gen.v1.urn.opendaylight.ping.rev130911,-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.types.rev150126,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.get.fdb.table.output,<!--md-sal-->
+              org.opendaylight.yangtools.yang.common,
+              org.opendaylight.yangtools.yang.binding,
+              org.opendaylight.controller.sal.binding.api,
+              org.slf4j,
+              org.eclipse.osgi.framework.console,
+              org.osgi.framework
+            </Import-Package>
+            <!--<Export-Package>org.opendaylight.controller.ping.service.api</Export-Package>-->
+            <Bundle-Activator>org.opendaylight.fdbmanager.impl.FdbManagerImpl</Bundle-Activator><!--fdbmanager add-->
+          </instructions>
+          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <!--<dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+    </dependency>-->
+    <!--<dependency>
+      <groupId>org.opendaylight.controller.model</groupId>
+      <artifactId>model-ping</artifactId>
+      <version>1.0</version>//yiling 1.1-SNAPSHOT
+    </dependency>-->
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-api</artifactId>
+      <version>${mdsal.version}</version>
+    </dependency>
+    <dependency>
+     <groupId>org.opendaylight.yangtools</groupId>
+     <artifactId>yang-common</artifactId>
+     <version>${yangtools.version}</version>
+    </dependency>
+    <dependency>
+     <groupId>org.opendaylight.yangtools</groupId>
+     <artifactId>yang-binding</artifactId>
+     <version>${yangtools.version}</version>
+    </dependency>
+    <!--fdbmanager add-->
+    <dependency>
+      <groupId>org.opendaylight.snmp4sdn</groupId>
+      <artifactId>md-model</artifactId>
+      <version>0.1.3-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+</project>

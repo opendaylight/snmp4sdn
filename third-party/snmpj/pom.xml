@@ -25,12 +25,12 @@
   <url>http://cl.cs.drexel.edu/people/sevy/snmp/</url>
   <packaging>bundle</packaging>
 
-  <scm>
+  <!--<scm>
     <connection>scm:git:https://git.opendaylight.org/gerrit/p/snmp4sdn.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</developerConnection>
-    <url>https://wiki.opendaylight.org/view/SNMP4SDN:Main</url>
     <tag>HEAD</tag>
-  </scm>
+    <url>https://git.opendaylight.org/gerrit/gitweb?p=snmp4sdn.git;a=summary</url>
+  </scm>-->
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

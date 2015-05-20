@@ -36,12 +36,12 @@ import org.opendaylight.snmp4sdn.protocol.SNMPMessage;//s4s add
 public class SynchronousMessage implements Callable<Object> {
     private ISwitch sw;
     private Integer xid;
-    private SNMPMessage syncMsg;
+    private /*OFMessage msg*/SNMPMessage syncMsg;
     protected CountDownLatch latch;
     private Object result;
     private boolean syncRequest;
 
-    public SynchronousMessage(ISwitch sw, Integer xid, SNMPMessage msg,
+    public SynchronousMessage(ISwitch sw, Integer xid, /*OFMessage msg*/SNMPMessage msg,
             boolean syncRequest) {
         this.sw = sw;
         this.xid = xid;
@@ -59,6 +59,10 @@ public class SynchronousMessage implements Callable<Object> {
          */
         if (syncRequest) {
             sw.asyncSend(syncMsg, xid);
+            /*if (!(syncMsg instanceof OFBarrierRequest)) {
+                OFBarrierRequest barrierMsg = new OFBarrierRequest();
+                sw.asyncSend(barrierMsg, xid);
+            }*///s4s doen't support barrier request
         }
         latch.await();
         return result;

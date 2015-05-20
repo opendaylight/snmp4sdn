@@ -9,12 +9,14 @@
     <url>http://github.com/cverges/expect4j</url>
     <description>A Java implementation of the standard Expect library</description>
 
-  <scm>
+    <packaging>bundle</packaging>
+
+  <!--<scm>
     <connection>scm:git:https://git.opendaylight.org/gerrit/p/snmp4sdn.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</developerConnection>
-    <url>https://wiki.opendaylight.org/view/SNMP4SDN:Main</url>
     <tag>HEAD</tag>
-  </scm>
+    <url>https://git.opendaylight.org/gerrit/gitweb?p=snmp4sdn.git;a=summary</url>
+  </scm>-->
 
     <licenses>
         <license>
@@ -32,9 +34,32 @@
     	<releaseplugin.version>2.3.2</releaseplugin.version>
     </properties>
 
+    <!-- The following could be removed, achieved by ~/.m2/settings.xml, as ODL required-->
+    <repositories>
+      <!--<repository>
+        <id>ebr-bundles-external</id>
+        <name>ebr-bundles-external</name>
+        <url>${nexusproxy}/repositories/ebr-bundles-external/</url>
+      </repository>-->
+
+	<!--for library not in ODL's nexus-->
+      <repository>
+            <id>com.springsource.repository.bundles.release</id>
+            <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
+            <url>http://repository.springsource.com/maven/bundles/release</url>
+        </repository>
+        <repository>
+            <id>com.springsource.repository.bundles.external</id>
+            <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
+            <url>http://repository.springsource.com/maven/bundles/external</url>
+        </repository>
+
+    </repositories>
+    <!-- End of...coudl be removed, achieved by ~/.m2/settings.xml, as ODL required-->
+
     <build>
         <plugins>
-            <plugin>
+            <!--<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.9.1</version>
@@ -47,7 +72,7 @@
                     </links>
                 </configuration>
             </plugin>
-            <!--<plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
                 <executions>
@@ -76,12 +101,23 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>2.4.0</version>
+        <version>2.3.6</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
             <Export-Package>
+              org.apache.servicemix.bundles.oro,<!--new add (reference to the answer in http://stackoverflow.com/questions/18415375/unable-to-resolve-1-0-missing-requirement-1-0-osgi-wiring-package-osgi-wi)-->
+              jsch,
+              commons-net,
+              com.springsource.tcl.lang.jacl,
+              tcl.lang.reflect<!--add due to when install and then start expect4j's bundle, appear: "missing tcl.lang.reflect", so I find this in jcraft's pom-->
             </Export-Package>
+            <Embed-Dependency><!--new add (imitate snmp4sdn plugin)-->
+              org.apache.servicemix.bundles.oro,
+              jsch,
+              commons-net,
+              com.springsource.tcl.lang.jacl
+            </Embed-Dependency><!--end of new add-->
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
@@ -158,7 +194,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.2</version>
+            <version>1.7.2</version><!--1.7.5 was used and thus cause dependency skew from the rest of snmp4sdn and the controller which used 1.7.2 then-->
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j.adapters</groupId>
@@ -198,6 +234,14 @@
             <artifactId>com.springsource.tcl.lang.jacl</artifactId>
             <version>1.4.1</version>
         </dependency>
+
+    <dependency><!--add due to when install and then start expect4j's bundle, appear: "missing com.jcraft.jzlib", so I find this in jcraft's pom-->
+      <groupId>com.jcraft</groupId>
+      <artifactId>jzlib</artifactId>
+      <version>1.0.7</version>
+      <optional>true</optional>
+    </dependency>
+    
     </dependencies>
 </project>
 <!-- vim: set ts=4 expandtab: -->
