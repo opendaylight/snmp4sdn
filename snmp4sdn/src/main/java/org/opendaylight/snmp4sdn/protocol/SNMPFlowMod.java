@@ -17,39 +17,54 @@ import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 
+//import org.openflow.protocol.action.OFAction;
+//import org.openflow.protocol.factory.OFActionFactory;
+//import org.openflow.protocol.factory.OFActionFactoryAware;
 import org.openflow.util.U16;
 
 import org.opendaylight.controller.sal.flowprogrammer.Flow;//s4s add
+//import org.openflow.protocol.OFFlowMod;//s4s add. may remove after revison done (no OF in this file)
 import org.openflow.protocol.OFMatch;//s4s add. may remove after revison done (no OF in this file)
 import org.openflow.protocol.OFPort;//s4s add. may remove after revison done (no OF in this file)
 
 
-public class SNMPFlowMod extends SNMPMessage  {
+public class SNMPFlowMod extends /*OFMessage*/SNMPMessage /*implements OFActionFactoryAware, Cloneable*/ {
     public static int MINIMUM_LENGTH = 72;
 
-    public static final short ETHPFC_ADD = 3;//OFPFC_ADD = 0;                /* New flow. */
-    public static final short ETHPFC_MODIFY = 3;//OFPFC_MODIFY = 1;             /* Modify all matching flows. */
-    public static final short OFPFC_MODIFY_STRICT = 2;      /* Modify entry strictly matching wildcards */
-    public static final short ETHPFC_DELETE=2;//OFPFC_DELETE=3;               /* Delete all matching flows. */
-    public static final short OFPFC_DELETE_STRICT =4;       /* Strictly match wildcards and priority. */
+    //public static final short OFPFC_ADD = 0;                /* New flow. */
+    public static final short SNMPFC_ADD = 0;               /* New flow. */
+    //public static final short OFPFC_MODIFY = 1;             /* Modify all matching flows. */
+    //public static final short OFPFC_MODIFY_STRICT = 2;      /* Modify entry strictly matching wildcards */
+    public static final short SNMPFC_MODIFY_STRICT = 2;      /* Modify entry strictly matching wildcards */
+    //public static final short OFPFC_DELETE=3;               /* Delete all matching flows. */
+    //public static final short OFPFC_DELETE_STRICT =4;       /* Strictly match wildcards and priority. */
+    public static final short SNMPFC_DELETE_STRICT =4;       /* Strictly match wildcards and priority. */
 
+    //protected OFActionFactory actionFactory;
     protected OFMatch match;
+    //protected long cookie;
     protected short command;
+    /*protected short idleTimeout;
+    protected short hardTimeout;
+    protected short priority;
+    protected int bufferId;*/
     protected short outPort;
+    //protected short flags;
+    //protected List<OFAction> actions;
 
     Flow flow;//s4s add
 
     protected int xid;//s4s add. OFMessage has "xid", so OFFlowMod (extends OFMessage) has xid, so here we should also have a xid variable (it is indeed needed in other place).
 
-    public SNMPFlowMod() {
+    public /*OFFlowMod*/SNMPFlowMod() {
         super();
-        this.type = SNMPType.FLOW_MOD;
+        this.type = /*OFType*/SNMPType.FLOW_MOD;
         this.length = U16.t(MINIMUM_LENGTH);
     }
 
     public SNMPFlowMod(short command, Flow flow) {//s4s add
         super();
-        this.type = SNMPType.FLOW_MOD;
+        this.type = /*OFType*/SNMPType.FLOW_MOD;
         this.length = U16.t(MINIMUM_LENGTH);
         this.command = command;
         this.flow = flow;
@@ -67,7 +82,7 @@ public class SNMPFlowMod extends SNMPMessage  {
      * Set command
      * @param command
      */
-    public SNMPFlowMod setCommand(short command) {
+    public /*OFFlowMod*/SNMPFlowMod setCommand(short command) {
         this.command = command;
         return this;
     }
@@ -85,7 +100,7 @@ public class SNMPFlowMod extends SNMPMessage  {
      * Set match
      * @param match
      */
-    public SNMPFlowMod setMatch(OFMatch match) {
+    public /*OFFlowMod*/SNMPFlowMod setMatch(OFMatch match) {
         this.match = match;
         return this;
     }
@@ -102,7 +117,7 @@ public class SNMPFlowMod extends SNMPMessage  {
      * Set out_port
      * @param outPort
      */
-    public SNMPFlowMod setOutPort(short outPort) {
+    public /*OFFlowMod*/SNMPFlowMod setOutPort(short outPort) {
         this.outPort = outPort;
         return this;
     }
@@ -111,12 +126,28 @@ public class SNMPFlowMod extends SNMPMessage  {
      * Set out_port
      * @param port
      */
-    public SNMPFlowMod setOutPort(OFPort port) {
+    public /*OFFlowMod*/SNMPFlowMod setOutPort(OFPort port) {
         this.outPort = port.getValue();
         return this;
     }
 
- 
+    /**
+     * Returns read-only copies of the actions contained in this Flow Mod
+     * @return a list of ordered OFAction objects
+     *//*
+    public List<OFAction> getActions() {
+        return this.actions;
+    }*///not used in cmeth
+
+    /**
+     * Sets the list of actions this Flow Mod contains
+     * @param actions a list of ordered OFAction objects
+     *//*
+    public OFFlowMod setActions(List<OFAction> actions) {
+        this.actions = actions;
+        return this;
+    }*///not used in cmeth
+
     public String toString() {
         return "SNMPFlowMod ["
                 + "command=" + command

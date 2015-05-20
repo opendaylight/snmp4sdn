@@ -85,7 +85,7 @@ public class PortStatisticsConverter {
         try {
             return new Node("SNMP", switchId);
         } catch (ConstructionException e1) {
-            log.error("",e1);
+            log.debug("ERROR: PortStatitsticsConverter: createSNMPNode(): SNMP Node creation fail, nodeId {}: {}", switchId, e1);
             return null;
         }
     }
