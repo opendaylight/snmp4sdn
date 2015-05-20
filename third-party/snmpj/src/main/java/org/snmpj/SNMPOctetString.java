@@ -275,7 +275,7 @@ public class SNMPOctetString extends SNMPObject
 
 
     /**
-    *    Returns a space-separated hex string corresponding to the raw bytes.
+    *    Returns a space(colon)-separated hex string corresponding to the raw bytes.
     */
 
     public String toHexString()
@@ -285,10 +285,14 @@ public class SNMPOctetString extends SNMPObject
 
         for (int i = 0; i < data.length; i++)
         {
-            returnStringBuffer.append(hexByte(data[i]) + " ");
+            returnStringBuffer.append(hexByte(data[i]) + ":");
         }
 
-        return returnStringBuffer.toString();
+        String ret = returnStringBuffer.toString();
+        if(ret.endsWith(":"))
+            ret.substring(0, ret.length()-1);
+
+        return ret;
 
     }
 

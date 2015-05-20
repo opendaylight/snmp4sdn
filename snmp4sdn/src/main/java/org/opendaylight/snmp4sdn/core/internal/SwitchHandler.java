@@ -39,6 +39,8 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.opendaylight.controller.sal.utils.Status;
+
 import org.opendaylight.snmp4sdn.core.IController;
 import org.opendaylight.snmp4sdn.core.ISwitch;
 import org.opendaylight.snmp4sdn.core.IMessageReadWrite;
@@ -105,6 +107,7 @@ public class SwitchHandler implements ISwitch {
     private Boolean probeSent;
     private ExecutorService executor;
     private ConcurrentHashMap<Integer, Callable<Object>> messageWaitingDone;
+    private ConcurrentHashMap<Integer, Status> pmsgProceedResult;//s4s add
     private boolean running;
     private IMessageReadWrite msgReadWriteService;
     private Thread switchHandlerThread;
@@ -150,6 +153,7 @@ public class SwitchHandler implements ISwitch {
         this.periodicTimer = null;
         this.executor = Executors.newFixedThreadPool(4);
         this.messageWaitingDone = new ConcurrentHashMap<Integer, Callable<Object>>();
+        this.pmsgProceedResult = new ConcurrentHashMap<Integer, Status>();
         this.responseTimerValue = MESSAGE_RESPONSE_TIMER;
         String rTimer = System.getProperty("of.messageResponseTimer");
         if (rTimer != null) {
@@ -224,7 +228,6 @@ public class SwitchHandler implements ISwitch {
         executor.shutdown();
 
         msgReadWriteService = null;
-
         if (switchHandlerThread != null) {
             switchHandlerThread.interrupt();
         }
@@ -250,11 +253,11 @@ public class SwitchHandler implements ISwitch {
      * @return The XID used
      */
     @Override
-    public Integer asyncSend(SNMPMessage msg) {
+    public Integer asyncSend(/*OFMessage*/SNMPMessage msg) {
         return asyncSend(msg, getNextXid());
     }
 
-    private Object syncSend(SNMPMessage msg, int xid) {
+    private Object syncSend(/*OFMessage*/SNMPMessage msg, int xid) {
         return syncMessageInternal(msg, xid, true);
     }
 
@@ -271,7 +274,7 @@ public class SwitchHandler implements ISwitch {
      * @return The XID used
      */
     @Override
-    public Integer asyncSend(SNMPMessage msg, int xid) {
+    public Integer asyncSend(/*OFMessage*/SNMPMessage msg, int xid) {
         msg.setXid(xid);
         if (transmitQ != null) {
             transmitQ.add(new PriorityMessage(msg, 0));
@@ -291,7 +294,7 @@ public class SwitchHandler implements ISwitch {
      * @return The XID used
      */
     @Override
-    public Integer asyncFastSend(SNMPMessage msg) {
+    public Integer asyncFastSend(/*OFMessage*/SNMPMessage msg) {
         return asyncFastSend(msg, getNextXid());
     }
 
@@ -306,7 +309,7 @@ public class SwitchHandler implements ISwitch {
      * @return The XID used
      */
     @Override
-    public Integer asyncFastSend(SNMPMessage msg, int xid) {
+    public Integer asyncFastSend(/*OFMessage*/SNMPMessage msg, int xid) {
         msg.setXid(xid);
         if (transmitQ != null) {
             transmitQ.add(new PriorityMessage(msg, 1));
@@ -335,7 +338,7 @@ public class SwitchHandler implements ISwitch {
      * @param xid
      *            Message xid
      */
-    private void asyncSendNow(SNMPMessage msg, Integer xid) {
+    private void asyncSendNow(/*OFMessage*/SNMPMessage msg, Integer xid) {
         if (xid == null) {
             xid = getNextXid();
         }
@@ -351,7 +354,7 @@ public class SwitchHandler implements ISwitch {
      * @param msg
      *            Message to be sent
      */
-    private void asyncSendNow(SNMPMessage msg) {
+    private void asyncSendNow(/*OFMessage*/SNMPMessage msg) {
         if (msgReadWriteService == null) {
             logger.warn(
                     "asyncSendNow: {} is not sent because Message ReadWrite Service is not available.",
@@ -373,7 +376,85 @@ public class SwitchHandler implements ISwitch {
         ((Controller) core).takeSwitchEventMsg(thisISwitch, msg);
     }
 
-    public void handleMessages() {
+    public void handleMessages() {/*//s4s: OF's code, now adopt some as s4s's
+        List<OFMessage> msgs = null;
+
+        try {
+            if (msgReadWriteService != null) {
+                msgs = msgReadWriteService.readMessages();
+            }
+        } catch (Exception e) {
+            reportError(e);
+        }
+
+        if (msgs == null) {
+            logger.debug("{} is down", this);
+            // the connection is down, inform core
+            reportSwitchStateChange(false);
+            return;
+        }
+        for (OFMessage msg : msgs) {
+            logger.trace("Message received: {}", msg);
+            this.lastMsgReceivedTimeStamp = System.currentTimeMillis();
+            OFType type = msg.getType();
+            switch (type) {
+            case HELLO:
+                // send feature request
+                OFMessage featureRequest = factory
+                        .getMessage(OFType.FEATURES_REQUEST);
+                asyncFastSend(featureRequest);
+                // delete all pre-existing flows
+                OFMatch match = new OFMatch().setWildcards(OFMatch.OFPFW_ALL);
+                OFFlowMod flowMod = (OFFlowMod) factory
+                        .getMessage(OFType.FLOW_MOD);
+                flowMod.setMatch(match).setCommand(OFFlowMod.OFPFC_DELETE)
+                        .setOutPort(OFPort.OFPP_NONE)
+                        .setLength((short) OFFlowMod.MINIMUM_LENGTH);
+                asyncFastSend(flowMod);
+                this.state = SwitchState.WAIT_FEATURES_REPLY;
+                startSwitchTimer();
+                break;
+            case ECHO_REQUEST:
+                OFEchoReply echoReply = (OFEchoReply) factory
+                        .getMessage(OFType.ECHO_REPLY);
+                // respond immediately
+                asyncSendNow(echoReply, msg.getXid());
+                break;
+            case ECHO_REPLY:
+                this.probeSent = false;
+                break;
+            case FEATURES_REPLY:
+                processFeaturesReply((OFFeaturesReply) msg);
+                break;
+            case GET_CONFIG_REPLY:
+                // make sure that the switch can send the whole packet to the
+                // controller
+                if (((OFGetConfigReply) msg).getMissSendLength() == (short) 0xffff) {
+                    this.state = SwitchState.OPERATIONAL;
+                }
+                break;
+            case BARRIER_REPLY:
+                processBarrierReply((OFBarrierReply) msg);
+                break;
+            case ERROR:
+                processErrorReply((OFError) msg);
+                break;
+            case PORT_STATUS:
+                processPortStatusMsg((OFPortStatus) msg);
+                break;
+            case STATS_REPLY:
+                processStatsReply((OFStatisticsReply) msg);
+                break;
+            case PACKET_IN:
+                break;
+            default:
+                break;
+            } // end of switch
+            if (isOperational()) {
+                ((Controller) core).takeSwitchEventMsg(thisISwitch, msg);
+            }
+        } // end of for
+        */
     }
 
     private void processPortStatusMsg(SNMPPortStatus msg) {
@@ -389,7 +470,56 @@ public class SwitchHandler implements ISwitch {
 
     }
 
-    private void startSwitchTimer() {
+    private void startSwitchTimer() {/*//s4s currently dont implement this issue
+        this.periodicTimer = new Timer();
+        this.periodicTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    Long now = System.currentTimeMillis();
+                    if ((now - lastMsgReceivedTimeStamp) > switchLivenessTimeout) {
+                        if (probeSent) {
+                            // switch failed to respond to our probe, consider
+                            // it down
+                            logger.warn("{} is idle for too long, disconnect",
+                                    toString());
+                            reportSwitchStateChange(false);
+                        } else {
+                            // send a probe to see if the switch is still alive
+                            logger.debug(
+                                    "Send idle probe (Echo Request) to {}",
+                                    this);
+                            probeSent = true;
+                            OFMessage echo = factory
+                                    .getMessage(OFType.ECHO_REQUEST);
+                            asyncFastSend(echo);
+                        }
+                    } else {
+                        if (state == SwitchState.WAIT_FEATURES_REPLY) {
+                            // send another features request
+                            OFMessage request = factory
+                                    .getMessage(OFType.FEATURES_REQUEST);
+                            asyncFastSend(request);
+                        } else {
+                            if (state == SwitchState.WAIT_CONFIG_REPLY) {
+                                // send another config request
+                                OFSetConfig config = (OFSetConfig) factory
+                                        .getMessage(OFType.SET_CONFIG);
+                                config.setMissSendLength((short) 0xffff)
+                                        .setLengthU(OFSetConfig.MINIMUM_LENGTH);
+                                asyncFastSend(config);
+                                OFMessage getConfig = factory
+                                        .getMessage(OFType.GET_CONFIG_REQUEST);
+                                asyncFastSend(getConfig);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    reportError(e);
+                }
+            }
+        }, SWITCH_LIVENESS_TIMER, SWITCH_LIVENESS_TIMER);
+        */
     }
 
     private void cancelSwitchTimer() {
@@ -426,7 +556,32 @@ public class SwitchHandler implements ISwitch {
         return this.sid;
     }
 
-    private void processFeaturesReply(OFFeaturesReply reply) {
+    private void processFeaturesReply(OFFeaturesReply reply) {/*//s4s currently dont implement this issue
+        if (this.state == SwitchState.WAIT_FEATURES_REPLY) {
+            this.sid = reply.getDatapathId();
+            this.buffers = reply.getBuffers();
+            this.capabilities = reply.getCapabilities();
+            this.tables = reply.getTables();
+            this.actions = reply.getActions();
+            // notify core of this error event
+            for (OFPhysicalPort port : reply.getPorts()) {
+                updatePhysicalPort(port);
+            }
+            // config the switch to send full data packet
+            OFSetConfig config = (OFSetConfig) factory
+                    .getMessage(OFType.SET_CONFIG);
+            config.setMissSendLength((short) 0xffff).setLengthU(
+                    OFSetConfig.MINIMUM_LENGTH);
+            asyncFastSend(config);
+            // send config request to make sure the switch can handle the set
+            // config
+            OFMessage getConfig = factory.getMessage(OFType.GET_CONFIG_REQUEST);
+            asyncFastSend(getConfig);
+            this.state = SwitchState.WAIT_CONFIG_REPLY;
+            // inform core that a new switch is now operational
+            reportSwitchStateChange(true);
+        }
+        */
     }
 
     private void updatePhysicalPort(SNMPPhysicalPort port) {
@@ -486,25 +641,25 @@ public class SwitchHandler implements ISwitch {
     }
 
     @Override
-    public Object getStatistics(OFStatisticsRequest req) {////s4s currently dont implement this issue
-        /*int xid = getNextXid();		
-        StatisticsCollector worker = new StatisticsCollector(this, xid, req);		
-        messageWaitingDone.put(xid, worker);		
-        Future<Object> submit = executor.submit(worker);		
-        Object result = null;		
-        try {		
-            result = submit.get(responseTimerValue, TimeUnit.MILLISECONDS);		
-            return result;		
-        } catch (Exception e) {		
-        logger.warn("Timeout while waiting for {} replies", req.getType());		
-        result = null; // to indicate timeout has occurred		
-        return result;		
-    }*/
+    public Object getStatistics(OFStatisticsRequest req) {/*////s4s currently dont implement this issue
+        int xid = getNextXid();
+        StatisticsCollector worker = new StatisticsCollector(this, xid, req);
+        messageWaitingDone.put(xid, worker);
+        Future<Object> submit = executor.submit(worker);
+        Object result = null;
+        try {
+            result = submit.get(responseTimerValue, TimeUnit.MILLISECONDS);
+            return result;
+        } catch (Exception e) {
+            logger.warn("Timeout while waiting for {} replies", req.getType());
+            result = null; // to indicate timeout has occurred
+            return result;
+        }*/
         return null;//s4s add
     }
 
     @Override
-    public Object syncSend(SNMPMessage msg) {
+    public Object syncSend(/*OFMessage*/SNMPMessage msg) {
         int xid = getNextXid();
         return syncSend(msg, xid);
     }
@@ -650,7 +805,8 @@ public class SwitchHandler implements ISwitch {
                 try {
                     while (!transmitQ.isEmpty()) {
                         PriorityMessage pmsg = transmitQ.poll();
-                        msgReadWriteService.asyncSend(pmsg.msg);
+                        Status status = msgReadWriteService.asyncSend(pmsg.msg);//s4s. add status
+                        pmsgProceedResult.put(pmsg.msg.getXid(), status);//s4s. add this to save the result, for future use
                         logger.trace("Message sent: {}", pmsg);
                         /*
                          * If syncReply is set to true, wait for the response
@@ -695,10 +851,19 @@ public class SwitchHandler implements ISwitch {
      */
     private void setupCommChannel() throws Exception {
         this.selector = SelectorProvider.provider().openSelector();
+        //this.socket.configureBlocking(false);//s4s. we don't need socket
+        //this.socket.socket().setTcpNoDelay(true);//s4s. we don't need socket
         this.msgReadWriteService = getMessageReadWriteService();
     }
 
-    private void sendFirstHello() {////s4s currently dont implement this issue
+    private void sendFirstHello() {/*////s4s currently dont implement this issue
+        try {
+            OFMessage msg = factory.getMessage(OFType.HELLO);
+            asyncFastSend(msg);
+        } catch (Exception e) {
+            reportError(e);
+        }
+        */
     }
 
     //retrive info on each switch for initialization (e.g. port status...)
@@ -707,6 +872,10 @@ public class SwitchHandler implements ISwitch {
     }
 
     private IMessageReadWrite getMessageReadWriteService() throws Exception {
+        /*String str = System.getProperty("secureChannelEnabled");
+        return ((str != null) && (str.trim().equalsIgnoreCase("true"))) ? new SecureMessageReadWriteService(
+                socket, selector) : new MessageReadWriteService(socket,
+                selector);*///s4s. can ethernet switch support secure channel?
         return new MessageReadWriteService(socket, selector, cmethUtil);//s4s add
     }
 
@@ -716,6 +885,10 @@ public class SwitchHandler implements ISwitch {
      */
     @Override
     public Object syncSendBarrierMessage() {//s4s doesn't support barrier message
+        /*
+        OFBarrierRequest barrierMsg = new OFBarrierRequest();
+        return syncSend(barrierMsg);
+        *///s4s. OF's
         return Boolean.FALSE;
     }
 
@@ -726,6 +899,19 @@ public class SwitchHandler implements ISwitch {
      */
     @Override
     public Object asyncSendBarrierMessage() {//s4s doesn't support barrier message
+        /*
+        if (transmitQ == null) {
+            return Boolean.FALSE;
+        }
+
+        OFBarrierRequest barrierMsg = new OFBarrierRequest();
+        int xid = getNextXid();
+
+        barrierMsg.setXid(xid);
+        transmitQ.add(new PriorityMessage(barrierMsg, 0, true));
+
+        return Boolean.TRUE;
+        *///s4s. OF's
         return Boolean.FALSE;
     }
 

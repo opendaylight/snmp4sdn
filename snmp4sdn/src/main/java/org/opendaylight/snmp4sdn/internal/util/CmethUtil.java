@@ -30,13 +30,23 @@ public class CmethUtil implements CommandProvider{
 
     private ConcurrentMap<Long, Vector> table;//<Long, Vector> as <mac, <ip, community_readonly, community_readwrite, cli_username, cli_password>>
 
-    boolean isDBPathFixed = false;
+    boolean isDBPathFixed = true;//junit test
 
     public CmethUtil(){
-        registerWithOSGIConsole();
         table = new ConcurrentHashMap<Long, Vector>();
         if(isDBPathFixed)
-            readDB("/home/christine/snmp4sdn/snmp4sdn/src/test/switch_login_db.csv");
+            //readDB("D:\\OpenDaylight\\snmp4sdn\\controller\\opendaylight\\protocol_plugins\\snmp4sdn\\snmp4sdn\\src\\test\\switch_login_db.csv");
+            readDB("/root/swdb.csv");
+            //readDB("D:\\swdb.csv");
+            printDB();
+    }
+
+    /*public CmethUtil(IDBHandler db){//TODO
+        this.dbHandler = db;
+    }*/
+
+    public void init(){
+        registerWithOSGIConsole();
     }
 
     public void readDB(String dbPath){
@@ -101,6 +111,19 @@ public class CmethUtil implements CommandProvider{
 
     public ConcurrentMap<Long, Vector> getEntries(){
         return new ConcurrentHashMap<Long, Vector>(table);
+    }
+
+    public String getIpAddr(long macAddr){
+        return getIpAddr(new Long(macAddr));
+    }
+    public String getSnmpCommunity(long macAddr){
+        return getSnmpCommunity(new Long(macAddr));
+    }
+    public String getCliUsername(long macAddr){
+        return getCliUsername(new Long(macAddr));
+    }
+    public String getCliPassword(long macAddr){
+        return getCliPassword(new Long(macAddr));
     }
 
     public String getIpAddr(Long macAddr){
@@ -172,21 +195,7 @@ public class CmethUtil implements CommandProvider{
     }
 
      public void _s4sPrintDB(CommandInterpreter ci){
-         ConcurrentMap<Long, Vector> table = getEntries();
-         ci.print("MAC address (sid)\t\t");
-         ci.print("IP address\t");
-         ci.print("SNMP community\t");
-         ci.print("CLI username\t");
-         ci.println("CLI password\t");
-         for (ConcurrentMap.Entry<Long, Vector> entry: table.entrySet()) {
-            Long mac = entry.getKey();
-            ci.print(HexString.toHexString(mac) + "\t");
-            ci.print("(" + mac + ")\t");
-            ci.print(getIpAddr(mac) + "\t");
-            ci.print(getSnmpCommunity(mac) + "\t");
-            ci.print(getCliUsername(mac) + "\t");
-            ci.println(getCliPassword(mac));
-        }
+        printDB();
      }
 
      public void printDB(){

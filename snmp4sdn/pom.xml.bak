@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * Copyright (c) 2013 Industrial Technology Research Institute of Taiwan and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opendaylight.snmp4sdn</groupId>
+    <artifactId>commons.snmp4sdn</artifactId><!--s4s: old value:commons-->
+    <version>0.1.3-SNAPSHOT</version>
+    <relativePath>../commons/snmp4sdn</relativePath><!--s4s: old value:../commons/opendaylight-->
+  </parent>
+
+  <!--<groupId>org.opendaylight.snmp4sdn</groupId>--><!--s4s:new add-->
+  <artifactId>snmp4sdn</artifactId>
+  <version>0.1.3-SNAPSHOT</version>
+  <packaging>bundle</packaging>
+
+  <!--<scm>
+    <connection>scm:git:https://git.opendaylight.org/gerrit/p/snmp4sdn.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://git.opendaylight.org/gerrit/gitweb?p=snmp4sdn.git;a=summary</url>
+  </scm>-->
+
+  <properties>
+    <yangtools.version>0.6.1</yangtools.version>
+    <mdsal.version>1.0</mdsal.version>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.4.0</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>
+              org.opendaylight.controller.sal.packet,
+              org.opendaylight.controller.sal.action,
+              org.opendaylight.controller.sal.discovery,
+              org.opendaylight.controller.sal.topology,
+              org.opendaylight.controller.sal.core,
+              org.opendaylight.controller.sal.flowprogrammer,
+              org.opendaylight.controller.sal.reader,
+              org.opendaylight.controller.sal.inventory,
+              org.opendaylight.controller.sal.match,
+              org.opendaylight.controller.sal.utils,
+              <!--org.opendaylight.controller.sal.vlan,//ad-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.types.rev150126,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev150515,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev150515.get.vlan.table.output,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.get.arp.table.output,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.get.fdb.table.output,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119,<!--md-sal-->
+              <!--com.google.common.collect,//md-sal-->
+              org.opendaylight.yangtools.yang.common,<!--md-sal copy from ping example-->
+              org.opendaylight.yangtools.yang.binding,<!--md-sal copy from ping example-->
+              org.opendaylight.controller.sal.binding.api,<!--md-sal copy from ping example-->
+              org.opendaylight.controller.sal.common.util,<!--md-sal copy from ping example-->
+              com.google.common.util.concurrent,<!--md-sal copy from ping example-->
+              org.apache.commons.lang3.builder,
+              org.apache.commons.lang3.tuple,
+              org.apache.felix.dm,
+              org.slf4j,
+              org.eclipse.osgi.framework.console,
+              org.osgi.framework,
+              javax.net.ssl,
+              <!--org.expect4j //TODO: with this, the following packages are not needed to be listed here?-->
+              <!--(a) the following line is needed when expect4j is included in the "Embed-Dependency" section below; otherwise can't build-->
+              com.jcraft.jsch, org.apache.commons.net.io, org.apache.commons.net.telnet, org.apache.oro.text, org.apache.oro.text.regex, sunlabs.brazil.util.regexp, tcl.lang.reflect,
+              
+              org.apache.commons.net.util,<!--this is needed due to those "org.apache.commons.net.*" above in (a)-->
+              org.apache.commons.net,<!--this is needed due to the two "org.apache.commons.net.util" above-->
+              javax.crypto,javax.crypto.spec,javax.net,<!--this line is needed due to "org.apache.commons.net" above, copy from in it's MANIFEST.MF listed "Import-Package" -->
+
+              org.apache.oro.util,<!--this is needed due to those "org.apache.oro.text" above in (a)-->
+            </Import-Package>
+            <Export-Package>
+              org.opendaylight.snmp4sdn.internal,<!--should not export-->
+              org.opendaylight.snmp4sdn,<!--TODO:vlan manager needs to import IVLANService when building, given that vlan manager call snmp4sdn directly-->
+              org.opendaylight.snmp4sdn.protocol.util,<!--TODO:vlan manager needs to import this in OSGi loading. A more proper place to use this util?-->
+              com.jcraft.jsch, org.apache.commons.net, org.apache.commons.net.util, org.apache.commons.net.io, org.apache.commons.net.telnet, org.apache.oro.text, org.apache.oro.text.regex, sunlabs.brazil.util.regexp, tcl.lang.reflect,
+              ;-split-package:=merge-first<!--add this line due to when building, "org.apache.oro.text, org.apache.oro.text.regex" above requires to add this parameter-->
+            </Export-Package>
+            <Embed-Dependency>
+              org.openflow.openflowj,
+              org.snmpj,
+              org.expect4j
+              <!--
+              ;scope=compile|runtime;inline=true
+              --> <!--with this line, the jar needed by expect4j would be included in s4s plugin's jar-->
+            </Embed-Dependency>
+            <Embed-Transitive>
+              false
+            </Embed-Transitive>
+            <Bundle-Activator>
+              org.opendaylight.snmp4sdn.internal.Activator
+            </Bundle-Activator>
+          </instructions>
+          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <!--copy from ping, seems useless-->
+    <!--<dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <version>5.0.0</version>
+    </dependency>-->
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal</artifactId>
+      <version>0.7.0</version><!--0.7.0-withVLAN--><!--//prg. custom ad-sal-->
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller.thirdparty</groupId>
+      <artifactId>org.openflow.openflowj</artifactId>
+      <version>1.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.snmp4sdn</groupId>
+      <artifactId>org.snmpj</artifactId>
+      <version>1.4.7-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.snmp4sdn</groupId>
+      <artifactId>org.expect4j</artifactId>
+      <version>1.4-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-net</groupId>
+      <artifactId>commons-net</artifactId>
+      <version>3.3</version>
+    </dependency>
+    <dependency><!--need this dependency because "Import-Package" above listed "org.apache.oro.util"-->
+      <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.oro</artifactId>
+      <version>2.0.8_6</version>
+      <optional>true</optional><!--must need this, otherwise seems this dependency has no effect in this pom-->
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.tcljava</groupId>
+      <artifactId>com.springsource.tcl.lang.jacl</artifactId>
+      <version>1.4.1</version>
+      <optional>true</optional><!--must need this, otherwise seems this dependency has no effect in this pom-->
+    </dependency>
+    <dependency>
+     <groupId>org.opendaylight.controller</groupId>
+     <artifactId>sal-binding-api</artifactId>
+     <version>${mdsal.version}</version><!--yiling 1.1-SNAPSHOT-->
+   </dependency>
+   <dependency>
+     <groupId>org.opendaylight.controller</groupId>
+     <artifactId>sal-common-util</artifactId>
+     <version>${mdsal.version}</version><!--yiling 1.1-SNAPSHOT-->
+   </dependency>
+   <dependency>
+     <groupId>org.opendaylight.yangtools</groupId>
+     <artifactId>yang-common</artifactId>
+     <version>${yangtools.version}</version><!--yiling-->
+   </dependency>
+   <dependency>
+     <groupId>org.opendaylight.yangtools</groupId>
+     <artifactId>yang-binding</artifactId>
+     <version>${yangtools.version}</version><!--yiling-->
+   </dependency>
+   <!--following are md-sal-->
+    <!--<dependency>
+      <groupId>org.opendaylight.snmp4sdn</groupId>
+      <artifactId>vlanmd-model</artifactId>
+      <version>0.1.3-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.snmp4sdn</groupId>
+      <artifactId>configmd-model</artifactId>
+      <version>0.1.3-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.snmp4sdn</groupId>
+      <artifactId>fdbmd-model</artifactId>
+      <version>0.1.3-SNAPSHOT</version>
+    </dependency>--><!--the thee ones are marked, now they are packaged in one budle "md-model"-->
+    <dependency>
+      <groupId>org.opendaylight.snmp4sdn</groupId>
+      <artifactId>md-model</artifactId>
+      <version>0.1.3-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+</project>
