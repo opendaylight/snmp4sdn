@@ -1,0 +1,206 @@
+module acl {
+    //TODO: rpc of del-all-acl-rule
+
+    yang-version 1;
+
+    namespace "urn:opendaylight:snmp4sdn:md:acl";
+    prefix acl;
+
+    import snmp4sdn-types {prefix types;}
+
+    organization "Industrial Technology Research Institute of Taiwan";
+    contact "Yi-Ling Hsieh <ylhsieh@itri.org.tw>";
+
+    description "YANG version of the SNMP4SDN ACL Service MIB.";
+
+    revision "2015-01-19" {//TODO: update date
+        description
+            "SNMP4SDN ACL Service module";
+    }
+
+    grouping acl-profile-index{
+        leaf profile-id{
+            type int32;
+        }
+        leaf profile-name{
+            type string;
+        }
+    }
+
+    grouping acl-rule-index{
+        leaf rule-id{
+            type int32;
+        }
+        leaf rule-name{
+            type string;
+        }
+    }
+
+    grouping acl-index{
+        uses acl-profile-index;
+        uses acl-rule-index;
+    }
+
+    grouping acl-field{
+        //Following are for IP layer rule
+        leaf vlan-id{
+            type int32;
+        }
+        leaf src-ip{
+            type string;
+        }
+        leaf dst-ip{
+            type string;
+        }
+        //Following are for MAC layer rule
+        //...TODO
+    }
+
+    typedef acl-action{
+        type enumeration {
+            enum "PERMIT" {
+                value 1;
+            }
+            enum "DENY" {
+                value 0;
+            }
+        }
+    }
+
+    typedef acl-layer{
+        type enumeration {
+            enum "ETHERNET" {
+                value 1;
+            }
+            enum "IP" {
+                value 2;
+            }
+        }
+    }
+
+    grouping acl-rule{
+        leaf-list port-list{
+            type int16;
+        }
+        leaf acl-layer{
+            type acl-layer;
+        }
+        uses acl-field;
+        leaf acl-action{
+            type acl-action;
+        }
+    }
+
+    grouping acl-profile{
+        leaf acl-layer{
+            type acl-layer;
+        }
+        leaf vlan-mask{
+            type int16;
+        }
+        leaf src-ip-mask{
+            type string;
+        }
+        leaf dst-ip-mask{
+            type string;
+        }
+    }
+
+    rpc set-acl-rule {
+        description
+            "Set ACL rule";
+        input {
+            leaf nodeId {
+                type int64;
+            }
+            uses acl-index;
+            uses acl-rule;
+        }
+        output {
+            leaf set-acl-rule-result{
+                type types:result;
+            }
+        }
+    }
+
+    rpc del-acl-rule {
+        description
+            "Delete ACL rule";
+        input {
+            leaf nodeId {
+                type int64;
+            }
+            uses acl-index;
+        }
+        output {
+            leaf del-acl-rule-result{
+                type types:result;
+            }
+        }
+    }
+
+    rpc create-acl-profile {
+        description
+          "Create an ACL profile on the switch";
+        input {
+            leaf nodeId {
+                type int64;
+            }
+            uses acl-profile-index;
+            uses acl-profile;
+        }
+        output {
+            leaf create-acl-profile-result{
+                type types:result;
+            }
+        }
+    }
+
+    rpc del-acl-profile {
+        description
+          "Delete ACL profile on the switch";
+        input {
+            leaf nodeId {
+                type int64;
+            }
+            uses acl-profile-index;
+        }
+        output {
+            leaf del-acl-profile-result{
+                type types:result;
+            }
+        }
+    }
+
+    rpc clear-acl-table {
+        description
+          "Clear ACL table on the switch";
+        input {
+            leaf nodeId {
+                type int64;
+            }
+        }
+        output {
+            leaf clear-acl-table-result{
+                type types:result;
+            }
+        }
+    }
+
+    /*rpc get-acl-index-list {
+        description
+          "Get the rule IDs in each of ACL profiles on the switch";
+        input {
+            leaf nodeId {
+                type int64;
+            }
+        }
+        output {
+            list acl-index-list-entry{
+                uses acl-index;
+            }
+        }
+    }*/
+
+  }  // module acl
+

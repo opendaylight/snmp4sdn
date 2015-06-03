@@ -1,0 +1,38 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+    <reference id="snmp4sdnICoreRef" interface="org.opendaylight.snmp4sdn.ICore"/>
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+        <command>
+          <action class="org.opendaylight.snmp4sdn.shell.ReadDB">
+            <property name="controller" ref="snmp4sdnICoreRef"/>
+          </action>
+        </command>
+        <command>
+          <action class="org.opendaylight.snmp4sdn.shell.TopoDiscoverSwitch">
+            <property name="controller" ref="snmp4sdnICoreRef"/>
+          </action>
+        </command>
+        <command>
+          <action class="org.opendaylight.snmp4sdn.shell.TopoDiscoverEdge">
+            <property name="controller" ref="snmp4sdnICoreRef"/>
+          </action>
+        </command>
+        <!-- Deprecated. The following methods are privided with VLAN Serivice's MD-SAL now-->
+        <!--
+        <command>
+          <action class="org.opendaylight.snmp4sdn.shell.AddVLANSetPorts">
+            <property name="controller" ref="snmp4sdnICoreRef"/>
+          </action>
+        </command>
+        <command>
+          <action class="org.opendaylight.snmp4sdn.shell.DeleteVlan">
+            <property name="controller" ref="snmp4sdnICoreRef"/>
+          </action>
+        </command>
+        <command>
+          <action class="org.opendaylight.snmp4sdn.shell.PrintVlanTable">
+            <property name="controller" ref="snmp4sdnICoreRef"/>
+          </action>
+        </command>
+        -->
+    </command-bundle>
+</blueprint>

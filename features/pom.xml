@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * Copyright (c) 2014 Industrial Technology Research Institute of Taiwan.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.opendaylight.snmp4sdn</groupId>
+        <artifactId>commons.snmp4sdn</artifactId>
+        <version>0.2.0-SNAPSHOT</version>
+        <relativePath>../commons/snmp4sdn</relativePath>
+    </parent>
+
+    <artifactId>features-snmp4sdn</artifactId>
+    <groupId>org.opendaylight.snmp4sdn</groupId>
+    <version>0.2.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <properties><!--TODO: move the settings to commons.snmp4sdn pom-->
+        <features.file>features.xml</features.file>
+        <branding.version>1.1.0-SNAPSHOT</branding.version>
+        <karaf.resources.version>1.5.0-SNAPSHOT</karaf.resources.version>
+        <karaf.version>3.0.1</karaf.version>
+        <feature.test.version>1.5.0-SNAPSHOT</feature.test.version><!--as required in gerrit 16240-->
+        <karaf.empty.version>1.5.0-SNAPSHOT</karaf.empty.version>
+        <surefire.version>2.16</surefire.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>features-adsal</artifactId>
+            <version>${sal.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <!-- declare the exclusion here -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.ops4j.pax.exam</groupId>
+                    <artifactId>pax-exam-container-native</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.snmp4sdn</groupId>
+            <artifactId>plugin-shell</artifactId>
+            <version>${project.version}</version>
+            <!-- declare the exclusion here -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.ops4j.pax.exam</groupId>
+                    <artifactId>pax-exam-container-native</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.snmp4sdn</groupId>
+            <artifactId>snmp4sdn</artifactId>
+            <version>${project.version}</version>
+            <!-- declare the exclusion here -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.ops4j.pax.exam</groupId>
+                    <artifactId>pax-exam-container-native</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.snmp4sdn</groupId>
+            <artifactId>md-model</artifactId>
+            <version>${project.version}</version>
+            <!-- declare the exclusion here -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.ops4j.pax.exam</groupId>
+                    <artifactId>pax-exam-container-native</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>features-yangtools</artifactId>
+          <version>${yangtools.version}</version>
+          <classifier>features</classifier>
+          <type>xml</type>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>features-mdsal</artifactId>
+          <version>${mdsal.version}</version>
+          <classifier>features</classifier>
+          <type>xml</type>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>features-restconf</artifactId>
+          <version>${mdsal.version}</version>
+          <classifier>features</classifier>
+          <type>xml</type>
+        </dependency>
+        <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>features-nsf</artifactId><!--for feature "odl-adsal-northbound"-->
+          <version>${nsf.version}</version>
+          <classifier>features</classifier>
+          <type>xml</type>
+        </dependency>
+        <!--<dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>features-base</artifactId>
+          <version>${commons.opendaylight.version}</version>
+          <classifier>features</classifier>
+          <type>xml</type>
+        </dependency>-->
+
+        <!-- test to validate features.xml -->
+        <dependency>
+          <groupId>org.opendaylight.odlparent</groupId><!--modify "yangtools" to "odlparent", as gerrit 16240-->
+          <artifactId>features-test</artifactId>
+          <version>${feature.test.version}</version>
+          <scope>test</scope>
+          <!--<exclusions>//remove this part, as gerrit 16240
+            <exclusion>
+            // declare the exclusion here
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-container-native</artifactId>
+            </exclusion>
+          </exclusions>-->
+        </dependency>
+
+        <!-- dependency for opendaylight-karaf-empty for use by testing -->
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>opendaylight-karaf-empty</artifactId>
+            <version>${karaf.empty.version}</version>
+            <type>zip</type>
+            <exclusions>
+                <!-- declare the exclusion here -->
+                <exclusion>
+                    <groupId>org.ops4j.pax.exam</groupId>
+                    <artifactId>pax-exam-container-native</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- Uncomment this if you get an error : java.lang.NoSuchMethodError: org.slf4j.helpers.MessageFormatter.format(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)Lorg/slf4j/helpers/FormattingTuple;
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.2</version>
+        </dependency>
+        -->
+    </dependencies>
+   
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+            </resources>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>2.7</version>
+                    <executions>
+                         <execution>
+                             <id>filter</id>
+                             <phase>generate-resources</phase>
+                             <goals>
+                                 <goal>resources</goal>
+                             </goals>
+                        </execution>
+                    </executions>
+               </plugin>
+               <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>1.9.1</version>
+                    <executions>
+                        <execution>
+                        <id>attach-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                   <file>${project.build.directory}/classes/${features.file}</file>
+                                   <type>xml</type>
+                                   <classifier>features</classifier>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire.version}</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <karaf.distro.groupId>org.opendaylight.controller</karaf.distro.groupId>
+                        <karaf.distro.artifactId>opendaylight-karaf-empty</karaf.distro.artifactId>
+                        <karaf.distro.version>${karaf.empty.version}</karaf.distro.version>
+                    </systemPropertyVariables>
+                    <dependenciesToScan>
+                        <dependency>org.opendaylight.odlparent:features-test</dependency><!--modify "yangtools" to "odlparent", as gerrit 16240-->
+                    </dependenciesToScan>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <!--<scm>
+    <connection>scm:git:https://git.opendaylight.org/gerrit/p/snmp4sdn.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://git.opendaylight.org/gerrit/gitweb?p=snmp4sdn.git;a=summary</url>
+  </scm>-->
+</project>
