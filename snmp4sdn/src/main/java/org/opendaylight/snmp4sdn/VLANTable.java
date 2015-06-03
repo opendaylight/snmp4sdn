@@ -19,22 +19,26 @@ import java.util.Map;
 import java.util.Vector;
 
 
-public class VLANTable{
+public class VLANTable{//TODO: on document, say to use List<VLANConfig> instead of VLANTable
     private Vector table = null;
 
     public VLANTable(){
         table = new Vector();
     }
 
-    public void addEntry(Long vlanID, List<NodeConnector> ports){
-        table.add(new VLANTableEntry(vlanID, ports));
+    public void addEntry(Integer vlanID, List<NodeConnector> ports){//TODO: not yet implemnent in snmphandler to get vlan name
+        table.add(new VLANTableEntry(vlanID, new String("v" + vlanID.toString()), ports));//TODO: vlan name shouldn't be assigned by program
     }
 
-    public List<NodeConnector> getPorts(Long vlanID){
+    public Vector getEntries(){
+        return table;
+    }
+
+    public List<NodeConnector> getPorts(Integer vlanID){
         VLANTableEntry entry = null;
         for(int i = 0; i < table.size(); i ++){
             entry = (VLANTableEntry)(table.get(i));
-            if(entry.equals(vlanID))
+            if(entry.getVlanID().equals(vlanID))
             return entry.getPorts();
         }
         return null;
@@ -45,7 +49,7 @@ public class VLANTable{
         String ans = "";
         for(int i = 0; i < table.size(); i ++){
             entry = (VLANTableEntry)(table.get(i));
-            ans += "VLAN(" + entry.getVlanID() + "): {";
+            ans += "VLAN(" + entry.getVlanID() + "): ports {";
             List<NodeConnector> ports = entry.getPorts();
             for(int j = 0; j < ports.size(); j++)
                 ans += (Short)(ports.get(j).getID()) + ",";
@@ -56,20 +60,26 @@ public class VLANTable{
     }
     
     public class VLANTableEntry{
-        private Long vlanID = null;
+        private Integer vlanID = null;
+        private String vlanName = null;
         private List<NodeConnector> ports = null;
         
-        public VLANTableEntry(Long vlanID, List<NodeConnector> ports){
-            this.vlanID = new Long(vlanID);
+        public VLANTableEntry(Integer vlanID, String vlanName, List<NodeConnector> ports){
+            this.vlanID = new Integer(vlanID);
+            this.vlanName = new String(vlanName);
             this.ports = new ArrayList<NodeConnector>(ports);
         }
     
-        public Long getVlanID(){
-            return this.vlanID;
-            }
-    
+        public Integer getVlanID(){
+            return new Integer(this.vlanID);
+        }
+
+        public String getVlanName(){
+            return new String(this.vlanName);
+        }
+
         public List<NodeConnector> getPorts(){
-            return this.ports;
+            return this.ports;//TODO: should create a new List and clone, and then return
         }
     }
     

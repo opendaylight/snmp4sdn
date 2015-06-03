@@ -140,6 +140,22 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
             return null;
         }
 
+        /*long sid = (Long) node.getID();
+        OFMatch ofMatch = new FlowConverter(flow).getOFMatch();
+        List<OFStatistics> ofList = (cached == true) ? statsMgr
+                .getOFFlowStatistics(sid, ofMatch) : statsMgr.queryStatistics(
+                sid, OFStatisticsType.FLOW, ofMatch);
+
+        // *
+        // * Convert and filter the statistics per container
+        // * /
+        List<FlowOnNode> flowOnNodeList = new FlowStatisticsConverter(ofList)
+                .getFlowOnNodeList(node);
+        List<FlowOnNode> filteredList = filterFlowListPerContainer(container,
+                node, flowOnNodeList);
+
+        return (filteredList == null || filteredList.isEmpty()) ? null
+                : filteredList.get(0);*///OF's code
         return (new SNMPHandler(cmethUtil)).readFlowRequest(flow, node);//s4s add
     }
 
@@ -147,6 +163,20 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
     public List<FlowOnNode> readAllFlow(String container, Node node,
             boolean cached) {
 
+        /*long sid = (Long) node.getID();
+        List<OFStatistics> ofList = (cached == true) ? statsMgr
+                .getOFFlowStatistics(sid) : statsMgr.queryStatistics(sid,
+                OFStatisticsType.FLOW, null);
+
+        // *
+        // * Convert and filter the statistics per container
+        // * /
+        List<FlowOnNode> flowOnNodeList = new FlowStatisticsConverter(ofList)
+                .getFlowOnNodeList(node);
+        List<FlowOnNode> filteredList = filterFlowListPerContainer(container,
+                node, flowOnNodeList);
+
+        return (filteredList == null) ? null : filteredList;*///OF's code
         return (new SNMPHandler(cmethUtil)).readAllFlowRequest(node);//s4s add
     }
 
