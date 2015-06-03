@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * Copyright (c) 2013 Industrial Technology Research Institute of Taiwan and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+--><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opendaylight.snmp4sdn</groupId>
+    <artifactId>commons.parent</artifactId>
+    <version>0.2.0-SNAPSHOT</version>
+    <relativePath>commons/parent</relativePath>
+  </parent>
+
+  <artifactId>snmp4sdn_distribution</artifactId>
+  <version>0.2.0-SNAPSHOT</version>
+  <name>snmp4sdn</name><!-- Used by Sonar to set project name -->
+  <packaging>pom</packaging>
+
+  <scm>
+    <connection>scm:git:https://git.opendaylight.org/gerrit/p/snmp4sdn.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://git.opendaylight.org/gerrit/gitweb?p=snmp4sdn.git;a=summary</url>
+  </scm>
+
+  <modules>
+    <module>third-party/snmpj</module>
+    <module>third-party/expect4j</module>
+    <module>commons/parent</module>
+    <module>commons/snmp4sdn</module>
+    <module>mdsal/model</module>
+    <module>mdsal/caller/aclmanager</module>
+    <module>mdsal/caller/configmanager</module>
+    <module>mdsal/caller/fdbmanager</module>
+    <module>mdsal/caller/vlanmanager</module>
+    <module>snmp4sdn</module>
+    <!--<module>integrationtest</module> //no need to add. run by eclipse junit test-->
+    <module>plugin-shell</module>
+    <module>features</module>
+    <module>distribution-karaf</module>
+  </modules>
+</project>
