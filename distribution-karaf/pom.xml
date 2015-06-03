@@ -25,8 +25,8 @@
   <properties><!--TODO: move the settings to commons.snmp4sdn pom-->
     <!-- Optional TODO: Move these properties to your parent pom and possibly
             DependencyManagement section of your parent pom -->
-    <branding.version>1.0.0-SNAPSHOT</branding.version>
-    <karaf.resources.version>1.4.2-SNAPSHOT</karaf.resources.version>
+    <branding.version>1.1.0-SNAPSHOT</branding.version>
+    <karaf.resources.version>1.5.0-SNAPSHOT</karaf.resources.version>
     <karaf.version>3.0.1</karaf.version>
   </properties>
 

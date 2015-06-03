@@ -36,7 +36,7 @@ public class ConfigProvider implements BindingAwareProvider, AutoCloseable {
 
     //The following three functions (getImplementations(), getFunctionality(), onSessionInitialized()), seems to be deprecated in yangtools ver. 0.7.0-SNAPSHOT
 
-    @Override//seems deprecated in yangtools 0.7.0-SNAPSHOT
+    /*@Override//seems deprecated in yangtools 0.7.0-SNAPSHOT
     public Collection<? extends RpcService> getImplementations() {
         return null;
     }
@@ -49,7 +49,7 @@ public class ConfigProvider implements BindingAwareProvider, AutoCloseable {
     @Override//seems deprecated in yangtools 0.7.0-SNAPSHOT
     public void onSessionInitialized(ConsumerContext session) {
         // NOOP
-    }
+    }*/
 
     @Override
     public void onSessionInitiated(ProviderContext session) {
