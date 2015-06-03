@@ -1,0 +1,39 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+    <!--<reference id="iCoreRef" interface="org.opendaylight.snmp4sdn.IKarafCore"/>-->
+    <!--<reference id="iVLANServiceRef" interface="org.opendaylight.snmp4sdn.IKarafVLANService"/>--><!--mark due to seems can't support two <reference> in one blueprint?-->
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+        <command>
+          <action class="org.opendaylight.snmp4sdn.shell.ReadDB">
+            <!--<property name="controller" ref="iCoreRef"/>-->
+          </action>
+        </command><command>
+          <action class="org.opendaylight.snmp4sdn.shell.TopoDiscover">
+            <!--<property name="controller" ref="iCoreRef"/>-->
+          </action>
+        </command>
+        <!--The following methods are for VLAN configuration. They will be discarded when the VLAN Serivice's MD-SAL is provided later.-->
+        <command>
+          <action class="org.opendaylight.snmp4sdn.shell.AddVLANSetPorts">
+            <!--<property name="vlanService" ref="iVLANServiceRef"/>--><!--see the IKarafVLANService line above-->
+          </action>
+        </command>
+        <command>
+          <action class="org.opendaylight.snmp4sdn.shell.DeleteVlan">
+            <!--<property name="vlanService" ref="iVLANServiceRef"/>--><!--see the IKarafVLANService line above-->
+          </action>
+        </command>
+        <command>
+          <action class="org.opendaylight.snmp4sdn.shell.PrintVlanTable">
+            <!--<property name="vlanService" ref="iVLANServiceRef"/>--><!--see the IKarafVLANService line above-->
+          </action>
+        </command>
+        <command>
+          <action class="org.opendaylight.snmp4sdn.shell.AddFlow">
+          </action>
+        </command>
+        <command>
+          <action class="org.opendaylight.snmp4sdn.shell.DeleteFlow">
+          </action>
+        </command>
+    </command-bundle>
+</blueprint>

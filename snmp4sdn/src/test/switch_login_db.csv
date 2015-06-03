@@ -1,0 +1,5 @@
+MAC,IP,SNMP_Community,CLI_Username,CLI_Password
+00:00:00:00:00:01,10.217.0.31,private,admin,password
+00:00:00:00:00:02,10.217.0.32,private,admin,password
+00:00:00:00:00:03,10.217.0.33,private,admin,password
+00:00:00:00:00:04,10.217.0.34,private,admin,password

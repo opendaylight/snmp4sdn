@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * Copyright (c) 2013 Industrial Technology Research Institute of Taiwan and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+ -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opendaylight.snmp4sdn</groupId>
+    <artifactId>commons.snmp4sdn</artifactId>
+    <version>0.2.0-SNAPSHOT</version>
+    <relativePath>../snmp4sdn</relativePath>
+  </parent>
+
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</developerConnection>
+    <url>https://wiki.opendaylight.org/view/SNMP4SDN:Main</url>
+  </scm>
+
+  <artifactId>commons.integrationtest</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <dependencies>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.eclipse.equinox.console</artifactId>
+      <version>1.0.0.v20120522-1841</version>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.eclipse.equinox.util</artifactId>
+      <version>1.0.400.v20120522-2049</version>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.eclipse.osgi.services</artifactId>
+      <version>3.3.100.v20120522-1822</version>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.eclipse.equinox.ds</artifactId>
+      <version>1.4.0.v20120522-1841</version>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.apache.felix.gogo.command</artifactId>
+      <version>0.8.0.v201108120515</version>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.apache.felix.gogo.runtime</artifactId>
+      <version>0.8.0.v201108120515</version>
+    </dependency>
+    <dependency>
+      <groupId>equinoxSDK381</groupId>
+      <artifactId>org.apache.felix.gogo.shell</artifactId>
+      <version>0.8.0.v201110170705</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
+      <plugin>
+       <groupId>org.ops4j.pax.exam</groupId>
+       <artifactId>maven-paxexam-plugin</artifactId>
+       <version>1.2.4</version>
+        <executions>
+          <execution>
+            <id>generate-config</id>
+            <goals>
+              <goal>generate-depends-file</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>${checkstyle.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.opendaylight.snmp4sdn</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+          </dependency>
+         </dependencies>
+        <configuration>
+          <failsOnError>true</failsOnError>
+          <configLocation>snmp4sdn/space_and_tabs_checks.xml</configLocation>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>properties-maven-plugin</artifactId>
+        <version>${propertymavenplugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>set-system-properties</goal>
+            </goals>
+            <configuration>
+              <properties>
+                <property>
+                  <name>logback.configurationFile</name>
+                  <value>${project.parent.parent.basedir}/logback.xml</value>
+                </property>
+              </properties>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
