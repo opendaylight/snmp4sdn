@@ -30,7 +30,7 @@
             <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
 
             <feature version='${sal.version}'>odl-adsal-all</feature><!--TODO: may need not this, odl-adsal-core is enough?-->
-            <feature version='${nsf.version}'>odl-adsal-northbound</feature>
+            <!--<feature version='${nsf.version}'>odl-adsal-northbound</feature>-->
             <feature version='${mdsal.version}'>odl-mdsal-apidocs</feature>
             <feature version='${mdsal.version}'>odl-restconf</feature>
 
