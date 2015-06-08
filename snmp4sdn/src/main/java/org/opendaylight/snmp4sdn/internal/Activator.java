@@ -12,22 +12,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.felix.dm.Component;
-/*import org.opendaylight.controller.protocol_plugin.openflow.IDataPacketListen;
-import org.opendaylight.controller.protocol_plugin.openflow.IDataPacketMux;
-import org.opendaylight.controller.protocol_plugin.openflow.IDiscoveryListener;
-import org.opendaylight.controller.protocol_plugin.openflow.IFlowProgrammerNotifier;
-import org.opendaylight.controller.protocol_plugin.openflow.IInventoryProvider;
-import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimExternalListener;
-import org.opendaylight.controller.protocol_plugin.openflow.IInventoryShimInternalListener;
-import org.opendaylight.controller.protocol_plugin.openflow.IOFStatisticsListener;
-import org.opendaylight.controller.protocol_plugin.openflow.IOFStatisticsManager;
-import org.opendaylight.controller.protocol_plugin.openflow.IReadFilterInternalListener;
-import org.opendaylight.controller.protocol_plugin.openflow.IReadServiceFilter;
-import org.opendaylight.controller.protocol_plugin.openflow.IRefreshInternalProvider;
-import org.opendaylight.controller.protocol_plugin.openflow.ITopologyServiceShimListener;
-import org.opendaylight.controller.protocol_plugin.openflow.core.IController;
-import org.opendaylight.controller.protocol_plugin.openflow.core.IMessageListener;
-import org.opendaylight.controller.protocol_plugin.openflow.core.internal.Controller;*/
     import org.opendaylight.snmp4sdn.ICore;//karaf
     import org.opendaylight.snmp4sdn.IDataPacketListen;
     import org.opendaylight.snmp4sdn.IDataPacketMux;
@@ -41,6 +25,7 @@ import org.opendaylight.controller.protocol_plugin.openflow.core.internal.Contro
     import org.opendaylight.snmp4sdn.IRefreshInternalProvider;
     import org.opendaylight.snmp4sdn.IStatisticsListener;
     import org.opendaylight.snmp4sdn.ITopologyServiceShimListener;
+    import org.opendaylight.snmp4sdn.ITopologyService;
     import org.opendaylight.snmp4sdn.core.IController;
     import org.opendaylight.snmp4sdn.core.IMessageListener;
     import org.opendaylight.snmp4sdn.core.internal.Controller;
@@ -49,8 +34,10 @@ import org.opendaylight.controller.sal.connection.IPluginOutConnectionService;*/
 import org.opendaylight.controller.sal.core.ComponentActivatorAbstractBase;
 import org.opendaylight.controller.sal.core.IContainerAware;
 import org.opendaylight.controller.sal.core.IContainerListener;
+import org.opendaylight.snmp4sdn.core.ISwitchStateListener;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+/*//Lithium: remove ad-sal service dependency
 import org.opendaylight.controller.sal.flowprogrammer.IPluginInFlowProgrammerService;
 import org.opendaylight.controller.sal.flowprogrammer.IPluginOutFlowProgrammerService;
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
@@ -60,7 +47,7 @@ import org.opendaylight.controller.sal.packet.IPluginOutDataPacketService;
 import org.opendaylight.controller.sal.reader.IPluginInReadService;
 import org.opendaylight.controller.sal.reader.IPluginOutReadService;
 import org.opendaylight.controller.sal.topology.IPluginInTopologyService;
-import org.opendaylight.controller.sal.topology.IPluginOutTopologyService;
+import org.opendaylight.controller.sal.topology.IPluginOutTopologyService;*/
 import org.opendaylight.controller.sal.utils.GlobalConstants;
 import org.opendaylight.controller.sal.utils.INodeConnectorFactory;//s4s test
 import org.opendaylight.controller.sal.utils.INodeFactory;//s4s test
@@ -87,6 +74,7 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
     private FdbProvider fdb = new FdbProvider();//md-sal
     private AclProvider acl = new AclProvider();//md-sal
     private VlanProvider vlan = new VlanProvider();//md-sal
+    private TopologyProvider topo = new TopologyProvider();//md-sal
  
     /**
      * Function called when the activator starts just after some initializations
@@ -124,6 +112,7 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
         fdb.close();//md-sal
         acl.close();//md-sal
         vlan.close();//md-sal
+        topo.close();//md-sal
     }
 
     @Override
@@ -133,6 +122,7 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
         fdb.setContext(arg0);
         acl.setContext(arg0);
         vlan.setContext(arg0);
+        topo.setContext(arg0);
     }
 
     /**
@@ -144,12 +134,20 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
      *         instantiated in order to get an fully working implementation
      *         Object
      */
+
+    //NOTICE: in Lithium, it seems configureInstance() would not be executed, so I disable the getImplementations() which goes together with configureInstance()
+
     @Override
     public Object[] getImplementations() {
-        Object[] res = { TopologyServices.class, DataPacketServices.class,
-                InventoryService.class, ReadService.class,
-                FlowProgrammerNotifier.class,
-                VLANService.class
+        //to make sure the code getImplementations() would not happen, the name changes to getImplementations_original(), and leave getImplementations() empty
+        Object[] res = {};
+        return res;
+    }
+    public Object[] getImplementations_original() {
+        Object[] res = { TopologyServices.class,/* DataPacketServices.class,*/
+                InventoryService.class,/* ReadService.class,*/
+                //FlowProgrammerNotifier.class,
+                //VLANService.class//ad-sal, no-sal
                 };
         return res;
     }
@@ -169,19 +167,24 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
      *            per-container different behavior if needed, usually should not
      *            be the case though.
      */
+
+    //NOTICE: in Lithium, it seems configureInstance() would not be executed, so in the configureInstance() the if{} sections for TopologyServices and InventoryService are moved to configureGlobalInstance()
     @Override
     public void configureInstance(Component c, Object imp, String containerName) {
+        //to make sure the code configureInstance() would not happen, the name changes to configureInstance_original(), and leave configureInstance() empty
+    }
+    public void configureInstance_original(Component c, Object imp, String containerName) {
         if (imp.equals(TopologyServices.class)) {
             // export the service to be used by SAL
             c.setInterface(
-                    new String[] { IPluginInTopologyService.class.getName(),
+                    new String[] { //IPluginInTopologyService.class.getName(),//Lithium: remove ad-sal service dependency
                             ITopologyServiceShimListener.class.getName() }, null);
             // Hook the services coming in from SAL, as optional in
             // case SAL is not yet there, could happen
-            c.add(createContainerServiceDependency(containerName)
+            /*c.add(createContainerServiceDependency(containerName)
                     .setService(IPluginOutTopologyService.class)
                     .setCallbacks("setPluginOutTopologyService",
-                            "unsetPluginOutTopologyService").setRequired(false));
+                            "unsetPluginOutTopologyService").setRequired(false));*///Lithium: remove ad-sal service dependency
             c.add(createServiceDependency()
                     .setService(IRefreshInternalProvider.class)
                     .setCallbacks("setRefreshInternalProvider",
@@ -192,7 +195,7 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
             // export the service
             c.setInterface(
                     new String[] {
-                            IPluginInInventoryService.class.getName(),
+                            //IPluginInInventoryService.class.getName(),//Lithium: remove ad-sal service dependency
                             IInventoryShimInternalListener.class.getName(),
                             IInventoryProvider.class.getName() }, null);
 
@@ -202,19 +205,19 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
                     .setService(IController.class, "(name=Controller)")
                     .setCallbacks("setController", "unsetController")
                     .setRequired(true));
-            c.add(createContainerServiceDependency(containerName)
+            /*c.add(createContainerServiceDependency(containerName)
                     .setService(IPluginOutInventoryService.class)
                     .setCallbacks("setPluginOutInventoryServices",
                             "unsetPluginOutInventoryServices")
-                    .setRequired(false));
+                    .setRequired(false));*///Lithium: remove ad-sal service dependency
         }
 
-        if (imp.equals(DataPacketServices.class)) {
+        /*if (imp.equals(DataPacketServices.class)) {
             // export the service to be used by SAL
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             // Set the protocolPluginType property which will be used
             // by SAL
-            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), /*Node.NodeIDType.OPENFLOW*/"SNMP");
+            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "SNMP");
             c.setInterface(IPluginInDataPacketService.class.getName(), props);
             // Hook the services coming in from SAL, as optional in
             // case SAL is not yet there, could happen
@@ -231,27 +234,27 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
                     .setCallbacks("setPluginOutDataPacketService",
                             "unsetPluginOutDataPacketService")
                     .setRequired(false));
-            /*c.add(createServiceDependency()
-                    .setService(IPluginOutConnectionService.class)
-                    .setCallbacks("setIPluginOutConnectionService",
-                            "unsetIPluginOutConnectionService")
-                    .setRequired(true));*///s4s cs
-        }
+            //c.add(createServiceDependency()
+            //        .setService(IPluginOutConnectionService.class)
+            //        .setCallbacks("setIPluginOutConnectionService",
+            //                "unsetIPluginOutConnectionService")
+            //        .setRequired(true));//s4s cs
+        }*///useless now
 
-        if (imp.equals(ReadService.class)) {
+        /*if (imp.equals(ReadService.class)) {
             // export the service to be used by SAL
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             // Set the protocolPluginType property which will be used
             // by SAL
-            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), /*Node.NodeIDType.OPENFLOW*/"SNMP");
+            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "SNMP");
             c.setInterface(new String[] {
-                    /*IReadFilterInternalListener.class.getName(),*///s4s read
+                    //IReadFilterInternalListener.class.getName(),//s4s read
                     IPluginInReadService.class.getName() }, props);
 
-            /*c.add(createServiceDependency()
-                    .setService(IReadServiceFilter.class)
-                    .setCallbacks("setService", "unsetService")
-                    .setRequired(true));*///s4s read
+            //c.add(createServiceDependency()
+            //        .setService(IReadServiceFilter.class)
+            //        .setCallbacks("setService", "unsetService")
+            //        .setRequired(true));//s4s read
 
             c.add(createContainerServiceDependency(containerName)
                     .setService(IPluginOutReadService.class)
@@ -259,19 +262,19 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
                             "unsetPluginOutReadServices")
                     .setRequired(false));
 
-            /*c.add(createServiceDependency()
-                    .setService(IPluginOutConnectionService.class)
-                    .setCallbacks("setIPluginOutConnectionService",
-                            "unsetIPluginOutConnectionService")
-                    .setRequired(true));*///s4s cs
-        }
+            //c.add(createServiceDependency()
+            //        .setService(IPluginOutConnectionService.class)
+            //        .setCallbacks("setIPluginOutConnectionService",
+            //                "unsetIPluginOutConnectionService")
+            //        .setRequired(true));//s4s cs
+        }*///useless now
 
-        if (imp.equals(FlowProgrammerNotifier.class)) {
+        /*if (imp.equals(FlowProgrammerNotifier.class)) {
             // export the service to be used by SAL
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             // Set the protocolPluginType property which will be used
             // by SAL
-            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), /*Node.NodeIDType.OPENFLOW*/"SNMP");
+            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "SNMP");
             c.setInterface(IFlowProgrammerNotifier.class.getName(), props);
 
             c.add(createContainerServiceDependency(containerName)
@@ -279,13 +282,14 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
                     .setCallbacks("setPluginOutFlowProgrammerService",
                             "unsetPluginOutFlowProgrammerService")
                     .setRequired(true));
-            /*c.add(createServiceDependency()
-                    .setService(IPluginOutConnectionService.class)
-                    .setCallbacks("setIPluginOutConnectionService",
-                            "unsetIPluginOutConnectionService")
-                    .setRequired(true));*///s4s cs
-        }
-        if (imp.equals(VLANService.class)) {
+            //c.add(createServiceDependency()
+            //        .setService(IPluginOutConnectionService.class)
+            //        .setCallbacks("setIPluginOutConnectionService",
+            //                "unsetIPluginOutConnectionService")
+            //        .setRequired(true));//s4s cs
+        }*///useless now
+
+        /*if (imp.equals(VLANService.class)) {
             //c.setInterface(IPluginInVLANService.class.getName(), null);//ad-sal
             //c.setInterface(IVLANService.class.getName(), null);//no-sal
             //c.setInterface(VlanService.class.getName(), null);//md-sal
@@ -294,7 +298,7 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
                     .setService(IController.class)
                     .setCallbacks("setController", "unsetController")
                     .setRequired(true));
-        }
+        }*///ad-sal, no-sal
     }
 
     /**
@@ -308,16 +312,18 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
      */
     @Override
     public Object[] getGlobalImplementations() {
-        Object[] res = { Controller.class, OFStatisticsManager.class,
-                FlowProgrammerService.class, ReadServiceFilter.class,
-                DiscoveryService.class, DataPacketMuxDemux.class, InventoryService.class,
+        Object[] res = { Controller.class,/* OFStatisticsManager.class,
+                FlowProgrammerService.class, ReadServiceFilter.class, //useless now*/
+                DiscoveryService.class, /*DataPacketMuxDemux.class, //useless now*/ InventoryService.class,
+                TopologyServices.class,
                 InventoryServiceShim.class, TopologyServiceShim.class,
                 NodeFactory.class, NodeConnectorFactory.class,//s4s test: add this line
                 //ConfigService.class,//ad-sal or no-sal
                 config,//md-sal
                 fdb,//md-sal
                 acl,//md-sal
-                vlan//md-sal
+                vlan,//md-sal
+                topo//md-sal
                 };
         return res;
     }
@@ -337,7 +343,7 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
     public void configureGlobalInstance(Component c, Object imp) {
         logger.debug("snmp4sdn: Activator configureGlobalInstance( ) is called");
 
-        //md-sal (the following items: config, fdb, acl, vlan)
+        //md-sal (the following items: config, fdb, acl, vlan, topo)
         if (imp == config) {
             c.add(createServiceDependency().setService(BindingAwareBroker.class)
                     .setCallbacks("setBroker", "unsetBroker").setRequired(true));
@@ -370,26 +376,83 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
                     .setCallbacks("setController", "unsetController").setRequired(true));
             logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and IController, for VlanService");
         }
+        if (imp == topo) {
+            c.add(createServiceDependency().setService(BindingAwareBroker.class)
+                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(ITopologyService.class)
+                    .setCallbacks("setTopologyServiceShim", "unsetTopologyServiceShim").setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(IInventoryProvider.class)
+                    .setCallbacks("setInventoryService", "unsetInventoryService").setRequired(true));
+            logger.debug("snmp4sdn: Activator: configured BindingAwareBroker, ITopologyService, and IInventoryProvider, for TopologyService");
+        }
 
         if (imp.equals(Controller.class)) {
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             props.put("name", "Controller");
-            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), /*Node.NodeIDType.OPENFLOW*/"SNMP");
+            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "SNMP");
             c.setInterface(new String[] { IController.class.getName(),
                                           /*IPluginInConnectionService.class.getName()*///s4s cs
                                           ICore.class.getName()//karaf
                                           },
                                           props);
+            logger.debug("snmp4sdn: Activator: Controller.class configured");
         }
 
-        if (imp.equals(FlowProgrammerService.class)) {
+        if (imp.equals(TopologyServices.class)) {
+            // export the service to be used by SAL
+            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            props.put("containerName", GlobalConstants.DEFAULT.toString());
+            c.setInterface(
+                    new String[] { //IPluginInTopologyService.class.getName(),//Lithium: remove ad-sal service dependency
+                            ITopologyServiceShimListener.class.getName() }, props);
+            // Hook the services coming in from SAL, as optional in
+            // case SAL is not yet there, could happen
+            /*c.add(createContainerServiceDependency(containerName)
+                    .setService(IPluginOutTopologyService.class)
+                    .setCallbacks("setPluginOutTopologyService",
+                            "unsetPluginOutTopologyService").setRequired(false));*///Lithium: remove ad-sal service dependency
+            c.add(createServiceDependency()
+                    .setService(IRefreshInternalProvider.class)
+                    .setCallbacks("setRefreshInternalProvider",
+                            "unsetRefreshInternalProvider").setRequired(false));
+            logger.debug("snmp4sdn: Activator: TopologyServices.class configured");
+        }
+
+        if (imp.equals(InventoryService.class)) {
+            // export the service
+            Dictionary<String, Object> props = new Hashtable<String, Object>();
+            props.put("containerName", GlobalConstants.DEFAULT.toString());
+            c.setInterface(
+                    new String[] {
+                            //IPluginInInventoryService.class.getName(),//Lithium: remove ad-sal service dependency
+                            IInventoryShimInternalListener.class.getName(),
+                            IInventoryProvider.class.getName()
+                            }, props);
+
+            // Now lets add a service dependency to make sure the
+            // provider of service exists
+            c.add(createServiceDependency()
+                    .setService(IController.class, "(name=Controller)")
+                    .setCallbacks("setController", "unsetController")
+                    .setRequired(true));
+            /*c.add(createContainerServiceDependency(containerName)
+                    .setService(IPluginOutInventoryService.class)
+                    .setCallbacks("setPluginOutInventoryServices",
+                            "unsetPluginOutInventoryServices")
+                    .setRequired(false));*///Lithium: remove ad-sal service dependency
+            logger.debug("snmp4sdn: Activator: InventoryService.class configured");
+        }
+
+        /*if (imp.equals(FlowProgrammerService.class)) {
             // export the service to be used by SAL
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             // Set the protocolPluginType property which will be used
             // by SAL
-            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), /*Node.NodeIDType.OPENFLOW*/"SNMP");
+            props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "SNMP");
             c.setInterface(
-                    new String[] { IPluginInFlowProgrammerService.class.getName(), /*IMessageListener.class.getName(),*/
+                    new String[] { IPluginInFlowProgrammerService.class.getName(), //IMessageListener.class.getName(),
                             IContainerListener.class.getName(), IInventoryShimExternalListener.class.getName(),
                             IContainerAware.class.getName() }, props);
 
@@ -404,18 +467,18 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
                             "unsetsetFlowProgrammerNotifier")
                     .setRequired(false));
 
-            /*c.add(createServiceDependency()
-                    .setService(IPluginOutConnectionService.class)
-                    .setCallbacks("setIPluginOutConnectionService",
-                            "unsetIPluginOutConnectionService")
-                    .setRequired(true));*///s4s cs
-        }
+            //c.add(createServiceDependency()
+            //        .setService(IPluginOutConnectionService.class)
+            //        .setCallbacks("setIPluginOutConnectionService",
+            //                "unsetIPluginOutConnectionService")
+            //        .setRequired(true));//s4s cs
+        }*/
 
-        if (imp.equals(ReadServiceFilter.class)) {
+        /*if (imp.equals(ReadServiceFilter.class)) {
 
-            c.setInterface(new String[] { /*IReadServiceFilter.class.getName(), *///s4s read
+            c.setInterface(new String[] { //IReadServiceFilter.class.getName(), //s4s read
                 IContainerListener.class.getName(),
-                    /*IOFStatisticsListener.class.getName(), *///s4s statistics
+                    //IOFStatisticsListener.class.getName(), //s4s statistics
                     IContainerAware.class.getName() }, null);
 
             c.add(createServiceDependency()
@@ -426,14 +489,14 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
                     .setService(IOFStatisticsManager.class)
                     .setCallbacks("setService", "unsetService")
                     .setRequired(true));
-            /*c.add(createServiceDependency()
-                    .setService(IReadFilterInternalListener.class)
-                    .setCallbacks("setReadFilterInternalListener",
-                            "unsetReadFilterInternalListener")
-                    .setRequired(false));*///s4s read
-        }
+            //c.add(createServiceDependency()
+            //        .setService(IReadFilterInternalListener.class)
+            //        .setCallbacks("setReadFilterInternalListener",
+            //                "unsetReadFilterInternalListener")
+            //        .setRequired(false));//s4s read
+        }*/
 
-        if (imp.equals(OFStatisticsManager.class)) {
+        /*if (imp.equals(OFStatisticsManager.class)) {
 
             c.setInterface(new String[] { IOFStatisticsManager.class.getName(),
                     IInventoryShimExternalListener.class.getName() }, null);
@@ -442,11 +505,11 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
                     .setService(IController.class, "(name=Controller)")
                     .setCallbacks("setController", "unsetController")
                     .setRequired(true));
-            /*c.add(createServiceDependency()
-                    .setService(IOFStatisticsListener.class)
-                    .setCallbacks("setStatisticsListener",
-                            "unsetStatisticsListener").setRequired(false));*///s4s statistics
-        }
+            //c.add(createServiceDependency()
+            //        .setService(IOFStatisticsListener.class)
+            //        .setCallbacks("setStatisticsListener",
+            //                "unsetStatisticsListener").setRequired(false));//s4s statistics
+        }*/
 
         if (imp.equals(DiscoveryService.class)) {
             // export the service
@@ -458,14 +521,9 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
                     .setService(IController.class, "(name=Controller)")
                     .setCallbacks("setController", "unsetController")
                     .setRequired(true));
-            c.add(createContainerServiceDependency(
-                    GlobalConstants.DEFAULT.toString())
-                    .setService(IInventoryProvider.class)
-                    .setCallbacks("setInventoryProvider",
-                    "unsetInventoryProvider").setRequired(true));
-            c.add(createServiceDependency().setService(IDataPacketMux.class)
+            /*c.add(createServiceDependency().setService(IDataPacketMux.class)
                     .setCallbacks("setIDataPacketMux", "unsetIDataPacketMux")
-                    .setRequired(true));
+                    .setRequired(true));*///useless now
             c.add(createServiceDependency()
                     .setService(IDiscoveryListener.class)
                     .setCallbacks("setDiscoveryListener",
@@ -475,11 +533,12 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
                     .setCallbacks("setIPluginOutConnectionService",
                             "unsetIPluginOutConnectionService")
                     .setRequired(true));*///s4s cs
+            logger.debug("snmp4sdn: Activator: DiscoveryService.class configured");
         }
 
         // DataPacket mux/demux services, which is teh actual engine
         // doing the packet switching
-        if (imp.equals(DataPacketMuxDemux.class)) {
+        /*if (imp.equals(DataPacketMuxDemux.class)) {
             c.setInterface(new String[] { IDataPacketMux.class.getName(), IContainerListener.class.getName(),
                     IInventoryShimExternalListener.class.getName(), IContainerAware.class.getName() }, null);
 
@@ -497,35 +556,12 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
                     .setService(IDataPacketListen.class)
                     .setCallbacks("setIDataPacketListen",
                             "unsetIDataPacketListen").setRequired(false));
-            /*c.add(createServiceDependency()
-                    .setService(IPluginOutConnectionService.class)
-                    .setCallbacks("setIPluginOutConnectionService",
-                            "unsetIPluginOutConnectionService")
-                    .setRequired(true));*///s4s cs
-        }
-
-        if (imp.equals(InventoryService.class)) {
-            // export the service
-            Dictionary<String, Object> props = new Hashtable<String, Object>();
-            props.put("scope", "Global");
-
-            c.setInterface(
-                    new String[] { IPluginInInventoryService.class.getName(),
-                            IInventoryShimInternalListener.class.getName(),
-                            IInventoryProvider.class.getName() }, props);
-
-            // Now lets add a service dependency to make sure the
-            // provider of service exists
-            c.add(createServiceDependency()
-                    .setService(IController.class, "(name=Controller)")
-                    .setCallbacks("setController", "unsetController")
-                    .setRequired(true));
-            c.add(createServiceDependency()
-                    .setService(IPluginOutInventoryService.class, "(scope=Global)")
-                    .setCallbacks("setPluginOutInventoryServices",
-                            "unsetPluginOutInventoryServices")
-                    .setRequired(true));
-        }
+            //c.add(createServiceDependency()
+            //        .setService(IPluginOutConnectionService.class)
+            //        .setCallbacks("setIPluginOutConnectionService",
+            //                "unsetIPluginOutConnectionService")
+            //        .setRequired(true));//s4s cs
+        }*/
 
         if (imp.equals(InventoryServiceShim.class)) {
             c.setInterface(new String[] { IContainerListener.class.getName(),
@@ -542,11 +578,6 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
                             "unsetInventoryShimInternalListener")
                     .setRequired(true));
             c.add(createServiceDependency()
-                    .setService(IInventoryShimInternalListener.class, "(scope=Global)")
-                    .setCallbacks("setInventoryShimGlobalInternalListener",
-                            "unsetInventoryShimGlobalInternalListener")
-                    .setRequired(true));
-            c.add(createServiceDependency()
                     .setService(IInventoryShimExternalListener.class)
                     .setCallbacks("setInventoryShimExternalListener",
                             "unsetInventoryShimExternalListener")
@@ -556,21 +587,23 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
                     .setCallbacks("setIPluginOutConnectionService",
                             "unsetIPluginOutConnectionService")
                     .setRequired(true));*///s4s cs
+            logger.debug("snmp4sdn: Activator: InventoryServiceShim.class configured");
         }
 
         if (imp.equals(TopologyServiceShim.class)) {
             c.setInterface(new String[] { IDiscoveryListener.class.getName(), IContainerListener.class.getName(),
-                    IRefreshInternalProvider.class.getName(), IInventoryShimExternalListener.class.getName(),
+                    IRefreshInternalProvider.class.getName(), IInventoryShimExternalListener.class.getName(), ITopologyService.class.getName(),
                     IContainerAware.class.getName() }, null);
-            c.add(createServiceDependency()
+            /*c.add(createServiceDependency()
                     .setService(ITopologyServiceShimListener.class)
                     .setCallbacks("setTopologyServiceShimListener",
                             "unsetTopologyServiceShimListener")
-                    .setRequired(true));
-            c.add(createServiceDependency()
+                    .setRequired(true));*///TODO: don't know why. if enable this, it seems as a result, multiple services creation failure
+            /*c.add(createServiceDependency()
                     .setService(IOFStatisticsManager.class)
                     .setCallbacks("setStatisticsManager",
-                            "unsetStatisticsManager").setRequired(false));
+                            "unsetStatisticsManager").setRequired(false));*///useless now
+            logger.debug("snmp4sdn: Activator: TopologyServiceShim.class configured");
         }
 
         if (imp.equals(NodeFactory.class)) {//s4s test (copied from Stub plugin's activator.java)
@@ -581,6 +614,7 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "SNMP");
             props.put("protocolName", "SNMP");
             c.setInterface(INodeFactory.class.getName(), props);
+            logger.debug("snmp4sdn: Activator: NodeFactory.class configured");
         }
         if (imp.equals(NodeConnectorFactory.class)) {//s4s test (copied from Stub plugin's activator.java)
             // export the service to be used by SAL
@@ -590,7 +624,9 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
             props.put(GlobalConstants.PROTOCOLPLUGINTYPE.toString(), "SNMP");
             props.put("protocolName", "SNMP");
             c.setInterface(INodeConnectorFactory.class.getName(), props);
+            logger.debug("snmp4sdn: Activator: NodeConnectorFactory.class configured");
         }
+
         /*if (imp.equals(ConfigService.class)) {//for ad-sal or no-sal
             //c.setInterface(new String[] { IConfigService.class.getName() }, null);
 
@@ -601,30 +637,4 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
         }*/
     }
 
-    //Following are for md-sal
-
-    /*VLANService vlanService;
-
-    public Activator() {
-        vlanService = new VLANService();
-    }
-
-    @Override
-    public Collection<? extends RpcService> getImplementations() {
-        return null;
-    }
-
-    @Override
-    public Collection<? extends ProviderFunctionality> getFunctionality() {
-        return null;
-    }
-
-    @Override
-    public void onSessionInitiated(ProviderContext session) {
-        session.addRpcImplementation(VLANService.class, vlanService);
-    }
-
-    @Override
-    protected void startImpl(BundleContext context) {
-    }*/
 }

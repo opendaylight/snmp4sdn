@@ -20,7 +20,7 @@
   <packaging>bundle</packaging>
 
   <properties>
-    <karaf.shell.version>3.0.0</karaf.shell.version><!--copy from ovsdb's /commons/parent/pom.xml-->
+    <karaf.shell.version>3.0.1</karaf.shell.version><!--odlparent karaf.version 3.0.3--><!--copy from ovsdb's /commons/parent/pom.xml-->
   </properties>
 
   <dependencies>

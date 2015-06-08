@@ -1,0 +1,116 @@
+module topology {
+
+    yang-version 1;
+
+    namespace
+        "urn:opendaylight:snmp4sdn:md:topology";
+
+    prefix vlan;
+
+    import snmp4sdn-types {prefix types;}
+
+    organization "Industrial Technology Research Institute of Taiwan";
+
+    contact
+        "Yi-Ling Hsieh <ylhsieh@itri.org.tw>";
+
+    description
+        "YANG version of the SNMP4SDN Topology Service MIB.";
+
+    revision "2015-05-28" {
+        description
+            "SNMP4SDN Topology Service module in progress.";
+    }
+
+    typedef device-type{
+        type enumeration{
+            enum "OF"{//openflow switch
+                value 1;
+            }
+            enum "SNMP"{//legacy ethernet switch
+                value 2;
+            }
+            enum "PR"{//production node
+                value 3;
+            }
+        }
+    }
+
+    grouping node{
+        leaf node-id {
+            type string;//due to PR type is String, SNMP and OF types are Long, so use String for all cases
+        }
+        leaf node-type{
+            type device-type;
+        }
+    }
+
+    grouping node-connector{
+        leaf node-connector-id{
+            type string;//due to PR type is String, SNMP and OF types are Short, so use String for all cases
+        }
+        leaf node-connector-type{
+            type device-type;
+        }
+        uses node;
+    }
+
+    grouping topo-edge{
+        //head port
+        leaf head-node-connector-id{
+            type string;//due to PR type is String, SNMP and OF types are Short, so use String for all cases
+        }
+        leaf head-node-connector-type{
+            type device-type;
+        }
+        leaf head-node-id {
+            type string;//due to PR type is String, SNMP and OF types are Long, so use String for all cases
+        }
+        leaf head-node-type{
+            type device-type;
+        }
+        //tail port
+        leaf tail-node-connector-id{
+            type string;//due to PR type is String, SNMP and OF types are Short, so use String for all cases
+        }
+        leaf tail-node-connector-type{
+            type device-type;
+        }
+        leaf tail-node-id {
+            type string;//due to PR type is String, SNMP and OF types are Long, so use String for all cases
+        }
+        leaf tail-node-type{
+            type device-type;
+        }
+    }
+
+    rpc get-node-list{
+        description
+            "get nodes";
+        output{
+            list node-list-entry {
+                uses node;
+            }
+        }
+    }
+
+    rpc get-node-connector-list{
+        description
+            "get nodeconnectors";
+        output{
+            list node-connector-list-entry {
+                uses node-connector;
+            }
+        }
+    }
+
+    rpc get-edge-list{
+        description
+            "get edges";
+        output{
+            list edge-list-entry {
+                uses topo-edge;
+            }
+        }
+    }
+}
