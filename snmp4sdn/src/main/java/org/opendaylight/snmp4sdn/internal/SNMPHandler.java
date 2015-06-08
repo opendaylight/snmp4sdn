@@ -826,6 +826,17 @@ public class SNMPHandler{
             return null;
         }
 
+        //socket had been cloased in the "2. read fwd table entry", so establish again
+        try{
+            String community = cmethUtil.getSnmpCommunity(nodeId);
+            comInterface = new SNMPv1CommunicationInterface(1, sw_ipAddr, community);
+            //logger.debug("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
+        }
+        catch (SocketException e1) {
+            logger.debug("ERROR: readFdbTableEntry(): for node {}" + ", create SNMP communication interface error: {}", switchIP, e1);
+            return null;
+        }
+
         //3. read fwd table entry's 'type' field
         //logger.debug("going to read fwd table entry type...");
         FDBEntry.EntryType type = readFwdTableEntryType(comInterface, (short)vlanId, destMac);
