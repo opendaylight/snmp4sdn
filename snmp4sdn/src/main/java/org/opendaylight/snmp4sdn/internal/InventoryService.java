@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class InventoryService implements IInventoryShimInternalListener,
-        IPluginInInventoryService, IInventoryProvider {
+        /*IPluginInInventoryService,//Lithium: remove ad-sal service dependency*/ IInventoryProvider {
     protected static final Logger logger = LoggerFactory
             .getLogger(InventoryService.class);
     private Set<IPluginOutInventoryService> pluginOutInventoryServices = Collections
@@ -173,10 +173,10 @@ public class InventoryService implements IInventoryShimInternalListener,
     }
 
     // nothing to return
-    @Override
+    /*@Override//Lithium: remove ad-sal service dependency (IPluginInInventoryService, which is removed in this code)
     public Set<Node> getConfiguredNotConnectedNodes() {
         return Collections.emptySet();
-    }
+    }*/
 
     @Override
     public void updateNodeConnector(NodeConnector nodeConnector,

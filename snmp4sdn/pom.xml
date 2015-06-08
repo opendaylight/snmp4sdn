@@ -61,6 +61,10 @@
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126,<!--md-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.get.fdb.table.output,<!--md-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150528,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150528.get.edge.list.output,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150528.get.node.list.output,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150528.get.node.connector.list.output,<!--md-sal-->
               <!--com.google.common.collect,//md-sal-->
               org.opendaylight.yangtools.yang.common,<!--md-sal copy from ping example-->
               org.opendaylight.yangtools.yang.binding,<!--md-sal copy from ping example-->
@@ -121,7 +125,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
-      <version>0.7.0</version><!--0.7.0-withVLAN--><!--//prg. custom ad-sal-->
+      <version>0.9.0-SNAPSHOT</version><!--0.7.0-withVLAN--><!--//prg. custom ad-sal-->
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller.thirdparty</groupId>

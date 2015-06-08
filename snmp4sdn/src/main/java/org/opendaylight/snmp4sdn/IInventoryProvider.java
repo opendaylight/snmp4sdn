@@ -14,9 +14,22 @@ package org.opendaylight.snmp4sdn;
 
 import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
 
+//the following imports are added due to the two APIs
+import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
+import org.opendaylight.controller.sal.core.Property;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
+
 /**
  * The Interface provides inventory service to the local plugin modules
  */
-public interface IInventoryProvider extends IPluginInInventoryService {
+public interface IInventoryProvider/* extends IPluginInInventoryService//Lithium adsal deprecated*/ {
+
+    //the two API are copied from IPluginInInventoryService
+    public ConcurrentMap<Node, Map<String, Property>> getNodeProps();
+
+    public ConcurrentMap<NodeConnector, Map<String, Property>> getNodeConnectorProps(
+            Boolean refresh);
 
 }

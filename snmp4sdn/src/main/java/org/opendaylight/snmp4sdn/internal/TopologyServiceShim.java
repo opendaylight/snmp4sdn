@@ -32,6 +32,7 @@ import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.opendaylight.snmp4sdn.IDiscoveryListener;
 import org.opendaylight.snmp4sdn.IInventoryShimExternalListener;
+import org.opendaylight.snmp4sdn.ITopologyService;
 import org.opendaylight.snmp4sdn.IOFStatisticsManager;
 import org.opendaylight.snmp4sdn.IRefreshInternalProvider;
 import org.opendaylight.snmp4sdn.ITopologyServiceShimListener;
@@ -61,7 +62,7 @@ import org.opendaylight.controller.sal.utils.GlobalConstants;
  */
 public class TopologyServiceShim implements IDiscoveryListener,
         IContainerListener, CommandProvider, IRefreshInternalProvider,
-        IInventoryShimExternalListener, IContainerAware {
+        IInventoryShimExternalListener, IContainerAware, ITopologyService {
     protected static final Logger logger = LoggerFactory
             .getLogger(TopologyServiceShim.class);
     private ConcurrentMap<String, ITopologyServiceShimListener> topologyServiceShimListeners = new ConcurrentHashMap<String, ITopologyServiceShimListener>();
@@ -849,4 +850,33 @@ public class TopologyServiceShim implements IDiscoveryListener,
         edgeMap.remove(containerName);
     }
 
+    //Lithium add
+    @Override //from ITopologyService
+    public List<Edge> getEdgeList(){
+        Map<NodeConnector, Pair<Edge, Set<Property>>> globalContainerEdges = edgeMap
+                .get(GlobalConstants.DEFAULT.toString());
+        if (globalContainerEdges == null) {
+            return null;
+        }
+        //TODO: not yet write code for other containers which are not named as GlobalConstants.DEFAULT
+
+        List<Edge> edgeList = new ArrayList<Edge>();
+
+        for (NodeConnector connector : globalContainerEdges.keySet()) {
+            // Get edge for which this node connector is head
+            Pair<Edge, Set<Property>> props = this.edgeMap.get(
+                    GlobalConstants.DEFAULT.toString()).get(connector);
+            if (props == null) {
+                logger.debug("ERROR: getEdgeMap(): edgeMap has null value for NodeConnector {}", connector);
+                continue;
+            }
+            Edge edge = props.getLeft();
+            if (edge == null) {
+                continue;
+            }
+            edgeList.add(edge);
+        }
+
+        return edgeList;
+    }
 }
