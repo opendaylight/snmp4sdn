@@ -5,19 +5,19 @@
     <parent>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>commons.snmp4sdn</artifactId>
-      <version>0.2.0-SNAPSHOT</version>
+      <version>0.2.0-Lithium</version>
       <relativePath>../../commons/snmp4sdn</relativePath>
     </parent>
    <!-- <parent>
       <artifactId>model-parent</artifactId>
       <groupId>org.opendaylight.controller.model</groupId>
-      <version>1.1-SNAPSHOT</version>
+      <version>1.1-Lithium</version>
       <relativePath></relativePath>
     </parent>-->
 
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>md-model</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.2.0-Lithium</version>
     <packaging>bundle</packaging>
     <!--<scm>
         <connection>scm:git:https://git.opendaylight.org/gerrit/p/snmp4sdn.git</connection>
