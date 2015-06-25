@@ -16,12 +16,12 @@
   </prerequisites>
   <groupId>org.opendaylight.snmp4sdn</groupId>
   <artifactId>commons.snmp4sdn</artifactId>
-  <version>0.2.0-Lithium</version>
+  <version>0.2.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.parent</artifactId>
-    <version>0.2.0-Lithium</version>
+    <version>0.2.1-SNAPSHOT</version>
     <relativePath>../parent</relativePath>
   </parent>
 
@@ -62,11 +62,11 @@
     <!--<javassist.version>3.17.1-GA</javassist.version>--><!--removed in ODL gerrit #15339-->
     <sample-toaster.version>1.0</sample-toaster.version>
     <releaseplugin.version>2.3.2</releaseplugin.version>
-    <sal.version>0.9.0-Lithium</sal.version><!--0.9.0-Lithium--><!--0.8.1-Lithium, before post-Helium update-->
-    <mdsal.version>1.2.0-Lithium</mdsal.version><!--1.1-Lithium--><!--Seems mdsal 1.2.0-Lithium depends on yangtools 0.7.0-Lithium-->
-    <nsf.version>0.5.0-Lithium</nsf.version><!--0.4.2-Lithium--><!--Helium SR2 is 0.4.2-Lithium. Helium is 0.4.2-Lithium-->
-    <yangtools.version>0.7.0-Lithium</yangtools.version><!--0.7.0-Lithium--><!--0.6.2-Lithium, before post-Helium update--><!--s4s. if using earlier version (even 0.6.2), will error when building md-model: cannot find symbol "org.opendaylight.yangtools.yang.binding.YangModelBindingProvider"-->
-    <commons.opendaylight.version>1.5.0-Lithium</commons.opendaylight.version><!--1.4.4-Lithium-->
+    <sal.version>0.9.1-SNAPSHOT</sal.version><!--0.9.1-SNAPSHOT--><!--0.8.2-SNAPSHOT, before post-Helium update-->
+    <mdsal.version>1.2.1-SNAPSHOT</mdsal.version><!--1.1.1-SNAPSHOT--><!--Seems mdsal 1.2.1-SNAPSHOT depends on yangtools 0.7.1-SNAPSHOT-->
+    <nsf.version>0.5.1-SNAPSHOT</nsf.version><!--0.4.3-SNAPSHOT--><!--Helium SR2 is 0.4.3-SNAPSHOT. Helium is 0.4.3-SNAPSHOT-->
+    <yangtools.version>0.7.1-SNAPSHOT</yangtools.version><!--0.7.1-SNAPSHOT--><!--0.6.3-SNAPSHOT, before post-Helium update--><!--s4s. if using earlier version (even 0.6.2), will error when building md-model: cannot find symbol "org.opendaylight.yangtools.yang.binding.YangModelBindingProvider"-->
+    <commons.opendaylight.version>1.5.1-SNAPSHOT</commons.opendaylight.version><!--1.4.5-SNAPSHOT-->
     <!--<commons.lang.version>3.1</commons.lang.version>--><!--removed in ODL gerrit #15339-->
     <!--<jacoco.version>0.6.2.201302030002</jacoco.version>--><!--removed in ODL gerrit #15339-->
   </properties>
@@ -408,7 +408,7 @@
             <dependency>
               <groupId>org.opendaylight.snmp4sdn</groupId>
               <artifactId>commons.checkstyle</artifactId>
-              <version>0.2.0-Lithium</version>//TODO: version need to up to date
+              <version>0.2.1-SNAPSHOT</version>//TODO: version need to up to date
             </dependency>
           </dependencies>
         <executions>

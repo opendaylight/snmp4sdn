@@ -13,22 +13,22 @@
     <parent>
         <groupId>org.opendaylight.snmp4sdn</groupId>
         <artifactId>commons.snmp4sdn</artifactId>
-        <version>0.2.0-Lithium</version>
+        <version>0.2.1-SNAPSHOT</version>
         <relativePath>../commons/snmp4sdn</relativePath>
     </parent>
 
     <artifactId>features-snmp4sdn</artifactId>
     <groupId>org.opendaylight.snmp4sdn</groupId>
-    <version>0.2.0-Lithium</version>
+    <version>0.2.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties><!--TODO: move the settings to commons.snmp4sdn pom-->
         <features.file>features.xml</features.file>
-        <branding.version>1.1.0-Lithium</branding.version>
-        <karaf.resources.version>1.5.0-Lithium</karaf.resources.version>
+        <branding.version>1.1.1-SNAPSHOT</branding.version>
+        <karaf.resources.version>1.5.1-SNAPSHOT</karaf.resources.version>
         <karaf.version>3.0.1</karaf.version><!--3.0.3-->
-        <feature.test.version>1.5.0-Lithium</feature.test.version><!--as required in gerrit 16240-->
-        <karaf.empty.version>1.5.0-Lithium</karaf.empty.version>
+        <feature.test.version>1.5.1-SNAPSHOT</feature.test.version><!--as required in gerrit 16240-->
+        <karaf.empty.version>1.5.1-SNAPSHOT</karaf.empty.version>
         <surefire.version>2.16</surefire.version>
     </properties>
     <dependencies>
