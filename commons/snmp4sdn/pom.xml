@@ -39,7 +39,6 @@
     <siteplugin>3.2</siteplugin>
     <projectinfo>2.6</projectinfo>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <!--<compiler.version>2.3.2</compiler.version>--><!--removed in ODL gerrit #15339-->
     <!--<surefire.version>2.15</surefire.version>--><!--removed in ODL gerrit #15339-->
     <failsafe.version>2.15</failsafe.version>
     <!--<exam.version>3.0.0</exam.version>--><!--removed in ODL gerrit #15339-->
@@ -582,8 +581,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>${compiler.version}</version>
           <configuration>
+            <!-- Override default odlparent target of 1.7
+                 FIXME: this may be problematic, as ODL runtime parts assume
+                        Java 7, so produced artifacts may not actually be able
+                        to run on Java 6.
+             -->
             <source>1.6</source>
             <target>1.6</target>
           </configuration>
