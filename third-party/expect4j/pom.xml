@@ -4,7 +4,7 @@
 
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>org.expect4j</artifactId>
-    <version>1.4.4-SNAPSHOT</version>
+    <version>1.4.4-Helium-SR4</version>
     <name>expect4j</name>
     <url>http://github.com/cverges/expect4j</url>
     <description>A Java implementation of the standard Expect library</description>

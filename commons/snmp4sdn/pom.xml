@@ -16,12 +16,12 @@
   </prerequisites>
   <groupId>org.opendaylight.snmp4sdn</groupId>
   <artifactId>commons.snmp4sdn</artifactId>
-  <version>0.1.7-SNAPSHOT</version>
+  <version>0.1.7-Helium-SR4</version>
   <packaging>pom</packaging>
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.parent</artifactId>
-    <version>0.1.7-SNAPSHOT</version>
+    <version>0.1.7-Helium-SR4</version>
     <relativePath>../parent</relativePath>
   </parent>
 
@@ -404,7 +404,7 @@
             <dependency>
               <groupId>org.opendaylight.snmp4sdn</groupId>
               <artifactId>commons.checkstyle</artifactId>
-              <version>0.0.5-SNAPSHOT</version>
+              <version>0.0.5-Helium-SR4</version>
             </dependency>
           </dependencies>
         <executions>
