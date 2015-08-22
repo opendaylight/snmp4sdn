@@ -4,13 +4,13 @@
   <!--<parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.snmp4sdn</artifactId>
-    <version>0.2.1-Lithium-SR1</version>
+    <version>0.2.2-SNAPSHOT</version>
     <relativePath>../commons/snmp4sdn</relativePath>
   </parent>-->
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>karaf-parent</artifactId>
-    <version>1.5.1-Lithium-SR1</version>
+    <version>1.5.2-SNAPSHOT</version>
     <relativePath />
   </parent>
   <!--
@@ -22,7 +22,7 @@
 
   <groupId>org.opendaylight.snmp4sdn</groupId>
   <artifactId>distribution-karaf</artifactId>
-  <version>0.2.1-Lithium-SR1</version>
+  <version>0.2.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <prerequisites>
@@ -31,8 +31,8 @@
   <properties><!--TODO: move the settings to commons.snmp4sdn pom-->
     <!-- Optional TODO: Move these properties to your parent pom and possibly
             DependencyManagement section of your parent pom -->
-    <branding.version>1.1.1-Lithium-SR1</branding.version>
-    <karaf.resources.version>1.5.1-Lithium-SR1</karaf.resources.version>
+    <branding.version>1.1.2-SNAPSHOT</branding.version>
+    <karaf.resources.version>1.5.2-SNAPSHOT</karaf.resources.version>
     <karaf.version>3.0.1</karaf.version><!--odlparent 3.0.3-->
   </properties>
 
@@ -93,7 +93,7 @@
       <dependency>
         <groupId>org.opendaylight.openflowplugin</groupId>
         <artifactId>features-openflowplugin</artifactId>
-        <version>0.0.4-Lithium-SR1</version>
+        <version>0.0.5-SNAPSHOT</version>
         <classifier>features</classifier>
         <type>xml</type>
         <scope>runtime</scope>
@@ -103,7 +103,7 @@
     <dependency><!--s4s add-->
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>features-snmp4sdn</artifactId>
-      <version>0.2.1-Lithium-SR1</version><!--0.1.4-Lithium-SR1, before post-Helium update-->
+      <version>0.2.2-SNAPSHOT</version><!--0.1.5-SNAPSHOT, before post-Helium update-->
     </dependency>
   </dependencies>
 

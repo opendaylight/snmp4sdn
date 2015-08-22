@@ -8,18 +8,18 @@
   <!--<parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.1</version>< // !- -yiling 1.4.3-Lithium-SR1 - - >
+    <version>1.4.1</version>< // !- -yiling 1.4.4-SNAPSHOT - - >
     <relativePath>../../../../../commons/opendaylight</relativePath>
   </parent>-->
   <parent><!--copy from snmp4sdn/snmp4sdn/pom.xml-->
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.snmp4sdn</artifactId>
-    <version>0.2.1-Lithium-SR1</version>
+    <version>0.2.2-SNAPSHOT</version>
     <relativePath>../../../commons/snmp4sdn</relativePath>
   </parent>
   <artifactId>configmanager</artifactId><!--configmanager add-->
   <packaging>bundle</packaging>
-  <version>0.2.1-Lithium-SR1</version>
+  <version>0.2.2-SNAPSHOT</version>
 
   <properties>
     <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
@@ -83,7 +83,7 @@
     <!--<dependency>
       <groupId>org.opendaylight.controller.model</groupId>
       <artifactId>model-ping</artifactId>
-      <version>1.0</version>//yiling 1.1.1-Lithium-SR1
+      <version>1.0</version>//yiling 1.1.2-SNAPSHOT
     </dependency>-->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -104,12 +104,12 @@
     <!--<dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>configmd-model</artifactId>
-      <version>0.1.4-Lithium-SR1</version>
+      <version>0.1.5-SNAPSHOT</version>
     </dependency>--><!--this bundle is packaged in 'md-model'-->
     <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>md-model</artifactId>
-      <version>0.2.1-Lithium-SR1</version>
+      <version>0.2.2-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
