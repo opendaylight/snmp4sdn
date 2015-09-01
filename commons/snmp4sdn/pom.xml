@@ -45,7 +45,6 @@
     <!--<exam.version>3.0.0</exam.version>--><!--removed in ODL gerrit #15339-->
     <!--<url.version>1.5.0</url.version>--><!--removed in ODL gerrit #15339-->
     <!--<enunciate.version>1.26.2</enunciate.version>--><!--removed in ODL gerrit #15339-->
-    <sonar.branch>${user.name}-private-view</sonar.branch>
     <sonar.skippedModules>org.openflow.openflowj,net.sf.jung2</sonar.skippedModules>
     <!--<logback.version>1.0.9</logback.version>--><!--removed in ODL gerrit #15339-->
     <!--<slf4j.version>1.7.2</slf4j.version>--><!--removed in ODL gerrit #15339-->
