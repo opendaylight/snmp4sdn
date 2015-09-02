@@ -25,8 +25,8 @@
     <feature name='odl-snmp4sdn-snmp4sdn' version='${project.version}' description='OpenDaylight :: SNMP4SDN :: Plugin'>
             <!--these marked are in Helium first release-->
             <feature version="${sal.version}">odl-adsal-core</feature>
-            <feature version='${yangtools.version}'>odl-yangtools-binding</feature>
-            <feature version='${yangtools.version}'>odl-yangtools-models</feature>
+            <feature version='${yangtools.version}'>odl-mdsal-binding-base</feature>
+            <feature version='${yangtools.version}'>odl-mdsal-models</feature>
             <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
 
             <feature version='${sal.version}'>odl-adsal-all</feature><!--TODO: may need not this, odl-adsal-core is enough?-->
