@@ -32,13 +32,17 @@ public class CmethUtil implements CommandProvider{
 
     boolean isDBPathFixed = true;//junit test
 
+    String defaultDbFilePath = "/etc/snmp4sdn_swdb.csv";
+
     public CmethUtil(){
         table = new ConcurrentHashMap<Long, Vector>();
         if(isDBPathFixed)
             //readDB("D:\\OpenDaylight\\snmp4sdn\\controller\\opendaylight\\protocol_plugins\\snmp4sdn\\snmp4sdn\\src\\test\\switch_login_db.csv");
-            readDB("/root/swdb.csv");
+            //readDB("/root/swdb.csv");
+            //readDB("/etc/snmp4sdn_swdb.csv");
+            readDB(defaultDbFilePath);
+            //readDB("/home/alien/swdb_fake100.csv");
             //readDB("D:\\swdb.csv");
-            printDB();
     }
 
     /*public CmethUtil(IDBHandler db){//TODO
@@ -49,7 +53,11 @@ public class CmethUtil implements CommandProvider{
         registerWithOSGIConsole();
     }
 
-    public void readDB(String dbPath){
+    public boolean readDB(){
+        return readDB(defaultDbFilePath);
+    }
+
+    public boolean readDB(String dbPath){
         logger.info("enter CmethUtil.readDB()");
         table.clear();
         logger.trace("DB cleared");
@@ -65,7 +73,7 @@ public class CmethUtil implements CommandProvider{
             if(line == null)
                 break;
 
-            String mac, ip, snmp_community, cli_username, cli_password;
+            String mac, ip, snmp_community, cli_username, cli_password, model;
 
             String str = new String(line).trim();
             mac = str.substring(0, str.indexOf(",")).trim();
@@ -88,24 +96,36 @@ public class CmethUtil implements CommandProvider{
             //logger.trace("cli_username: " + cli_username);
 
             str = str.substring(str.indexOf(",") + 1).trim();
-            cli_password = new String(str);
+            cli_password = str.substring(0, str.indexOf(",")).trim();
             if(cli_password.startsWith(","))logger.warn("cli_password field is empty");
             //logger.trace("cli_password: " + cli_password);
 
-            addEntry(HexString.toLong(mac), ip, snmp_community, cli_username, cli_password);
+            str = str.substring(str.indexOf(",") + 1).trim();
+            model = new String(str);
+            if(model.startsWith(","))logger.warn("model field is empty");
+            //logger.trace("model: " + model);
+
+
+            addEntry(HexString.toLong(mac), ip, snmp_community, cli_username, cli_password, model);
         }
         }catch(Exception e){
             logger.error("CmethUtil.readDB() err: {}", e);
+            return false;
         }
+
+        printDB();
+
+        return true;
 
     }
 
-    public void addEntry(Long mac, String ip, String snmp_community, String cli_username, String cli_password){
+    public void addEntry(Long mac, String ip, String snmp_community, String cli_username, String cli_password, String model){
         Vector entryVec = new Vector();
         entryVec.add(ip);
         entryVec.add(snmp_community);
         entryVec.add(cli_username);
         entryVec.add(cli_password);
+        entryVec.add(model);
         table.put(mac, entryVec);
     }
 
@@ -125,6 +145,9 @@ public class CmethUtil implements CommandProvider{
     public String getCliPassword(long macAddr){
         return getCliPassword(new Long(macAddr));
     }
+    public String getModel(long macAddr){
+        return getModel(new Long(macAddr));
+    }
 
     public String getIpAddr(Long macAddr){
         Vector entryVec = table.get(macAddr);
@@ -132,7 +155,7 @@ public class CmethUtil implements CommandProvider{
             return null;
         String ipAddr = (String)(entryVec.get(0));
         //logger.trace("(CmethUtil:  " + HexString.toHexString(macAddr) + " --> " + ipAddr + ")");
-        return ipAddr;
+        return new String(ipAddr);
     }
 
     public String getSnmpCommunity(Long macAddr){
@@ -141,7 +164,7 @@ public class CmethUtil implements CommandProvider{
             return null;
         String community = (String)(entryVec.get(1));
         //logger.trace("(CmethUtil:  " + HexString.toHexString(macAddr) + "'s snmp community --> " + community + ")");
-        return community;
+        return new String(community);
     }
 
     public String getCliUsername(Long macAddr){
@@ -150,7 +173,7 @@ public class CmethUtil implements CommandProvider{
             return null;
         String username = (String)(entryVec.get(2));
         //logger.trace("(CmethUtil:  " + HexString.toHexString(macAddr) + "'s username --> " + username + ")");
-        return username;
+        return new String(username);
     }
 
     public String getCliPassword(Long macAddr){
@@ -159,7 +182,16 @@ public class CmethUtil implements CommandProvider{
             return null;
         String password = (String)(entryVec.get(3));
         //logger.trace("(CmethUtil:  " + HexString.toHexString(macAddr) + "'s password --> " + password + ")");
-        return password;
+        return new String(password);
+    }
+
+    public String getModel(Long macAddr){
+        Vector entryVec = table.get(macAddr);
+        if(entryVec == null)
+            return null;
+        String model = (String)(entryVec.get(4));
+        //logger.trace("(CmethUtil:  " + HexString.toHexString(macAddr) + "'s model --> " + model + ")");
+        return new String(model);
     }
 
     public Long getSID(String switchIP){
@@ -169,7 +201,7 @@ public class CmethUtil implements CommandProvider{
             ip = (String)(entry.getValue().get(0));
             if(ip.equalsIgnoreCase(switchIP)){
                 mac = entry.getKey();
-                return mac;
+                return new Long(mac);
             }
         }
         return null;
@@ -200,20 +232,37 @@ public class CmethUtil implements CommandProvider{
 
      public void printDB(){
          ConcurrentMap<Long, Vector> table = getEntries();
-         System.out.print("MAC address (sid)\t\t");
-         System.out.print("IP address\t");
-         System.out.print("SNMP community\t");
-         System.out.print("CLI username\t");
-         System.out.println("CLI password\t");
+         System.out.print("MAC_address (sid)\t");
+         System.out.print("\t\t\t");
+         System.out.print("IP_address\t");
+         System.out.print("SNMP_community\t");
+         System.out.print("CLI_username\t");
+         System.out.print("CLI_password\t");
+         System.out.println("Model_name\t");
+         System.out.println("=======================================================================");
          for (ConcurrentMap.Entry<Long, Vector> entry: table.entrySet()) {
             Long mac = entry.getKey();
+            String macStr = mac.toString();
             System.out.print(HexString.toHexString(mac) + "\t");
-            System.out.print("(" + mac + ")\t");
+            System.out.print("(" + macStr + padding(macStr, 20) + ")\t");
             System.out.print(getIpAddr(mac) + "\t");
             System.out.print(getSnmpCommunity(mac) + "\t");
+            System.out.print("\t");
             System.out.print(getCliUsername(mac) + "\t");
-            System.out.println(getCliPassword(mac));
+            System.out.print("\t");
+            System.out.print(getCliPassword(mac) + "\t");
+            System.out.println(getModel(mac));
         }
+     }
+
+     //Just to make printDB layout looks fine
+     //padding() will give a String consisting of spaces, whose length is to fulfill the input 'str' to the 'length'
+     private String padding(String str, int length){
+        String spaces = "";
+        for(int i = 0; i < length - str.length(); i++){
+            spaces += " ";
+        }
+        return spaces;
      }
 }
 

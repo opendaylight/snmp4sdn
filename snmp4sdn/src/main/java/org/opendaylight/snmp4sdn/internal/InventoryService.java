@@ -153,12 +153,21 @@ public class InventoryService implements IInventoryShimInternalListener,
     public ConcurrentMap<NodeConnector, Map<String, Property>> getNodeConnectorProps(
             Boolean refresh) {
         if (nodeConnectorProps == null) {
+            logger.debug("ERROR: getNodeConnectorProps(): nodeConnectorProps is null, can't proceed");
             return null;
         }
 
-        if (isDefaultContainer && refresh) {
+        if (/*isDefaultContainer && */refresh) {//s4s: OF code use isDefaultContainer, s4s seems don't need this
             Map<Long, ISwitch> switches = controller.getSwitches();
             for (ISwitch sw : switches.values()) {
+                if(sw == null){
+                    logger.debug("ERROR: getNodeConnectorProps(): there is a null ISwitch in Controller.getSwitches()");
+                    return null;
+                }
+                if(!sw.refreshPhysicalPorts()){//Bug fix: port on/off update depends link-down/up trap, but sometime trap lost, so need using snmp to request switch for completely correct ports states.
+                    logger.debug("ERROR: getNodeConnectorProps(): call SwitchHandler.refreshPhysicalPorts() fail");
+                    return null;
+                }
                 Map<NodeConnector, Set<Property>> ncProps = InventoryServiceHelper
                         .SNMPSwitchToProps(sw);
                 for (Map.Entry<NodeConnector, Set<Property>> entry : ncProps
@@ -224,7 +233,8 @@ public class InventoryService implements IInventoryShimInternalListener,
                 /*logger.debug("updateNodeConnector(): report nodeConnector update to SAL");
                 logger.debug("updateNodeConnector(): nodeConnector: {}", nodeConnector);
                 logger.debug("updateNodeConnector(): type: {}", type.getName());*/
-                //logger.debug("updateNode(): properties: {}", props);
+                //logger.debug("updateNodeConnector(): properties: {}", props);
+                //logger.trace("updateNodeConnector(): now will call ({})IPluginOutInventoryService.updateNodeConnector(), with port {} and event type {}", service.getClass().getName(), nodeConnector.getID(), type);
                 service.updateNodeConnector(nodeConnector, type, props);
             }
         }

@@ -160,7 +160,7 @@ public class TopologyServices implements ITopologyServiceShimListener,
     private String edgeListToString(List<TopoEdgeUpdate> topoedgeupdateList){
         String str = "";
         for(TopoEdgeUpdate edgeUpd : topoedgeupdateList){
-            str += edgeUpd.getEdge().toString() + "\n";
+            str += edgeUpd.getEdge().toString() + "\t" + edgeUpd.getUpdateType() + "\n";
         }
         return str;
     }

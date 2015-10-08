@@ -38,6 +38,8 @@ import org.opendaylight.snmp4sdn.core.ISwitch;
 import org.opendaylight.snmp4sdn.core.ISwitchStateListener;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.Config;
+import org.opendaylight.controller.sal.core.State;
 //import org.opendaylight.snmp4sdn.internal.ConfigService;
 import org.opendaylight.snmp4sdn.internal.SNMPHandler;
 import org.opendaylight.snmp4sdn.internal.SNMPListener;
@@ -151,6 +153,9 @@ public class Controller implements IController, ICore, CommandProvider {
         registerWithOSGIConsole();//s4s. in junit test, doesn't need. but need it when system test
         cmethUtil = new CmethUtil();
         cmethUtil.init();
+
+        Node.NodeIDType.registerIDType("SNMP", Long.class);
+        NodeConnector.NodeConnectorIDType.registerIDType("SNMP", Short.class, "SNMP");
     }
     public void init_forTest() {//s4s. same content as init(), but the last line is canceled
         logger.info("snmp4sdn's Controller: Initializing! (for junit test)");
@@ -284,7 +289,11 @@ public class Controller implements IController, ICore, CommandProvider {
             }*///s4s:OF's
             logger.info("Add switch({}) to the Controller", HexString.toHexString(sid));
 
-            takeSwitchEventAdd(switchHandler);//s4s: in OF, this function is called in SwitchHandler, now we put it here directly
+            //takeSwitchEventAdd(switchHandler);//s4s: in OF, this function is called in SwitchHandler, now we put it here directly
+            //copy the following from "EventHandler's case SWITCH_ADD" to replace the "takeSwitchEventAdd(switchHandler)" above
+            switches.put(sid, switchHandler);
+            notifySwitchAdded(switchHandler);
+
             return switchHandler;
         /*} catch (IOException e) {
             return;
@@ -301,6 +310,17 @@ public class Controller implements IController, ICore, CommandProvider {
         //}//s4s: no need to check isOperational
         ((SwitchHandler) sw).stop();
         sw = null;
+    }
+
+    //add by fixing "topology discovery 2 step to 1 step"
+    public void notifyMessageListener(ISwitch sw, SNMPMessage msg){
+        if (msg != null) {
+            IMessageListener listener = messageListeners.get(msg.getType());
+            if (listener != null) {
+                //logger.trace("notifyMessageListener(): now will call ({})IMessageListener.receive(), with switch {} msg: {}", listener.getClass().getName(), sw.getId(), msg);
+                listener.receive(sw, msg);
+            }
+        }
     }
 
     private void notifySwitchAdded(ISwitch sw) {
@@ -369,8 +389,26 @@ public class Controller implements IController, ICore, CommandProvider {
 
     @Override//karaf
     public void topoDiscover(){
-        topologyDiscover();
+        int count = 0;
+        while(switchStateListener == null){
+            try{
+                logger.info("\nTopology Discovery halts, waiting for related modules to be ready, then can proceed\n");
+                Thread.sleep(1000);
+                count += 1;
+                if(count > 20){
+                    logger.info("\nTimeout of Topology Discovery waiting for related modules to be ready, cancel Topology Discovery\n");
+                    break;
+                }
+            }catch(Exception e1){
+                logger.debug("ERROR: topoDiscover(): Thread.sleept() error: {}", e1);
+            }
+        }
+        switchStateListener.disableNewInventoryTriggerDiscovery();
+        topologyDiscoverSwitchesAndPorts();
         topologyDiscoverEdges();
+        switchStateListener.enableNewInventoryTriggerDiscovery();
+        //TODO Issue: in topologyDiscoverSwitchesAndPorts(), new port triggers edges discovery, but maybe due to the racing of 'new port' and 'detected edge's remote port not yet detected", which cause discovery completion delay (with retry mechanism in DiscoveryService, finally complete discovery). So we also directly do topologyDiscoverEdges() to finish.
+        //TODO: if the issue sovled, remember to modify topoDiscover() accordingly
     }
 
     @Override//karaf
@@ -456,17 +494,20 @@ public class Controller implements IController, ICore, CommandProvider {
                 null);
     }
 
-    public void topologyDiscover(){
+    public void topologyDiscoverSwitchesAndPorts(){
         logger.trace("Remove existing switches...");
         for(ConcurrentHashMap.Entry<Long, ISwitch> entry : switches.entrySet()){
             ISwitch sw = entry.getValue();
             logger.trace("\tSwitch {} is being removed", HexString.toHexString(sw.getId()));
-            takeSwitchEventDelete(sw);
+            //takeSwitchEventDelete(sw);
+            disconnectSwitch(sw);//copy from "EventHandler's case SWITCH_DELETE"to replace the "takeSwitchEventDelete(sw)" above
         }
 
         try{
                 Thread.sleep(2000);
-        }catch(Exception e){;}
+        }catch(Exception e1){
+            logger.debug("ERROR: topologyDiscoverSwitchesAndPorts(): Thread.sleept() error: {}", e1);
+        }
 
         ConcurrentMap<Long, Vector> entries = cmethUtil.getEntries();//TODO: query DB instead
         for(ConcurrentMap.Entry<Long, Vector> entry : entries.entrySet()){
@@ -478,13 +519,17 @@ public class Controller implements IController, ICore, CommandProvider {
     }
 
     private void topologyDiscoverEdges(){
-        logger.debug("\n\nBegin Topology resoving by retrieving LLDP data from switches\n\n");
+        logger.debug("\n\nBegin Topology resolving by retrieving LLDP data from switches\n\n");
         switchStateListener.doTopoDiscover();
-        logger.debug("\n\nFinish Topology resoving by retrieving LLDP data from switches\n\n");
+        logger.debug("\n\nFinish Topology resolving by retrieving LLDP data from switches\n\n");
     }
 
     public void _s4sTopoDiscover(CommandInterpreter ci){
-        topologyDiscover();
+         topoDiscover();
+    }
+
+    public void _s4sTopoDiscoverSwitchesAndPorts(CommandInterpreter ci){
+        topologyDiscoverSwitchesAndPorts();
     }
 
     public void _s4sTopoDiscoverEdges(CommandInterpreter ci){
@@ -534,22 +579,41 @@ public class Controller implements IController, ICore, CommandProvider {
             short port;
             SNMPPhysicalPort phyPort;
             Map<Short, String> portIDTable = (new SNMPHandler(cmethUtil)).readLLDPLocalPortIDs(sid);
+            Map<Short, Integer> portStateTable = (new SNMPHandler(cmethUtil)).readPortState(sid);
+            
             for(Map.Entry<Short, String> entry : portIDTable.entrySet()){
                 String portName = entry.getValue();
                 port = entry.getKey().shortValue();
                 phyPort = new SNMPPhysicalPort(port);
                 phyPort.setName(portName);
-                logger.info("Add to switch (ip: {}, mac: {}) a new port, port number = {}", cmethUtil.getIpAddr(sid), HexString.toHexString(sid), port);
-                handleAddingNewPort(sid, port, portName);
+
+                Integer portState = portStateTable.get(port);
+                if(portState == null){
+                    logger.error("ERROR: scanAndAddPort(): portStateTable has no entry for port {}", port);
+                    return;
+                }
+                if(portState == 1){//standard snmp MIB: ifAdminStatus: 1 as up, 2 as down
+                    logger.info("Add to switch (ip: {}, mac: {}) a new port, port number = {}, state = UP", cmethUtil.getIpAddr(sid), HexString.toHexString(sid), port);
+                    handleAddingNewPort(sid, port, portName, Config.ADMIN_UP);
+                }
+                else if(portState == 2){//standard snmp MIB: ifAdminStatus: 1 as up, 2 as down
+                    logger.info("Add to switch (ip: {}, mac: {}) a new port, port number = {}, state = DOWN", cmethUtil.getIpAddr(sid), HexString.toHexString(sid), port);
+                    handleAddingNewPort(sid, port, portName, Config.ADMIN_DOWN);
+                }
+                else{
+                    logger.info("WARNING: Add to switch (ip: {}, mac: {}) a new port, port number = {}, state = UNKNOWN", cmethUtil.getIpAddr(sid), HexString.toHexString(sid), port);
+                    handleAddingNewPort(sid, port, portName, Config.ADMIN_UNDEF);
+                }
             }
     }
 
-    private void handleAddingNewPort(Long sid, short port, String portName){
+    private void handleAddingNewPort(Long sid, short port, String portName, int config){
         ISwitch sw = switches.get(sid);
         if(sw == null)logger.warn("ISwitch sw is null!"); 
 
         SNMPPhysicalPort phyPort = new SNMPPhysicalPort(port);
         phyPort.setName(portName);
+        phyPort.setConfig(config);//Bug fix: "port on/off" is not "add/remove port".
 
         SNMPPortStatus portStatus = new SNMPPortStatus();
         portStatus.setDesc(phyPort);
@@ -585,3 +649,4 @@ public class Controller implements IController, ICore, CommandProvider {
         return cmethUtil;
     }
 }
+

@@ -41,6 +41,7 @@ import org.opendaylight.controller.protocol_plugin.openflow.core.internal.Contro
     import org.opendaylight.snmp4sdn.IRefreshInternalProvider;
     import org.opendaylight.snmp4sdn.IStatisticsListener;
     import org.opendaylight.snmp4sdn.ITopologyServiceShimListener;
+    import org.opendaylight.snmp4sdn.DiscoveryServiceAPI;
     import org.opendaylight.snmp4sdn.core.IController;
     import org.opendaylight.snmp4sdn.core.IMessageListener;
     import org.opendaylight.snmp4sdn.core.internal.Controller;
@@ -87,6 +88,8 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
     private FdbProvider fdb = new FdbProvider();//md-sal
     private AclProvider acl = new AclProvider();//md-sal
     private VlanProvider vlan = new VlanProvider();//md-sal
+    private SwitchDbProvider switchdb = new SwitchDbProvider();//md-sal
+    private TopologyProvider topo = new TopologyProvider();//md-sal
  
     /**
      * Function called when the activator starts just after some initializations
@@ -100,8 +103,9 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
          *         If you'd like to add other custom types, it provides the 'registerIDType()' approach, as below, to manually add new type of Node and NodeConnector
          *  Author: Yi-Ling Hsieh
          */
-        Node.NodeIDType.registerIDType("SNMP", Long.class);
-        NodeConnector.NodeConnectorIDType.registerIDType("SNMP", Short.class, "SNMP");
+        //Node.NodeIDType.registerIDType("SNMP", Long.class);
+        //NodeConnector.NodeConnectorIDType.registerIDType("SNMP", Short.class, "SNMP");
+        //TODO: Issue: is code architecture okay in this way?: the code above is moved to Controller.init(), because SNMP type is used during Topology Discovery but here Activator.init() is the latest code to be called in snmp4sdn start up (start up means all modules creation, initialization, start... and we also put Topology Discovery in InventoryServiceShim's start).
     }
 
     /**
@@ -124,6 +128,8 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
         fdb.close();//md-sal
         acl.close();//md-sal
         vlan.close();//md-sal
+        switchdb.close();//md-sal
+        topo.close();//md-sal
     }
 
     @Override
@@ -133,6 +139,8 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
         fdb.setContext(arg0);
         acl.setContext(arg0);
         vlan.setContext(arg0);
+        switchdb.setContext(arg0);
+        topo.setContext(arg0);
     }
 
     /**
@@ -317,7 +325,9 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
                 config,//md-sal
                 fdb,//md-sal
                 acl,//md-sal
-                vlan//md-sal
+                vlan,//md-sal
+                switchdb,//md-sal
+                topo//md-sal
                 };
         return res;
     }
@@ -335,9 +345,9 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
      */
     @Override
     public void configureGlobalInstance(Component c, Object imp) {
-        logger.debug("snmp4sdn: Activator configureGlobalInstance( ) is called");
+        logger.debug("Activator configureGlobalInstance( ) is called");
 
-        //md-sal (the following items: config, fdb, acl, vlan)
+        //md-sal (the following two item)
         if (imp == config) {
             c.add(createServiceDependency().setService(BindingAwareBroker.class)
                     .setCallbacks("setBroker", "unsetBroker").setRequired(true));
@@ -369,6 +379,22 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
                     .setService(IController.class, "(name=Controller)")
                     .setCallbacks("setController", "unsetController").setRequired(true));
             logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and IController, for VlanService");
+        }
+        if (imp == switchdb) {
+            c.add(createServiceDependency().setService(BindingAwareBroker.class)
+                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(IController.class, "(name=Controller)")
+                    .setCallbacks("setController", "unsetController").setRequired(true));
+            logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and IController, for SwitchDb");
+        }
+        if (imp == topo) {
+            c.add(createServiceDependency().setService(BindingAwareBroker.class)
+                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(DiscoveryServiceAPI.class/*, "(name=XXX)"*/)/*Memo: name=XXX was given, then setService() fails!*/
+                    .setCallbacks("setDiscoveryService", "setDiscoveryService").setRequired(true));
+            logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and DiscoveryServiceAPI, for TopologyService");
         }
 
         if (imp.equals(Controller.class)) {
@@ -452,7 +478,7 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
             // export the service
             c.setInterface(
                     new String[] { IInventoryShimExternalListener.class.getName(), IDataPacketListen.class.getName(),
-                            IContainerListener.class.getName() }, null);
+                            IContainerListener.class.getName(), DiscoveryServiceAPI.class.getName() }, null);
 
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")

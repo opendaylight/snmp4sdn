@@ -86,7 +86,8 @@ public class InventoryServiceHelper {
      */
     public static Config SNMPPortToConfig(int portConfig) {
         Config config;
-        if ((SNMPPortConfig.SNMPPPC_PORT_DOWN.getValue() & portConfig) != 0)
+        //if ((SNMPPortConfig.SNMPPPC_PORT_DOWN.getValue() & portConfig) != 0)
+        if(portConfig != Config.ADMIN_UP)//Bug fix: with the 'if' criteria, can't process correct, so I directly use this criteria
             config = new Config(Config.ADMIN_DOWN);
         else
             config = new Config(Config.ADMIN_UP);
@@ -98,7 +99,8 @@ public class InventoryServiceHelper {
      */
     public static State SNMPPortToState(int portState) {
         State state;
-        if ((SNMPPortState.SNMPPPS_LINK_DOWN.getValue() & portState) != 0)
+        //if ((SNMPPortState.SNMPPPS_LINK_DOWN.getValue() & portState) != 0)
+        if(portState != State.EDGE_UP)//Bug fix: with the 'if' criteria, as the line above, can't process correct, so I directly use this criteria
             state = new State(State.EDGE_DOWN);
         else
             state = new State(State.EDGE_UP);
@@ -159,6 +161,7 @@ public class InventoryServiceHelper {
             node = new Node("SNMP", sw.getId());
         }catch (ConstructionException e1) {
             //logger.error("",e1);
+            System.out.println("ERROR: SNMPSwitchToProps(): create SNMP Node fail, given node ID " + sw.getId() + ", error: " + e1);
         }
         if (node == null) {
             return ncProps;

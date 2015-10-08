@@ -147,6 +147,14 @@ public interface ISwitch {
     public Object syncSend(/*OFMessage*/SNMPMessage msg);
 
     /**
+     * To refesh pysical port, including Config and State.
+     *
+     * @param port
+     * @return True if the refresh complete
+     */
+    public boolean refreshPhysicalPorts();//Bug fix: port on/off update depends link-down/up trap, but sometime trap lost, so need using snmp to request switch for completely correct ports states.
+    
+    /**
      * Returns a map containing all SNMPPhysicalPorts of this switch.
      *
      * @return The Map of SNMPPhysicalPort

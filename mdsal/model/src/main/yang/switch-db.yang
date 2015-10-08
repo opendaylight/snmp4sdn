@@ -1,0 +1,33 @@
+module switch-db {
+    yang-version 1;
+
+    namespace "urn:opendaylight:snmp4sdn:md:switchdb";
+    prefix switch-db;
+
+    import snmp4sdn-types {prefix types;}
+
+    organization "Industrial Technology Research Institute of Taiwan";
+    contact "Yi-Ling Hsieh <ylhsieh@itri.org.tw>";
+
+    description "YANG version of the SNMP4SDN Switch List DB Service MIB.";
+
+    revision "2015-09-01" {//TODO: update date
+        description
+            "SNMP4SDN Switch DB";
+    }
+
+    rpc reload-db {
+        description
+            "Reload switch list DB";
+        /*input {
+            leaf db-file-path {
+                type string;
+            }
+        }*///use default path: "/etc/snmp4sdn_swdb.csv"
+        output {
+            leaf reload-db-result{
+                type types:result;
+            }
+        }
+    } //rpc reload-db
+}

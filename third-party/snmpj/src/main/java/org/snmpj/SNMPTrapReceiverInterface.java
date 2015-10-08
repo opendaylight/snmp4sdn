@@ -70,7 +70,7 @@ public class SNMPTrapReceiverInterface
     private final Vector v2InformRequestListenerVector;
     private PrintWriter errorLog;
 
-
+    int recvPacketNum = 0;
 
 
     /**
@@ -302,7 +302,7 @@ public class SNMPTrapReceiverInterface
 
                 DatagramPacket inPacket = new DatagramPacket(new byte[receiveBufferSize], receiveBufferSize);
 
-                dSocket.receive(inPacket);
+                dSocket.receive(inPacket);recvPacketNum += 1;
 
                 byte[] encodedMessage = inPacket.getData();
 
@@ -462,6 +462,13 @@ public class SNMPTrapReceiverInterface
         if(dSocket.isConnected())
             dSocket.disconnect();
         dSocket.close();
+    }
+
+    public void printStatus(){//s4s add: to examine why huge trap come in and listener hangs
+        System.out.println("receiveThread.isAlive(): " + receiveThread.isAlive());
+        System.out.println("receiveThread.isInterrupted(): " + receiveThread.isInterrupted());
+        System.out.println("dSocket.isConnected(): " + dSocket.isConnected());
+        System.out.println("recvPacketNum = " + recvPacketNum);
     }
 
 }

@@ -29,6 +29,7 @@ import org.opendaylight.snmp4sdn.core.IController;
 import org.opendaylight.snmp4sdn.core.IMessageListener;
 import org.opendaylight.snmp4sdn.core.ISwitch;
 import org.opendaylight.snmp4sdn.core.ISwitchStateListener;
+import org.opendaylight.snmp4sdn.core.internal.Controller;
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.Drop;
 import org.opendaylight.controller.sal.action.Output;
@@ -56,6 +57,7 @@ import org.opendaylight.snmp4sdn.protocol.SNMPPortStatus;
 import org.opendaylight.snmp4sdn.protocol.SNMPPortStatus.SNMPPortReason;
 import org.opendaylight.snmp4sdn.protocol.SNMPType;
 import org.opendaylight.snmp4sdn.protocol.statistics.SNMPDescriptionStatistics;
+import org.opendaylight.snmp4sdn.DiscoveryServiceAPI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -151,6 +153,7 @@ public class InventoryServiceShim implements IContainerListener,
     void init() {
         this.controller.addMessageListener(SNMPType.PORT_STATUS, this);
         this.controller.addSwitchStateListener(this);
+        logger.info("SNMP4SDN: InventoryServiceShim.init() done!");
     }
 
     /**
@@ -159,6 +162,7 @@ public class InventoryServiceShim implements IContainerListener,
     void started() {
         /* Start with existing switches */
         startService();
+        initTopologyDiscoveryFromCore();
     }
 
     /**
@@ -176,10 +180,33 @@ public class InventoryServiceShim implements IContainerListener,
         this.controller = null;
     }
 
+    private void initTopologyDiscoveryFromCore(){
+        //Just for reference: we tried to put this code and call this code in DiscoveryService.started(), but can't go succesfully, because InventoryServiceShim is not yet ready at that time.
+
+        if(controller != null){
+            while(!((Controller)controller).isOtherBundleReady){
+                logger.debug("init(): waiting for waitOtherNecessaryBundle() to be done...");
+                try{
+                    Thread.sleep(1000);
+                }catch(Exception e1){
+                    logger.debug("init(): waiting for waitOtherNecessaryBundle to be done, Thread.sleep() error: {}", e1);
+                    return;
+                }
+            }
+            logger.info("\n\n=== SNMP4SDN: trigger Topology Discovery ===\n\n");
+            //Copy from Controller.java's topoDiscover() as follows
+            ((Controller)controller).topoDiscover();
+        }
+        else{
+            logger.info("ERROR: in InventoryServiceShim.started(), can't automatically trigger Topology Discovery, because snmp4sdn core is null");
+        }
+    }
+
     @Override
     public void receive(ISwitch sw, SNMPMessage msg) {
         try {
             if (msg instanceof SNMPPortStatus) {
+                //logger.debug("receive(): now will call handlePortStatusMessage, with switch {} msg: {}", sw.getId(), msg);
                 handlePortStatusMessage(sw, (SNMPPortStatus) msg);
             }
         } catch (ConstructionException e) {
@@ -210,6 +237,7 @@ public class InventoryServiceShim implements IContainerListener,
             // get node connector properties
             Set<Property> props = InventoryServiceHelper.SNMPPortToProps(m
                     .getDesc());
+            //logger.debug("receive(): now will call notifyInventoryShimListener, with switch {} msg: {}", sw.getId(), m);
             notifyInventoryShimListener(nodeConnector, type, props);
         }
     }
@@ -230,9 +258,9 @@ public class InventoryServiceShim implements IContainerListener,
         boolean isTrapMechnismCancled = true;//s4s: if true, trap mechanism is cancled
         if(isTrapMechnismCancled){//s4s:directly do what the "notifyInventoryShimListener()-->notifyInventoryShimExternalListener()" at the else section below will do.
             for (IInventoryShimExternalListener s : this.inventoryShimExternalListeners) {
-                //logger.trace("new port event: InventoryServiceShim.notifyInventoryShimExternalListener(), then now call to DiscoveryService.doEthSwDiscovery()");
+                //logger.trace("new switch event: InventoryServiceShim.sitchAdded(), sw {}, then now call to DiscoveryService.doEthSwDiscovery()", sw);
                 if(s.getClass().getName().equals(DiscoveryService.class.getName()))
-                    ((DiscoveryService)s).doEthSwDiscovery();
+                    ((DiscoveryService)s).doTopoDiscovery();
             }
         }
         else{
@@ -330,9 +358,16 @@ public class InventoryServiceShim implements IContainerListener,
     private void notifyInventoryShimExternalListener(
             NodeConnector nodeConnector, UpdateType type, Set<Property> props) {
         for (IInventoryShimExternalListener s : this.inventoryShimExternalListeners) {
-            //logger.trace("new port event: InventoryServiceShim.notifyInventoryShimExternalListener(), then now call to DiscoveryService.updateNodeConnector()");
+            //logger.debug("notifyInventoryShimExternalListener(): now will call ({})IInventoryShimExternalListener.updateNodeConnector(), with port {} and event type {}", s.getClass().getName(), nodeConnector.getID(), type);
+
+            if(type == UpdateType.REMOVED && s.getClass().getName().equals(DiscoveryService.class.getName())){//bug fix: without the protection of link-down and Topology Discovery by mutual exclusive, we let Topology Discovery to be canceled if link-down occurs.
+                ((DiscoveryServiceAPI)s).notifyCancelTopologyDiscovery();
+            }
+
             s.updateNodeConnector(nodeConnector, type, props);
+            //TODO: performance enhance for link-down event: "TopologyServiceShim" is in the inventoryShimExternalListeners List, TopologyServiceShim will immediately remove edge for nodeConnecotor removal, so here we may make "TopologyServiceShim" to be process first on purpose, to ensure the edge removal could be reported to SAL as quickly as could be.
         }
+        //logger.debug("notifyInventoryShimExternalListener(): InventoryServiceShim NodeConnector event handling DONE! for port {} and type {}", nodeConnector.getID(), type);
     }
 
     private void notifyInventoryShimInternalListener(String container,
@@ -340,6 +375,7 @@ public class InventoryServiceShim implements IContainerListener,
         IInventoryShimInternalListener inventoryShimInternalListener = inventoryShimInternalListeners
                 .get(container);
         if (inventoryShimInternalListener != null) {
+            //logger.debug("notifyInventoryShimInternalListener(): now will call ({})IInventoryShimInternalListener.updateNodeConnector(), with port {} and event type {}", inventoryShimInternalListener.getClass().getName(), nodeConnector.getID(), type);
             inventoryShimInternalListener.updateNodeConnector(nodeConnector,
                     type, props);
             logger.trace(
@@ -355,6 +391,7 @@ public class InventoryServiceShim implements IContainerListener,
             UpdateType type, Set<Property> props) {
         // Always notify default InventoryService. Store properties in default
         // one.
+        //logger.debug("notifyInventoryShimListener(): now will call notifyInventoryShimInternalListener, for port {} and event type {}", nodeConnector.getID(), type);
         notifyInventoryShimInternalListener(GlobalConstants.DEFAULT.toString(),
                 nodeConnector, type, props);
 
@@ -363,12 +400,14 @@ public class InventoryServiceShim implements IContainerListener,
         if (containers != null) {
             for (String container : containers) {
                 // no property stored in container components.
+                //logger.debug("notifyInventoryShimListener(): now will call notifyInventoryShimInternalListener, for container {} and port {} and event type {}", container, nodeConnector.getID(), type);
                 notifyInventoryShimInternalListener(container, nodeConnector,
                         type, null);
             }
         }
 
-        // Notify DiscoveryService
+        // Notify DiscoveryService, TopologyServiceShim
+        //logger.debug("notifyInventoryShimListener(): now will call notifyInventoryShimExternalListener, for port {}, event type: ", nodeConnector.getID(), type);
         notifyInventoryShimExternalListener(nodeConnector, type, props);
     }
 
@@ -426,7 +465,7 @@ public class InventoryServiceShim implements IContainerListener,
         try {
             node = new Node(/*NodeIDType.OPENFLOW*/"SNMP", sw.getId());
         } catch (ConstructionException e) {
-            logger.error("{}", e.getMessage());
+            logger.error("ERROR: addNode(): fail to create Node with type SNMP and nodeID {}: {}", sw.getId(), e.getMessage());
             return;
         }
 
@@ -473,7 +512,7 @@ public class InventoryServiceShim implements IContainerListener,
         try {
             node = new Node(/*NodeIDType.OPENFLOW*/"SNMP", sw.getId());
         } catch (ConstructionException e) {
-            logger.error("{}", e.getMessage());
+            logger.error("ERROR: removeNode(): fail to create Node with type SNMP and nodeID {}: {}", sw.getId(), e.getMessage());
             return;
         }
 
@@ -498,7 +537,7 @@ public class InventoryServiceShim implements IContainerListener,
         try {
             node = new Node(/*NodeIDType.OPENFLOW*/"SNMP", switchId);
         } catch (ConstructionException e) {
-            logger.error("{}", e.getMessage());
+            logger.error("ERROR: descriptionRefreshed(): fail to create Node with type SNMP and nodeID {}: {}", switchId, e.getMessage());
             return;
         }
 
@@ -583,11 +622,28 @@ public class InventoryServiceShim implements IContainerListener,
         return list;
     }
 
+    @Override
     public void doTopoDiscover(){
         for (IInventoryShimExternalListener s : this.inventoryShimExternalListeners) {
             //logger.trace("new port event: InventoryServiceShim.notifyInventoryShimExternalListener(), then now call to DiscoveryService.doEthSwDiscovery()");
             if(s.getClass().getName().equals(DiscoveryService.class.getName()))
-                ((DiscoveryService)s).doEthSwDiscovery();
+                ((DiscoveryService)s).doTopoDiscovery();
+        }
+    }
+
+    @Override
+    public void disableNewInventoryTriggerDiscovery(){
+        for (IInventoryShimExternalListener s : this.inventoryShimExternalListeners) {
+            if(s.getClass().getName().equals(DiscoveryService.class.getName()))
+                ((DiscoveryService)s).disableNewInventoryTriggerDiscovery();
+        }
+    }
+
+    @Override
+    public void enableNewInventoryTriggerDiscovery(){
+        for (IInventoryShimExternalListener s : this.inventoryShimExternalListeners) {
+            if(s.getClass().getName().equals(DiscoveryService.class.getName()))
+                ((DiscoveryService)s).enableNewInventoryTriggerDiscovery();
         }
     }
 
