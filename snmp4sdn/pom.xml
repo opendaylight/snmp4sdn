@@ -79,7 +79,7 @@
               <!--org.expect4j //TODO: with this, the following packages are not needed to be listed here?-->
               <!--(a) the following line is needed when expect4j is included in the "Embed-Dependency" section below; otherwise can't build-->
               com.jcraft.jsch, org.apache.commons.net.io, org.apache.commons.net.telnet, org.apache.oro.text, org.apache.oro.text.regex, sunlabs.brazil.util.regexp, tcl.lang.reflect,
-              
+
               org.apache.commons.net.util,<!--this is needed due to those "org.apache.commons.net.*" above in (a)-->
               org.apache.commons.net,<!--this is needed due to the two "org.apache.commons.net.util" above-->
               javax.crypto,javax.crypto.spec,javax.net,<!--this line is needed due to "org.apache.commons.net" above, copy from in it's MANIFEST.MF listed "Import-Package" -->
@@ -179,9 +179,9 @@
      <version>${yangtools.version}</version><!--yiling-->
    </dependency>
    <dependency>
-     <groupId>org.opendaylight.yangtools</groupId>
+     <groupId>org.opendaylight.mdsal</groupId>
      <artifactId>yang-binding</artifactId>
-     <version>${yangtools.version}</version><!--yiling-->
+     <version>0.8.0-SNAPSHOT</version><!--yiling-->
    </dependency>
    <!--following are md-sal-->
     <!--<dependency>
