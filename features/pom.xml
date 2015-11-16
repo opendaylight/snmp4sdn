@@ -30,6 +30,8 @@
         <feature.test.version>1.6.0-SNAPSHOT</feature.test.version><!--referencing to other projects, usually is 1.6.0-SNAPSHOT after version bump for Lithium-->
         <karaf.empty.version>1.6.0-SNAPSHOT</karaf.empty.version>
         <surefire.version>2.16</surefire.version>
+        <restconf.version>1.3.0-SNAPSHOT</restconf.version>
+        <mdsal.model.version>0.8.0-SNAPSHOT</mdsal.model.version>
     </properties>
     <dependencies>
         <dependency>
@@ -97,9 +99,9 @@
           <type>xml</type>
         </dependency>
         <dependency>
-          <groupId>org.opendaylight.controller</groupId>
+          <groupId>org.opendaylight.netconf</groupId>
           <artifactId>features-restconf</artifactId>
-          <version>${mdsal.version}</version>
+          <version>${restconf.version}</version>
           <classifier>features</classifier>
           <type>xml</type>
         </dependency>
@@ -155,7 +157,7 @@
         </dependency>
         -->
     </dependencies>
-   
+
     <build>
         <resources>
             <resource>

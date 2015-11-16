@@ -16,7 +16,7 @@
     <repository>mvn:org.opendaylight.controller/features-adsal/${sal.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.controller/features-nsf/${nsf.version}/xml/features</repository><!--for odl-adsal-northbound-->
     <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
-    <repository>mvn:org.opendaylight.controller/features-restconf/${mdsal.version}/xml/features</repository>
+    <repository>mvn:org.opendaylight.netconf/features-restconf/${restconf.version}/xml/features</repository>
     <!--NOT to add snmp4sdn repo, cause recursive loading--><!--<repository>mvn:org.opendaylight.snmp4sdn/features-snmp4sdn/${project.version}/xml/features</repository>-->
 
     <feature name='odl-snmp4sdn-all' version='${project.version}' description='OpenDaylight :: SNMP4SDN :: All'>
@@ -25,14 +25,13 @@
     <feature name='odl-snmp4sdn-snmp4sdn' version='${project.version}' description='OpenDaylight :: SNMP4SDN :: Plugin'>
             <!--these marked are in Helium first release-->
             <feature version="${sal.version}">odl-adsal-core</feature>
-            <feature version='${yangtools.version}'>odl-yangtools-binding</feature>
-            <feature version='${yangtools.version}'>odl-yangtools-models</feature>
+            <feature version='${yangtools.version}'>odl-mdsal-models</feature>
             <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
 
             <feature version='${sal.version}'>odl-adsal-all</feature><!--TODO: may need not this, odl-adsal-core is enough?-->
             <!--<feature version='${nsf.version}'>odl-adsal-northbound</feature>-->
             <feature version='${mdsal.version}'>odl-mdsal-apidocs</feature>
-            <feature version='${mdsal.version}'>odl-restconf</feature>
+            <feature version='${restconf.version}'>odl-restconf</feature>
 
             <bundle>mvn:org.opendaylight.snmp4sdn/md-model/${project.version}</bundle>
             <bundle>mvn:org.opendaylight.snmp4sdn/snmp4sdn/${project.version}</bundle>
