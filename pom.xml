@@ -39,8 +39,8 @@
     <module>mdsal/caller/vlanmanager</module>
     <module>snmp4sdn</module>
     <!--<module>integrationtest</module> //no need to add. run by eclipse junit test-->
-    <module>plugin-shell</module>
-    <module>features</module>
+    <!--<module>plugin-shell</module>
+    <module>features</module>-->
     <module>distribution-karaf</module>
   </modules>
 </project>

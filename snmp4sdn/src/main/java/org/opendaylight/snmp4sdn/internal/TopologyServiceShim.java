@@ -247,6 +247,7 @@ public class TopologyServiceShim implements IDiscoveryListener,
         };
 
         registerWithOSGIConsole();
+        System.out.println("TopologyServiceShim.init() done");
     }
 
     /**
@@ -352,9 +353,9 @@ public class TopologyServiceShim implements IDiscoveryListener,
         notifyThread.interrupt();
     }
 
-    void setTopologyServiceShimListener(Map<?, ?> props,
+    void setTopologyServiceShimListener(/*Map<?, ?> props,*/
             ITopologyServiceShimListener s) {
-        if (props == null) {
+        /*if (props == null) {
             logger.error("Didn't receive the service properties");
             return;
         }
@@ -362,7 +363,8 @@ public class TopologyServiceShim implements IDiscoveryListener,
         if (containerName == null) {
             logger.error("containerName not supplied");
             return;
-        }
+        }*/
+        String containerName = GlobalConstants.DEFAULT.toString();//bug fix (just workaround): eleminate the input parameter, hardcode the containerName
         if ((this.topologyServiceShimListeners != null)
                 && !this.topologyServiceShimListeners
                         .containsKey(containerName)) {
@@ -410,25 +412,30 @@ public class TopologyServiceShim implements IDiscoveryListener,
         Map<NodeConnector, Pair<Edge, Set<Property>>> edgePropsMap = edgeMap
                 .get(container);
         if (edgePropsMap == null) {
+            logger.warn("WARNING: removeNodeConnector(): edgeMap.get() gets null, given container '{}' => so no update upward", container);
             return;
         }
 
         // Remove edge in one direction
         Pair<Edge, Set<Property>> edgeProps = edgePropsMap.get(nodeConnector);
         if (edgeProps == null) {
+            logger.warn("WARNING: removeNodeConnector(): edgePropsMap.get() gets null, given NodeConnector {}", nodeConnector);
             return;
+        }else{
+            teuList.add(new TopoEdgeUpdate(edgeProps.getLeft(), null,
+                    UpdateType.REMOVED));
         }
-        teuList.add(new TopoEdgeUpdate(edgeProps.getLeft(), null,
-                UpdateType.REMOVED));
 
         // Remove edge in another direction
         edgeProps = edgePropsMap
                 .get(edgeProps.getLeft().getHeadNodeConnector());
         if (edgeProps == null) {
-            return;
+            logger.warn("WARNING: removeNodeConnector(): edgePropsMap.get() gets null edge in opposite direction, given here NodeConnector {} (here edge: {}). This case could be normal because the reverse edge's src NodeConnector is not SNMP", nodeConnector, edgePropsMap.get(nodeConnector).getLeft());
+            //return;//Bug fix: for the case that reverse edge's src NodeConnector is not SNMP so that the reverse edge is not in edgePropsMap
+        }else{
+            teuList.add(new TopoEdgeUpdate(edgeProps.getLeft(), null,
+                    UpdateType.REMOVED));
         }
-        teuList.add(new TopoEdgeUpdate(edgeProps.getLeft(), null,
-                UpdateType.REMOVED));
 
         // Update in one shot
         notifyEdge(container, teuList);
@@ -457,6 +464,12 @@ public class TopologyServiceShim implements IDiscoveryListener,
                 edge, props);
         boolean rv = false;
 
+        //Bug fix: 
+        if(!src.getType().equals("SNMP")){
+            logger.trace("Trick: the edge's src port as tail port, but is type {}, not type of SNMP, so adopt the head port to be src port", src.getType());//lg.dbug-trc
+            src = edge.getHeadNodeConnector();
+        }
+
         switch (type) {
         case ADDED:
         case CHANGED:
@@ -467,7 +480,10 @@ public class TopologyServiceShim implements IDiscoveryListener,
                 if (edgePropsMap.containsKey(src)
                         && edgePropsMap.get(src).equals(edgeProps)) {
                     // Entry already exists. No update.
-                    rv = false;
+                    //rv = false;
+                    logger.debug("The edge {} to be updated is already in edgePropsMap, no need to report upward. But we still let it report upward (a trick, TODO)");
+                        //the trick here is due to for: TopologyManager rejects an edge if containing non-existing port, then this edge is still maintained here so when next time the edge is updated but is rejected in the checking here
+                    rv = true;
                 } else {
                     rv = true;
                 }
@@ -495,9 +511,9 @@ public class TopologyServiceShim implements IDiscoveryListener,
         }
 
         if (rv) {
-            logger.debug(
+            logger.trace(
                     "notifyLocalEdgeMap: {} for Edge {} in container {}",
-                    new Object[] { type.getName(), edge, container });
+                    new Object[] { type.getName(), edge, container });//lg.dbug-trc
         }
 
         return rv;
@@ -514,8 +530,8 @@ public class TopologyServiceShim implements IDiscoveryListener,
         if (notifyListeners) {
             notifyQ.add(new NotifyEntry(container, new TopoEdgeUpdate(edge, props,
                     type)));
-            logger.debug("notifyEdge: {} Edge {} in container {}",
-                    new Object[] { type.getName(), edge, container });
+            logger.trace("notifyEdge: {} Edge {} in container {}",
+                    new Object[] { type.getName(), edge, container });//lg.dbug-trc
         }
     }
 

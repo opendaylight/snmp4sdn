@@ -1,0 +1,43 @@
+module topology {
+    yang-version 1;
+
+    namespace "urn:opendaylight:snmp4sdn:md:topology";
+    prefix topology;
+
+    import snmp4sdn-types {prefix types;}
+
+    organization "Industrial Technology Research Institute of Taiwan";
+    contact "Yi-Ling Hsieh <ylhsieh@itri.org.tw>";
+
+    description "YANG version of the SNMP4SDN Topology Service MIB.";
+
+    revision "2015-09-01" {//TODO: update date
+        description
+            "SNMP4SDN Topology Service";
+    }
+
+    rpc rediscover {
+        description
+            "Trigger topology discovery";
+        output {
+            leaf rediscover-result{
+                type types:result;
+            }
+        }
+    } //rpc rediscover
+
+    rpc set-discovery-interval {
+        description
+            "Set periodic topology discovery interval time";
+        input {
+            leaf interval-second{
+                type int32;
+            }
+        }
+        output {
+            leaf set-discovery-interval-result{
+                type types:result;
+            }
+        }
+    } //rpc rediscover
+}
