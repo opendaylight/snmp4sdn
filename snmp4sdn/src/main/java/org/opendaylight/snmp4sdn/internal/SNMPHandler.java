@@ -37,6 +37,10 @@ import org.opendaylight.snmp4sdn.FDBEntry;
 import org.opendaylight.snmp4sdn.VLANTable;
 //import org.opendaylight.controller.sal.vlan.VLANTable;//ad-sal
 
+//for vendor-specific
+import org.opendaylight.snmp4sdn.VsFunctionName;
+import org.opendaylight.snmp4sdn.VlanAttributeTag;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +57,7 @@ import java.util.TreeSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Vector;
 import java.io.*;
 
 //TODO: decouple the hardware-dependent parts as another module
@@ -63,10 +68,18 @@ public class SNMPHandler{
 
     //TODO: read these from DB or vendor-specific configuration file
     private int NUMBER_OF_MAC_ADDRESS_SEGMENTS_IN_SNMP_FDB = 6;
+
+    
+    private int NUMBER_OF_PORT = 64;
+    private int NUMBER_OF_PORT_IN_SNMP_VLAN = 64;
+    private int NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN = NUMBER_OF_PORT_IN_SNMP_VLAN/8;
+    private int NUMBER_OF_PORT_IN_SNMP_FDB = 64;
+    /*//TODO: make the following covered by vendor-specific solution
     private int NUMBER_OF_PORT_DLINK = 24;
     private int NUMBER_OF_PORT_IN_SNMP_VLAN_DLINK = 48;
     private int NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN_DLINK = NUMBER_OF_PORT_IN_SNMP_VLAN_DLINK/8;
     private int NUMBER_OF_PORT_IN_SNMP_FDB_DLINK = 32;
+    */
     private int NUMBER_OF_PORT_GROUP_IN_VALUE_ASSIGN_IN_SNMP_VLAN = 7;
     private int DELETE_VLAN_SNMP_VALUE = 6;
     private int NUMBER_OF_MAC_ADDRESS_SEGMENTS_IN_SNMP_ARP = 6;
@@ -97,6 +110,7 @@ public class SNMPHandler{
             return this.value;
         }
     }*/
+    //TODO: move this enum to a stand-alone code, like FDBEntry.java
     private enum FdbEntrySetType{//by snmpset, only 2 and 3 (i.e. INVALID and PERMANENT can be set)
         OTHER (1),
         INVALID (2),//delete
@@ -112,12 +126,14 @@ public class SNMPHandler{
         }
     };
 
-    String lldpRemoteChassisIdOID = "1.0.8802.1.1.2.1.4.1.1.5";//s4s
     String lldpLocalChassisIdOID = "1.0.8802.1.1.2.1.3.2.0";//s4s
+    String lldpLocalPortIdTypeOID = "1.0.8802.1.1.2.1.3.7.1.2";//s4s
     String lldpLocalPortIdOID = "1.0.8802.1.1.2.1.3.7.1.3";//s4s
+    String lldpRemoteChassisIdOID = "1.0.8802.1.1.2.1.4.1.1.5";//s4s
     String lldpRemotePortIdTypeOID = "1.0.8802.1.1.2.1.4.1.1.6";//s4s
     String lldpRemotePortIdOID = "1.0.8802.1.1.2.1.4.1.1.7";//s4s
     int portIdType_MacAddr = 3;
+    int portIdType_ifName = 5;
     int portIdType_LocallyAssigned = 7;
 
     String vlanNameOID = "1.3.6.1.2.1.17.7.1.4.3.1.1";
@@ -174,6 +190,19 @@ public class SNMPHandler{
     String stpDesignatedRootOID = "1.3.6.1.2.1.17.2.5";//dot1dStpDesignatedRoot: return root switch's mac address (on D-link, e.g. 10:00:xx:xx:xx:xx:xx:xx, TODO: now just ignore prefix "10:00", right?)
     String stpPortDesignatedRootOID = "1.3.6.1.2.1.17.2.15.1.6";//dot1dStpPortDesignatedRoot: return root switch's mac address (on D-link, e.g. 10:00:xx:xx:xx:xx:xx:xx, TODO: now just ignore prefix "10:00", right?)
 
+    String portStateOID = "1.3.6.1.2.1.2.2.1.7";
+    /*ifAdminStatus
+    root@ubuntu:~# snmpwalk -v2c -c public 192.168.0.32 1.3.6.1.2.1.2.2.1.7
+    iso.3.6.1.2.1.2.2.1.7.1 = INTEGER: 2
+    iso.3.6.1.2.1.2.2.1.7.2 = INTEGER: 1
+    ...
+    iso.3.6.1.2.1.2.2.1.7.50 = INTEGER: 1 //all ports are listed
+
+    1 : up
+    2 : down
+    3 : testing
+    */
+
     //String requestTypeOIDs = {"1.1.1.1.1"};//(when all kinds of OID more and more, may consider to use requestTypeOIDs[typeID] instead of rasing one by one like above
 
     CmethUtil cmethUtil = null;
@@ -192,21 +221,48 @@ public class SNMPHandler{
     */
     private String convertToEthSwitchPortString(int port){
         //String ans = "0x";//for linux snmpset command parameter form
+
+        /* Old code has bug: in the "HexString.toHexString((long)Math.pow(2, pow));", Math.pow() may gets very large number which exceeds long integer upper bound!
         String ans = "";
         int pow;
 
-        pow = NUMBER_OF_PORT_IN_SNMP_FDB_DLINK - port;
+        pow = NUMBER_OF_PORT_IN_SNMP_FDB - port;
         ans = HexString.toHexString((long)Math.pow(2, pow));
 
         //error checking
         if(ans.length() != 16 + 7)//TODO: 16+7 is the uniform length of the output string from HexString.toHexString(long). Notice HexString library change in the future.
             return null;
-        int lenghOfNoneZero = (NUMBER_OF_PORT_IN_SNMP_FDB_DLINK/8)*3 - 1;
+        int lenghOfNoneZero = (NUMBER_OF_PORT_IN_SNMP_FDB/8)*3 - 1;
         int lengthOfZeroInFront = ans.length() - lenghOfNoneZero;
         if(HexString.toLong(ans.substring(0, lengthOfZeroInFront)) != 0)//the substring here should be "00:00:00..." all zero. If not, abnormal.
             return null;
 
         ans = ans.substring(lengthOfZeroInFront, ans.length());
+        return ans;
+        */
+
+        //New code as below (old code has bug, as decribed at the beginning of the marked code above)
+        /*
+        for example:
+        0x00400000 ( port 10 )
+        | 0000| 0000 | 0100 | 0000 | 0000| 0000 | 0000 | 0000 |
+        ==> port 10 is at zone 3, position 2
+        */
+        String ans = "";
+        int zone = (port - 1) / 4 + 1;
+        int pos = port - (zone - 1) * 4;
+        for(int i = 1; i <= 16; i++){
+            if(i == zone){
+                int digit = (int)Math.pow(2, (4 - pos));
+                ans = ans + digit;
+            }
+            else
+                ans = ans + "0";
+            if(i %2 == 0)
+                ans += ":";
+        }
+        ans = ans.substring(0, ans.length() - 1);
+        //System.out.println("convertToEthSwitchPortString(port " + port + ") = " + ans);
         return ans;
     }
 
@@ -260,7 +316,7 @@ public class SNMPHandler{
             str = new Integer((int)Math.pow(2, pow)).toString();
             ans = "00" + sep + "00" + sep + "00" + sep + str + "0";
         }
-        else if(port <= NUMBER_OF_PORT_IN_SNMP_FDB_DLINK){
+        else if(port <= NUMBER_OF_PORT_IN_SNMP_FDB){
             pow = 32 - port;
             str = new Integer((int)Math.pow(2, pow)).toString();
             ans = "00" + sep + "00" + sep + "00" + sep + "0" + str;
@@ -808,6 +864,8 @@ public class SNMPHandler{
             return null;
         }
 
+        //2. read fwd table entry
+        //logger.debug("going to read fwd table entry...");
         try{
             String community = cmethUtil.getSnmpCommunity(nodeId);
             comInterface = new SNMPv1CommunicationInterface(1, sw_ipAddr, community);
@@ -817,9 +875,6 @@ public class SNMPHandler{
             logger.debug("ERROR: readFdbTableEntry(): for node {}" + ", create SNMP communication interface error: {}", switchIP, e1);
             return null;
         }
-
-        //2. read fwd table entry
-        //logger.debug("going to read fwd table entry...");
         short port = (short)readFwdTableEntry(comInterface, (short)vlanId, destMac);
         if(port < 0){
             logger.debug("ERROR: readFdbTableEntry(): given nodeId {} vlanId {} destMac {}, call readFwdTableEntry() returns invalid port {}", nodeId, vlanId, destMac, port);
@@ -828,6 +883,15 @@ public class SNMPHandler{
 
         //3. read fwd table entry's 'type' field
         //logger.debug("going to read fwd table entry type...");
+        try{
+            String community = cmethUtil.getSnmpCommunity(nodeId);
+            comInterface = new SNMPv1CommunicationInterface(1, sw_ipAddr, community);
+            //logger.debug("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
+        }
+        catch (SocketException e1) {
+            logger.debug("ERROR: readFdbTableEntry(): for node {}" + ", create SNMP communication interface error: {}", switchIP, e1);
+            return null;
+        }
         FDBEntry.EntryType type = readFwdTableEntryType(comInterface, (short)vlanId, destMac);
         if(type == null){
             logger.debug("ERROR: readFwdTableEntryType(): given nodeId {} vlanId {} destMac {}, call readFwdTableEntryType() returns null", nodeId, vlanId, destMac);
@@ -878,7 +942,7 @@ public class SNMPHandler{
         SNMPInteger value = (SNMPInteger)pair.getSNMPObjectAt(1);
         int valueInt = ((BigInteger)value.getValue()).intValue();
 
-        logger.trace("readFwdTableEntry(): get value of {} = {}" + value.getClass().getName(), valueInt);
+        logger.trace("readFwdTableEntry(): get value of {} = {}", value.getClass().getName(), valueInt);
 
         return valueInt;
     }
@@ -919,7 +983,7 @@ public class SNMPHandler{
 
         logger.trace("readFwdTableEntryType: get value of {} = {}" + value.getClass().getName(), valueInt);
 
-        if(valueInt == FDBEntry.EntryType.OTHER.ordinal())
+        if(valueInt == FDBEntry.EntryType.OTHER.getValue())
                 return FDBEntry.EntryType.OTHER;
         else if(valueInt == FDBEntry.EntryType.INVALID.getValue())
                 return FDBEntry.EntryType.INVALID;
@@ -1398,6 +1462,29 @@ public class SNMPHandler{
         return ans;
     }
 
+    private Short retrievePortNumFromChassisOIDAtEnd(String oidstr){
+        //e.g. oidstr as "iso.3.6.1.2.1.2.2.1.7.40", then return "40"
+        int tail = oidstr.lastIndexOf(".") + 1;
+        String ansStr= oidstr.substring(tail, oidstr.length());
+        Short ans = null;
+        try{
+            ans = Short.parseShort(ansStr);
+        }catch(Exception e1){
+            logger.debug("ERROR: given OID {} which ends with {} to be converted to Short value, but error: {}", oidstr, ansStr, e1);
+            return null;
+        }
+        //logger.debug("oidstr (" + oidstr +") to retrieve port number:" + ans);
+        return ans;
+    }
+
+    private String asciiStringToHexString(byte[] valueBytes){
+        String ret = new String(valueBytes);
+        ret = ret.replaceAll("-", ":");
+        if(ret.length() != NUMBER_OF_BYTES_FOR_IPV4_MAC_ADDRESS * 2 + (NUMBER_OF_BYTES_FOR_IPV4_MAC_ADDRESS -1))//the number of characters in a mac-address format string
+            logger.debug("WARNING: {} is of length {} which is not equal to 6-seg mac-address format", ret, ret.length());
+        return ret;
+    }
+
     private Map<Short, String> readLLDPRemoteChassisIDEntries(SNMPv1CommunicationInterface comInterface){
             logger.trace("enter readLLDPRemoteChassisIDEntries()...");
             Map<Short, String> table =  new HashMap<Short, String>();
@@ -1430,7 +1517,12 @@ public class SNMPHandler{
                 Short portNum = retrievePortNumFromChassisOID(snmpOIDstr);
 
                 byte[] valueBytes = (byte[])value.getValue();
-                String valueStr = HexString.toHexString(valueBytes);
+                //TODO: unsolved issue: for D-link DGS-3650 switch, remote chassis ID subtype is 4 (mac-address form), but it gives a String instead of a Hex-String
+                //Bug fix: for D-link DGS-3650, chassis ID is String; in earlier switch, chassis ID is Hex-String
+                String valueStr  = HexString.toHexString(valueBytes);//for general switch
+                if(cmethUtil.getModel(cmethUtil.getSID(comInterface.getHostAddress())).equals("D-Link_DGS-3650")){
+                    valueStr = asciiStringToHexString(valueBytes);//for D-Link DGS-3650 switch
+                }
 
                 table.put(portNum, valueStr);
                 //logger.debug("Retrieved OID: " + snmpOID + ", value: " + valueStr);
@@ -1521,7 +1613,7 @@ public class SNMPHandler{
             //logger.debug("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
         }
         catch (SocketException e1) {
-            logger.debug("ERROR: readFlowRequest(), for node {}" + ", create SNMP communication interface error: {}", switchIP, e1);
+            logger.debug("ERROR: getLLDPChassis(), for node {}" + ", create SNMP communication interface error: {}", switchIP, e1);
             return null;
         }
 
@@ -1550,7 +1642,13 @@ public class SNMPHandler{
         }
         SNMPOctetString value = (SNMPOctetString)pair.getSNMPObjectAt(1);//TODO: error checking (may reference to getVLANPort())
         byte[] valueBytes = (byte[])value.getValue();
-        String valueStr = HexString.toHexString(valueBytes);
+        //TODO: issue: for D-link DGS-3650 switch, local chassis ID subtype is 4 (mac-address form), but it gives a String instead of a Hex-String
+        //TODO: here we may try getting local chass ID subtype from earlier switch to confirm whether ths issue here is solvable
+        //Bug fix: for D-link DGS-3650, chassis ID is String; in earlier switch, chassis ID is Hex-String
+        String valueStr = HexString.toHexString(valueBytes);//for general switch
+        if(cmethUtil.getModel(cmethUtil.getSID(comInterface.getHostAddress())).equals("D-Link_DGS-3650")){
+            valueStr = asciiStringToHexString(valueBytes);//for D-Link DGS-3650 switch
+        }
 
         return valueStr;        
     }
@@ -1628,6 +1726,12 @@ public class SNMPHandler{
                return null;
            }
 
+            Map<Short, Integer> localPortIDTypeTable = readLLDPLocalPortIDTypeEntries(comInterface);
+            if(localPortIDTypeTable == null){
+                logger.debug("ERROR: readLLDPLocalPortIDEntries(): call readLLDPLocalPortIDTypeEntries() fail, given SNMP interface of node {}", comInterface.getHostAddress());
+                return null;
+            }
+
             try{
                 comInterface.closeConnection();
             }
@@ -1646,9 +1750,28 @@ public class SNMPHandler{
                 Short portNum = retrievePortNumFromPortOID(snmpOIDstr);
 
                 byte[] valueBytes = (byte[])value.getValue();
-                String valueStr = HexString.toHexString(valueBytes);
+                String valueStr;
 
-                table.put(portNum, valueStr);
+                if(localPortIDTypeTable.get(portNum) == null){
+                    logger.debug("ERROR: readLLDPLocalPortIDEntries(), localPortIDTypeTable of node {} has no entry for port {}", comInterface.getHostAddress(), portNum);
+                    return null;
+                }
+                int portIdType = localPortIDTypeTable.get(portNum).intValue();
+                if(portIdType == portIdType_MacAddr){
+                    valueStr = HexString.toHexString(valueBytes);
+                }
+                else if(portIdType == portIdType_ifName){
+                    valueStr = new String(valueBytes);
+                }
+                else if(portIdType == portIdType_LocallyAssigned){
+                    valueStr = new String(valueBytes);
+                }
+                else{
+                    logger.debug("ERROR: readLLDPLocalPortIDEntries(), portIdType {} is unkown for node {} port {}", portIdType, comInterface.getHostAddress(), portNum);
+                    return null;
+                }
+
+                table.put(portNum, valueStr.trim());//Bug fix: on D-Link DGS-3650, the portId is a string representing a number, however the string is from bytes and seems contains non-visual character in the string, so let's trim() to clean it
                 //logger.debug("Retrieved OID: " + snmpOID + " (so port num=" + portNum + "), value: " + valueStr);
             }
             return table;
@@ -1728,6 +1851,10 @@ public class SNMPHandler{
         }
 
         Map<Short, Integer> remotePortIDTypeTable = readLLDPRemotePortIDTypeEntries(comInterface);
+        if(remotePortIDTypeTable == null){
+            logger.debug("ERROR: readLLDPRemotePortIDEntries(): call readLLDPRemotePortIDTypeEntries() fail, given SNMP interface of node {}", comInterface.getHostAddress());
+            return null;
+        }
 
         try{
             comInterface.closeConnection();
@@ -1749,19 +1876,25 @@ public class SNMPHandler{
                 byte[] valueBytes = (byte[])value.getValue();
                 String valueStr;
 
+                if(remotePortIDTypeTable.get(portNum) == null){
+                    logger.debug("ERROR: readLLDPRemotePortIDEntries(), remotePortIDTypeTable of node {} has no entry for port {}", comInterface.getHostAddress(), portNum);
+                    return null;
+                }
                 int portIdType = remotePortIDTypeTable.get(portNum).intValue();
                 if(portIdType == portIdType_MacAddr){
                     valueStr = HexString.toHexString(valueBytes);
                 }
+                else if(portIdType == portIdType_ifName){
+                    valueStr = new String(valueBytes);
+                }
                 else if(portIdType == portIdType_LocallyAssigned){
                     valueStr = new String(valueBytes);
-                    //System.out.println("remote OF portID = " + valueStr);
                 }
                 else{
-                    logger.debug("ERROR: readLLDPRemotePortIDEntries(), portIdType {} is unkown for node {} port {}", portIdType, comInterface.getHostAddress(), portNum);
+                    logger.debug("ERROR: readLLDPRemotePortIDEntries(), portIdType {} is unknown for node {} port {}", portIdType, comInterface.getHostAddress(), portNum);
                     return null;
                 }
-                table.put(portNum, valueStr);
+                table.put(portNum, valueStr.trim());//Bug fix: on D-Link DGS-3650, the portId is a string representing a number, however the string is from bytes and seems contains non-visual character in the string, so let's trim() to clean it
                 //logger.debug("Retrieved OID: " + snmpOID + ", value: " + valueStr);
         }
         return table;
@@ -1821,11 +1954,157 @@ public class SNMPHandler{
         return table;
     }
 
+    private Map<Short, Integer> readLLDPLocalPortIDTypeEntries(SNMPv1CommunicationInterface comInterface){
+        //logger.trace("enter readLLDPLocalPortIDTypeEntries()...");
+
+        Map<Short, Integer> table =  new HashMap<Short, Integer>();
+        SNMPVarBindList tableVars;
+
+        try{
+            //logger.debug("to retieve oid " + lldpLocalPortIdOID + "'s values...");
+
+            tableVars = comInterface.retrieveMIBTable(lldpLocalPortIdTypeOID);
+        }
+        catch(Exception e1)
+        {
+            logger.debug("ERROR: readLLDPLocalPortIDTypeEntries(), Exception during SNMP retrieveMIBTable() for node {}: {}", comInterface.getHostAddress(), e1);
+            //TODO: call comInterface.closeConnection()? (An innter try..catch here?)
+            return null;
+        }
+
+        /*//TODO: snmp connection should be created and closed here inpendently? (but need fix that comInterface had been closed before entering here, and here we don't know the switchIP for create snmp)
+        try{
+            comInterface.closeConnection();
+        }
+        catch(SocketException e2){
+            logger.debug("ERROR: readLLDPLocalPortIDTypeEntries(), Exception during SNMPv1CommunicationInterface.closeConnection() for node {}: {}", comInterface.getHostAddress(), e2);
+            return null;
+        }*/
+
+        //logger.debug("Number of table entries: " + tableVars.size());
+        for(int i = 0; i < tableVars.size(); i++){
+                SNMPSequence pair = (SNMPSequence)(tableVars.getSNMPObjectAt(i));
+                SNMPObjectIdentifier snmpOID = (SNMPObjectIdentifier)pair.getSNMPObjectAt(0);
+                SNMPInteger value = (SNMPInteger)pair.getSNMPObjectAt(1);
+
+                String snmpOIDstr = snmpOID.toString();
+                Short portNum = retrievePortNumFromPortOID(snmpOIDstr);//TODO: suggest to change a function name?  
+
+                int valueInt = ((BigInteger)value.getValue()).intValue();
+
+                table.put(portNum, new Integer(valueInt));
+                //logger.debug("Retrieved OID: " + snmpOID + ", value: " + valueInt);
+        }
+        return table;
+    }
+
     //abandom this method, because addVLAN() must be given vlanName also
     /*public Status addVLAN(Node node, Integer vlanID){
         logger.debug("enter SNMPHandler.addVLAN()...");
         return addVLAN(node, vlanID, "v" + vlanID);
     }*/
+
+    public Map<Short, Integer>  readPortState(Long sw_macAddr){//return <portNumber, remoteChassisID>
+        logger.trace("enter SNMPHandler.readPortState()");
+
+        String switchIP;
+        String community;
+        InetAddress sw_ipAddr;
+        SNMPv1CommunicationInterface comInterface;
+
+        switchIP = cmethUtil.getIpAddr(sw_macAddr);
+        if(switchIP == null){
+            logger.debug("ERROR: readPortState() for node, mac addr: {}, can't find the IP address of the node in DB", sw_macAddr);
+            return null;
+        }
+
+        community = cmethUtil.getSnmpCommunity(sw_macAddr);
+        if(community == null){
+            logger.debug("ERROR: readPortState() for node, mac addr: {}, can't find the SNMP community of the node in DB", sw_macAddr);
+            return null;
+        }
+
+        try{
+            sw_ipAddr = InetAddress.getByName(switchIP);
+        }
+        catch (UnknownHostException e) {
+            logger.debug("ERROR: readPortState() for node {}, call InetAddress.getByName() error: {}", switchIP, e);
+            return null;
+        }
+        if(sw_ipAddr == null){
+            logger.debug("ERROR:readPortState() for node {}, convert InetAddress fails", switchIP);
+            return null;
+        }
+
+        //1. open snmp communication interface
+        try{
+            comInterface = new SNMPv1CommunicationInterface(1, sw_ipAddr, community);
+            //logger.debug("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
+        }
+        catch (SocketException e1) {
+            logger.debug("ERROR: readPortState(), for node {}" + ", create SNMP communication interface error: {}", switchIP, e1);
+            return null;
+        }
+
+        //2. now can set fwd table entry
+        //logger.debug("going to read LLDP remote chassis IDs...");
+        return readPortStateEntries(comInterface);
+    }
+
+    private Map<Short, Integer> readPortStateEntries(SNMPv1CommunicationInterface comInterface){
+        logger.trace("enter readPortStateEntries()...");
+        Map<Short, Integer> table =  new HashMap<Short, Integer>();
+        SNMPVarBindList tableVars;
+
+        try{
+            //logger.debug("to retieve oid " + portStateOID + "'s values...");
+
+            tableVars = comInterface.retrieveMIBTable(portStateOID);
+        }
+        catch(Exception e1)
+        {
+            logger.debug("ERROR: readPortStateEntries(), Exception during SNMP retrieveMIBTable() for node {}: {}", comInterface.getHostAddress(), e1);
+            //TODO: call comInterface.closeConnection()? (An innter try..catch here?)
+            return null;
+        }
+
+        try{
+            comInterface.closeConnection();
+        }
+        catch(SocketException e2){
+            logger.debug("ERROR: readPortStateEntries(), Exception during SNMPv1CommunicationInterface.closeConnection() for node {}: {}", comInterface.getHostAddress(), e2);
+            return null;
+        }
+
+        //logger.debug("Number of table entries: " + tableVars.size());
+        int tmpCount = 0;//TODO: tmpCount's init value is 0, based on that port number begins from 1. Always ok?
+        for(int i = 0; i < tableVars.size(); i++){
+            SNMPSequence pair = (SNMPSequence)(tableVars.getSNMPObjectAt(i));
+            SNMPObjectIdentifier snmpOID = (SNMPObjectIdentifier)pair.getSNMPObjectAt(0);
+            SNMPInteger value = (SNMPInteger)pair.getSNMPObjectAt(1);
+
+            String snmpOIDstr = snmpOID.toString();
+            Short portNum = retrievePortNumFromChassisOIDAtEnd(snmpOIDstr);
+
+            //bug fix: for example, with the currently used OID (portStateOID), get switch's port numbers as 1~48, 49, 50, 1000, ..., 100000, which exceeds Short value limit. Also, 50->1000, shows that there's only 50 ports.
+            if(portNum == null){
+                logger.debug("ERROR: readPortStateEntries(): for node {}, call retrievePortNumFromChassisOIDAtEnd(), given snmpOIDstr {}, fail", comInterface.getHostAddress(), snmpOIDstr);
+                return null;
+            }
+            if(portNum != tmpCount + 1){
+                logger.trace("readPortStateEntries(): for node {}, the {} port state entries, port {} is followed by port {}, so skip the ports afterward", comInterface.getHostAddress(), tmpCount, portNum);
+                return table;
+            }
+            else
+                tmpCount = portNum;
+
+            int valueInt = ((BigInteger)value.getValue()).intValue();
+
+            table.put(portNum, new Integer(valueInt));
+            //logger.debug("readPortStateEntries: Retrieved OID: " + snmpOID + ", value: " + valueInt);
+        }
+        return table;
+    }
 
     public Status addVLAN(long nodeID, int vlanID, String vlanName){
         //TODO: suggest to modify function name as "setXXX()" because its behavior is "set" (i.e. for existing vlan entry, this function still can write)
@@ -2038,8 +2317,9 @@ public class SNMPHandler{
         }
 
         String oid = vlanEgressPortsOID + "." + vlanID;
-        byte[] value = new byte[(NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN_DLINK)*NUMBER_OF_PORT_GROUP_IN_VALUE_ASSIGN_IN_SNMP_VLAN];
-        System.arraycopy(nodeConnsBytes, 0, value, 0, NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN_DLINK);
+        int valueBytesNum = NUMBER_OF_PORT / 8;
+        byte[] value = new byte[valueBytesNum];
+        System.arraycopy(nodeConnsBytes, 0, value, 0, valueBytesNum);
         SNMPOctetString octetValue =  new SNMPOctetString(value);
         SNMPVarBindList newVar;
         try{
@@ -2072,8 +2352,8 @@ public class SNMPHandler{
     public Status setVLANPorts (long nodeID, int vlanID, int taggedPortList[], int untaggedPortList[]){
         logger.trace("enter SNMPHandler.setVLANPorts(nodeId: {}, vlanID: {}, taggedPortList[]: {}, untaggedPortList[]: {}", nodeID, vlanID, Arrays.toString(taggedPortList), Arrays.toString(untaggedPortList));
 
-        int portList[] = new int[NUMBER_OF_PORT_DLINK];
-        for(int i = 0; i < NUMBER_OF_PORT_DLINK; i++)
+        int portList[] = new int[NUMBER_OF_PORT];//TODO: array size should be taggedPortList.length or untaggedPortList.length?
+        for(int i = 0; i < NUMBER_OF_PORT; i++)
             portList[i] = taggedPortList[i] | untaggedPortList[i];
 
         return setVLANPortsAndUntaggedPorts(nodeID, vlanID, portList, untaggedPortList);
@@ -2160,7 +2440,7 @@ public class SNMPHandler{
 
         String oid = vlanEgressPortsOID + "." + vlanID;
         String oidU = vlanUntaggedPortsOID+ "." + vlanID;
-        int valueBytesNum = NUMBER_OF_PORT_DLINK / 8;
+        int valueBytesNum = NUMBER_OF_PORT / 8;
         byte[] value = new byte[valueBytesNum];
         byte[] valueU = new byte[valueBytesNum];
         System.arraycopy(nodeConnsBytes, 0, value, 0, valueBytesNum);
@@ -2200,6 +2480,192 @@ public class SNMPHandler{
         logger.trace("\n[Switch response]:\n  " + newVars.toString());
         return true;
     }
+
+    //modify existing addVLANandSetPortsWithUntaggedPorts(), adding the cmdList given from VenderSpecificHandler
+    public Status addVLANandSetPorts(long nodeID, String vlanName, int vlanID, int taggedPortList[], int untaggedPortList[], List<List<String>> cmdList){
+        Long sw_macAddr = new Long(nodeID);
+        String switchIP;
+        String community;
+        InetAddress sw_ipAddr;
+        SNMPv1CommunicationInterface comInterface;
+
+        if(nodeID < 0){
+            logger.debug("ERROR: addVLANandSetPortsWithUntaggedPorts(), vendor-specific: given nodeID {} and vlanID {}, nodeID is invalid", nodeID, vlanID);
+            return new Status(StatusCode.NOTALLOWED, "addVLANandSetPortsWithUntaggedPorts(), vendor-specific: given invalid nodeID " + nodeID);
+        }
+
+        if(!isValidVlan(vlanID)){
+            logger.debug("ERROR: addVLANandSetPortsWithUntaggedPorts(), vendor-specific: given nodeID {} and vlanID {}, vlanID is invalid", nodeID, vlanID);
+            return new Status(StatusCode.NOTALLOWED, "addVLANandSetPortsWithUntaggedPorts(), vendor-specific: nodeID " + nodeID +"), given invalid vlanID " + vlanID);
+        }
+
+        if(vlanName == null || vlanName == ""){
+            logger.debug("ERROR: addVLANandSetPortsWithUntaggedPorts(), vendor-specific: given nodeID {} and vlanID {}, vlanName is invalid as null or empty string", nodeID, vlanID);
+            return new Status(StatusCode.NOTALLOWED, "addVLANandSetPortsWithUntaggedPorts(), vendor-specific: nodeID " + nodeID + ", vlanID " + vlanID + ", vlanName is invalid as null or empty string");
+        }
+
+        switchIP = cmethUtil.getIpAddr(sw_macAddr);
+        if(switchIP == null){
+            logger.debug("ERROR: addVLANandSetPortsWithUntaggedPorts(), vendor-specific: nodeID {}, can't find the IP address of the node {} in DB", nodeID);
+            return new Status(StatusCode.NOTFOUND, "addVLANandSetPortsWithUntaggedPorts(), vendor-specific: for nodeID " + nodeID + ", can't find the IP address of the node {} in DB");
+        }
+
+        community = cmethUtil.getSnmpCommunity(sw_macAddr);
+        if(community == null){
+            logger.debug("ERROR: addVLANandSetPortsWithUntaggedPorts(), vendor-specific: nodeID: {},  can't find the SNMP community of the node in DB", nodeID);
+            return new Status(StatusCode.NOTFOUND, "addVLANandSetPortsWithUntaggedPorts(), vendor-specific: nodeID " + nodeID + ", can't find the SNMP community of the node in DB");
+        }
+
+        try{
+            sw_ipAddr = InetAddress.getByName(switchIP);
+        }
+        catch (UnknownHostException e) {
+            logger.debug("ERROR: addVLANandSetPortsWithUntaggedPorts(), vendor-specific: node {}, call InetAddress.getByName() error: {}", switchIP, e);
+            return new Status(StatusCode.INTERNALERROR, "addVLANandSetPortsWithUntaggedPorts(), vendor-specific: node " + switchIP +", call InetAddress.getByName() error: " + e);
+        }
+        if(sw_ipAddr == null){
+            logger.debug("ERROR: addVLANandSetPortsWithUntaggedPorts(), vendor-specific: node {}, convert InetAddress fails", switchIP);
+            return new Status(StatusCode.INTERNALERROR, "addVLANandSetPortsWithUntaggedPorts(), vendor-specific: node " + switchIP +", convert InetAddress fails");
+        }
+
+        //1. open snmp communication interface
+        try{
+            comInterface = new SNMPv1CommunicationInterface(1, sw_ipAddr, community);
+            //logger.debug("snmp connection created...swtich IP addr=" + sw_ipAddr.toString() + ", community=" + community);
+        }
+        catch (SocketException e1) {
+            logger.debug("ERROR: addVLANandSetPortsWithUntaggedPorts(), vendor-specific: for node {}" + ", create SNMP communication interface error: {}", switchIP, e1);
+            return new Status(StatusCode.INTERNALERROR, "addVLANandSetPortsWithUntaggedPorts(), vendor-specific: for node " + switchIP + ", create SNMP communication interface error: " + e1);
+        }
+
+        //2. then send snmp settings request in order
+        //print sent data
+        logger.trace("addVLANandSetPortsWithUntaggedPorts(), vendor-specific: given node: {}, vlanID: {}, vlanName: {}, ports:(see below)), send snmp packet:", comInterface.getHostAddress(), vlanID, vlanName);
+        for(List<String> cmd : cmdList){
+            String[] oids = new String[cmd.size()];
+            SNMPObject [] values = new SNMPObject[cmd.size()];
+
+            //generate OIDs and values according to the given attributes, as one snmp request packet
+            boolean bool = genOidAndValue_for_addVLANandSetPortsWithUntaggedPorts(cmd, oids, values, vlanName, vlanID, taggedPortList, untaggedPortList);
+            if(!bool){
+                logger.debug("ERROR: addVLANandSetPortsWithUntaggedPorts(), vendor-specific: for nodeID {}, given vlanID {} vlanName {} taggedPortList {} untaggedPortList {}, call genOidAndValue_for_addVLANandSetPortsWithUntaggedPorts() fail", nodeID, vlanID, vlanName, Arrays.toString(taggedPortList), Arrays.toString(untaggedPortList));
+                return new Status(StatusCode.INTERNALERROR, "addVLANandSetPortsWithUntaggedPorts(), vendor-specific: for nodeID " + nodeID + ", given vlanID " + vlanID + " vlanName " + vlanName + " taggedPortList {}" + Arrays.toString(taggedPortList) + " untaggedPortList " + Arrays.toString(untaggedPortList) + ", call genOidAndValue_for_addVLANandSetPortsWithUntaggedPorts() fail");
+            }
+
+            //send out the snmp request
+            SNMPVarBindList newVars = null;
+            try{
+                newVars = comInterface.setMIBEntry(oids, values);
+            }catch(Exception e1){
+                logger.debug("ERROR: addVLANandSetPortsWithUntaggedPorts(), vendor-specific: for nodeID {}, given vlanID {} vlanName {} taggedPortList {} untaggedPortList {}, call comInterface.setMIBEntry(oids, values) fail: error: {}", nodeID, vlanID, vlanName, Arrays.toString(taggedPortList), Arrays.toString(untaggedPortList), e1);
+
+                //print the data to be sent in snmp packet
+                logger.trace("\n[Send to switch]:");
+                for(int i = 0; i < oids.length; i++){
+                    if(i == 1)//the egress port
+                        logger.trace("\n  OID: {}\n    value = {}", oids[i], ((SNMPOctetString)values[i]).toHexString());
+                    else
+                        logger.trace("\n  OID: {}\n    value = {}", oids[i], values[i]);
+                }
+                logger.trace("\n[Switch response]:\n  " + ((newVars == null)? "null":newVars.toString()));//TODO: for value of bytes[], make it SNMPOctetString then can print it
+
+                //TODO: call comInterface.closeConnection()? (An innter try..catch here?)
+
+                return new Status(StatusCode.INTERNALERROR, "addVLANandSetPortsWithUntaggedPorts(), vendor-specific: for nodeID " + nodeID + ", given vlanID " + vlanID + " vlanName " + vlanName + " taggedPortList {}" + Arrays.toString(taggedPortList) + " untaggedPortList " + Arrays.toString(untaggedPortList) + ", call comInterface.setMIBEntry(oids, values) fail");
+            }
+
+            logger.trace("\n[Send to switch]:");
+            for(int i = 0; i < oids.length; i++){
+                if(i == 1)//the egress port
+                    logger.trace("\n  OID: {}\n    value = {}", oids[i], ((SNMPOctetString)values[i]).toHexString());
+                else
+                    logger.trace("\n  OID: {}\n    value = {}", oids[i], values[i]);
+            }
+            logger.trace("\n[Switch response]:\n  " + newVars.toString());//TODO: for value of bytes[], make it SNMPOctetString then can print it
+            
+        }
+
+        //3. close snmp
+        try{
+            comInterface.closeConnection();
+        }
+        catch(SocketException e2){
+            logger.debug("ERROR: addVLANandSetPortstoSwitch(): Exception during SNMPv1CommunicationInterface.closeConnection() for node {}: {}", comInterface.getHostAddress(), e2);
+            return new Status(StatusCode.INTERNALERROR, "ERROR");
+        }
+
+        return new Status(StatusCode.SUCCESS);
+    }
+
+    private boolean genOidAndValue_for_addVLANandSetPortsWithUntaggedPorts(List<String> cmd, String[] oids, SNMPObject [] values, String vlanName, int vlanID, int taggedPortList[], int untaggedPortList[]){
+        String vlanIDStr = "." + vlanID;
+        logger.trace("genOidAndValue_for_addVLANandSetPortsWithUntaggedPorts(): there are {} attributes in the given cmd", cmd.size());
+        for(int i = 0; i < cmd.size(); i++){
+            String attr = cmd.get(i);
+            if(attr == null){
+                logger.debug("ERROR: genOidAndValue_for_addVLANandSetPortsWithUntaggedPorts(): there is null string in the given List<String> cmd");
+                return false;
+            }
+            logger.trace("genOidAndValue_for_addVLANandSetPortsWithUntaggedPorts(): gen OID and value for attribute '{}'", attr);
+
+            attr = attr.trim();
+            if(attr.equals(VlanAttributeTag.vlanCreate.toString())){
+                /*TODO: in snmp OID, vlan_id is wrapped in the OID, not a value,
+                    so suggest to move vlan_id to a stand-alone xml element,
+                    not to list in it in command string.
+                    If we apply so, the 'if' section here should be removed,
+                    and vlanRowStatus needs to be added, after the 'for loop' completes*/
+                oids[i] = new String(vlanRowStatusOID + vlanIDStr);
+                values[i] = new SNMPInteger(4);//create vlan
+            }
+            else if(attr.equals(VlanAttributeTag.vlanName.toString())){
+                oids[i] = new String(vlanNameOID + vlanIDStr);
+                byte vlanNameBytes[] = new byte[vlanName.length()];
+                try{
+                    vlanNameBytes = vlanName.getBytes("US-ASCII");
+                }catch(Exception e){
+                    logger.debug("ERROR: genOidAndValue_for_addVLANandSetPortsWithUntaggedPorts(): convert String vlanName(" + vlanName + ") to byte[] fail"/* + "\n" + 
+                                        "node: {}, vlanID: {}, vlanName: {}, ports: {}, untagged ports: {}",
+                                        comInterface.getHostAddress(), vlanID, vlanName, new SNMPOctetString(nodeConnsBytes).toHexString(), new SNMPOctetString(untaggedNodeConnsBytes).toHexString()*/
+                                        );
+                    return false;
+                }
+                values[i] = new SNMPOctetString(vlanNameBytes);
+            }
+            else if(attr.equals(VlanAttributeTag.egressPorts.toString())){
+                oids[i] = new String(vlanEgressPortsOID + vlanIDStr);
+
+                int portList[] = new int[NUMBER_OF_PORT];//TODO: array size should be taggedPortList.length or untaggedPortList.length?
+                for(int p = 0; p < NUMBER_OF_PORT; p++)
+                    portList[p] = taggedPortList[p] | untaggedPortList[p];
+
+                byte[] portsBytes = convertPortListToBytes(portList);
+                if(portsBytes == null){
+                    logger.debug("ERROR: genOidAndValue_for_addVLANandSetPortsWithUntaggedPorts(): call convertPortListToBytes(), for portList {}, fail", portList);
+                    return false;
+                }
+                values[i] = new SNMPOctetString(portsBytes);
+            }
+            else if(attr.equals(VlanAttributeTag.untaggedPorts.toString())){
+                oids[i] = new String(vlanUntaggedPortsOID + vlanIDStr);
+
+                byte[] untagggedPortsBytes = convertPortListToBytes(untaggedPortList);
+
+                if(untagggedPortsBytes == null){
+                    logger.debug("ERROR: genOidAndValue_for_addVLANandSetPortsWithUntaggedPorts(): call convertPortListToBytes(), for untaggedPortList {}, fail", untaggedPortList);
+                    return false;
+                }
+                values[i] = new SNMPOctetString(untagggedPortsBytes);
+            }
+            else{
+                logger.debug("ERROR: genOidAndValue_for_addVLANandSetPortsWithUntaggedPorts(): unkown attribute tag '{}'", attr);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 
     //TODO: suggest to modify function name, because this function works as setting tagged port (i.e. the input parameter "int portList[]" is tagged port list)
     //NOTE: the input parameter of port list is length of port number, e.g. {0,0,1,0,1,1,0,...} every bit represents a port
@@ -2283,6 +2749,7 @@ public class SNMPHandler{
     }
 
     //TODO: suggest to modify function name, because this function works as setting tagged port (i.e. the input parameter "byte[] nodeConnsBytes" is tagged port list)
+    //TODO: Acction ECS4610-52T code not yet added
     private boolean addVLANandSetPortstoSwitch(SNMPv1CommunicationInterface comInterface, int vlanID, String vlanName, byte[] nodeConnsBytes){
         //TODO: suggest to modify function name as "setVLANandSetPortstoSwitch()" because its behavior is "set" (i.e. for existing vlan entry, this function still can write)
         //logger.debug("enter SNMPHandler.addVLANandSetPortstoSwitch(), vlanID " + vlanID + " and vlanName " + vlanName);
@@ -2304,7 +2771,7 @@ public class SNMPHandler{
             return false;
         }
 
-        int valueBytesNum = NUMBER_OF_PORT_DLINK / 8;
+        int valueBytesNum = NUMBER_OF_PORT / 8;
         byte[] value = new byte[valueBytesNum];
         System.arraycopy(nodeConnsBytes, 0, value, 0, valueBytesNum);
 
@@ -2361,8 +2828,8 @@ public class SNMPHandler{
     public Status addVLANandSetPorts(long nodeID, String vlanName, int vlanID, int taggedPortList[], int untaggedPortList[]){
         logger.trace("enter SNMPHandler.addVLANandSetPorts(nodeId: {}, vlanID: {}, taggedPortList[]: {}, untaggedPortList[]: {}", nodeID, vlanID, Arrays.toString(taggedPortList), Arrays.toString(untaggedPortList));
 
-        int portList[] = new int[NUMBER_OF_PORT_DLINK];
-        for(int i = 0; i < NUMBER_OF_PORT_DLINK; i++)
+        int portList[] = new int[NUMBER_OF_PORT];//TODO: array size should be taggedPortList.length or untaggedPortList.length?
+        for(int i = 0; i < NUMBER_OF_PORT; i++)
             portList[i] = taggedPortList[i] | untaggedPortList[i];
 
         return addVLANandSetPortsWithUntaggedPorts(nodeID, vlanName, vlanID, portList, untaggedPortList);
@@ -2482,38 +2949,102 @@ public class SNMPHandler{
             return false;
         }
 
-        int valueBytesNum = NUMBER_OF_PORT_DLINK / 8;
+        int valueBytesNum = NUMBER_OF_PORT / 8;
         byte[] value = new byte[valueBytesNum];
         System.arraycopy(nodeConnsBytes, 0, value, 0, valueBytesNum);
         byte[] valueUntagged = new byte[valueBytesNum];
         System.arraycopy(untaggedNodeConnsBytes, 0, valueUntagged, 0, valueBytesNum);
 
-        String[] oids = {   vlanNameOID + vlanIDStr,
-                                    vlanEgressPortsOID + vlanIDStr,
-                                    //vlanForbiddenEgressPortsOID + vlanIDStr,
-                                    vlanUntaggedPortsOID + vlanIDStr,
-                                    vlanRowStatusOID + vlanIDStr
-                                    };
-        SNMPObject [] values = {
-                                    new SNMPOctetString(vlanNameBytes), 
-                                    new SNMPOctetString(value), 
-                                    //new SNMPOctetString(new byte[42]), 
-                                    new SNMPOctetString(valueUntagged), 
-                                    new SNMPInteger(4)
-                                    };
 
-        SNMPVarBindList newVars;
-        try{
-            newVars = comInterface.setMIBEntry(oids, values);
-        }catch(Exception e){
-            logger.debug("ERROR: addVLANandSetPortstoSwitch() get exception when calling SNMP setMIBEntry():" + "\n" + 
-                                "node: {}, vlanID: {}, vlanName: {}, ports: {}, untagged ports: {}" + "\n" + 
-                                "Exception: {}" + "\n" + 
-                                "(Maybe because the VLAN ID already exists, or VLAN name already exists, or invalid ports)", 
-                                comInterface.getHostAddress(), vlanID, vlanName, new SNMPOctetString(nodeConnsBytes).toHexString(), new SNMPOctetString(untaggedNodeConnsBytes).toHexString(),
-                                e);
-            //TODO: call comInterface.closeConnection()? (An innter try..catch here?)
-            return false;
+        //Bug fix: Accton ECS4610-52T requires two steps: activate VLAN first, then set its configuration
+        //          For general switch, one step is done!
+        if(cmethUtil.getModel(cmethUtil.getSID(comInterface.getHostAddress())).equals("Accton_ECS4610-52T")){
+            //(1) activate VLAN
+            String oid = vlanRowStatusOID + vlanIDStr;
+            SNMPInteger valueInt = new SNMPInteger(4);
+
+            SNMPVarBindList newVars;
+            try{
+                newVars = comInterface.setMIBEntry(oid, valueInt);
+            }catch(Exception e){
+                logger.debug("ERROR: addVLANandSetPortstoSwitch() get exception when calling SNMP setMIBEntry():" + "\n" + 
+                                    "node: {}, vlanID: {}" + "\n" + 
+                                    "Exception: {}" + "\n" + 
+                                    "(Maybe because the VLAN ID already exists, or other reason)", 
+                                    comInterface.getHostAddress(), vlanID,
+                                    e);
+                //TODO: call comInterface.closeConnection()? (An innter try..catch here?)
+                return false;
+            }
+
+            //(2) set the VLAN's configuration
+            String[] oids2 = {   vlanNameOID + vlanIDStr,
+                                        vlanEgressPortsOID + vlanIDStr,
+                                        //vlanForbiddenEgressPortsOID + vlanIDStr,
+                                        vlanUntaggedPortsOID + vlanIDStr,
+                                        //vlanRowStatusOID + vlanIDStr
+                                        };
+            SNMPObject [] values2 = {
+                                        new SNMPOctetString(vlanNameBytes), 
+                                        new SNMPOctetString(value), 
+                                        //new SNMPOctetString(new byte[42]), 
+                                        new SNMPOctetString(valueUntagged), 
+                                        //new SNMPInteger(4)
+                                        };
+            try{
+                newVars = comInterface.setMIBEntry(oids2, values2);
+            }catch(Exception e){
+                logger.debug("ERROR: addVLANandSetPortstoSwitch() get exception when calling SNMP setMIBEntry():" + "\n" + 
+                                    "node: {}, vlanID: {}, vlanName: {}, ports: {}, untagged ports: {}" + "\n" + 
+                                    "Exception: {}" + "\n" + 
+                                    "(Maybe because the VLAN ID already exists, or VLAN name already exists, or invalid ports)", 
+                                    comInterface.getHostAddress(), vlanID, vlanName, new SNMPOctetString(nodeConnsBytes).toHexString(), new SNMPOctetString(untaggedNodeConnsBytes).toHexString(),
+                                    e);
+                //TODO: call comInterface.closeConnection()? (An innter try..catch here?)
+                return false;
+            }
+
+            //TODO: print sent data, as the bottom code of the following else section.
+        }
+        else{//for general switches: for switches other than Accton ECS4610-52T
+            String[] oids = {   vlanNameOID + vlanIDStr,
+                                        vlanEgressPortsOID + vlanIDStr,
+                                        //vlanForbiddenEgressPortsOID + vlanIDStr,
+                                        vlanUntaggedPortsOID + vlanIDStr,
+                                        vlanRowStatusOID + vlanIDStr
+                                        };
+            SNMPObject [] values = {
+                                        new SNMPOctetString(vlanNameBytes), 
+                                        new SNMPOctetString(value), 
+                                        //new SNMPOctetString(new byte[42]), 
+                                        new SNMPOctetString(valueUntagged), 
+                                        new SNMPInteger(4)
+                                        };
+
+            SNMPVarBindList newVars;
+            try{
+                newVars = comInterface.setMIBEntry(oids, values);
+            }catch(Exception e){
+                logger.debug("ERROR: addVLANandSetPortstoSwitch() get exception when calling SNMP setMIBEntry():" + "\n" + 
+                                    "node: {}, vlanID: {}, vlanName: {}, ports: {}, untagged ports: {}" + "\n" + 
+                                    "Exception: {}" + "\n" + 
+                                    "(Maybe because the VLAN ID already exists, or VLAN name already exists, or invalid ports)", 
+                                    comInterface.getHostAddress(), vlanID, vlanName, new SNMPOctetString(nodeConnsBytes).toHexString(), new SNMPOctetString(untaggedNodeConnsBytes).toHexString(),
+                                    e);
+                //TODO: call comInterface.closeConnection()? (An innter try..catch here?)
+                return false;
+            }
+
+            logger.trace("SNMPHandler.addVLANandSetPortstoSwitch(node: {}, vlanID: {}, vlanName: {}, ports:(see below)):", comInterface.getHostAddress(), vlanID, vlanName);
+            logger.trace("\n[Send to switch]:");
+            for(int i = 0; i < oids.length; i++){
+                if(i == 1 || i == 2)//the egress port and untagged port
+                    logger.trace("\n  OID: {}\n    value = {}", oids[i], ((SNMPOctetString)values[i]).toHexString());
+                else
+                    logger.trace("\n  OID: {}\n    value = {}", oids[i], values[i]);
+            }
+            logger.trace("\n[Switch response]:\n  " + newVars.toString());//TODO: for value of bytes[], make it SNMPOctetString then can print it
+
         }
 
         try{
@@ -2524,16 +3055,6 @@ public class SNMPHandler{
             return false;
         }
 
-        logger.trace("SNMPHandler.addVLANandSetPortstoSwitch(node: {}, vlanID: {}, vlanName: {}, ports:(see below)):", comInterface.getHostAddress(), vlanID, vlanName);
-        logger.trace("\n[Send to switch]:");
-        for(int i = 0; i < oids.length; i++){
-            if(i == 1 || i == 2)//the egress port and untagged port
-                logger.trace("\n  OID: {}\n    value = {}", oids[i], ((SNMPOctetString)values[i]).toHexString());
-            else
-                logger.trace("\n  OID: {}\n    value = {}", oids[i], values[i]);
-        }
-        logger.trace("\n[Switch response]:\n  " + newVars.toString());//TODO: for value of bytes[], make it SNMPOctetString then can print it
-        
         return true;
     }
 
@@ -2572,7 +3093,7 @@ public class SNMPHandler{
             return null;
         }
         String portListStr = portList2String(portList);
-        byte[] answer = new byte[NUMBER_OF_PORT_DLINK / 8];
+        byte[] answer = new byte[NUMBER_OF_PORT / 8];
         int index = 0;
         for(int i = 0; i < portList.length; i++){
             if(portList[i] < 0){//TODO: port max
@@ -2581,7 +3102,7 @@ public class SNMPHandler{
             }
         }
         logger.trace("\nNow converting port list to bytes.\nThe port list: " + Arrays.toString(portList));
-        for(int j = 0; j < NUMBER_OF_PORT_DLINK - 7; j += 8){
+        for(int j = 0; j < NUMBER_OF_PORT - 7; j += 8){
             int seg = portList[j] * 128 + portList[j + 1] * 64 + portList[j + 2] * 32 + portList[j + 3] * 16
                           + portList[j + 4] * 8 + portList[j + 5] * 4 + portList[j + 6] * 2 + portList[j + 7];
             /*int seg = portList[j] << 7 + portList[j + 1] << 6 + portList[j + 2] << 5 + portList[j + 3] << 4
@@ -2782,12 +3303,12 @@ public class SNMPHandler{
             }
             SNMPOctetString value = (SNMPOctetString)pair.getSNMPObjectAt(1);
             byte[] valueBytes = (byte[])value.getValue();
-            byte[] portBytes = new byte[NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN_DLINK];
+            byte[] portBytes = new byte[NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN];
             if(valueBytes.length < portBytes.length){
-                logger.debug("ERROR: getVLANPorts(), length of retrieved port list = " + valueBytes.length +" is abnormal, it should be a much longer lengh than NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN_DLINK " + NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN_DLINK);
+                logger.debug("ERROR: getVLANPorts(), length of retrieved port list = " + valueBytes.length +" is abnormal, it should be a much longer lengh than NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN " + NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN);
                 return null;
             }
-            System.arraycopy(valueBytes, 0, portBytes, 0, NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN_DLINK);
+            System.arraycopy(valueBytes, 0, portBytes, 0, NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN);
 
             int ports[] = convertPortBytesToList(portBytes);
             if(ports == null)
@@ -2797,9 +3318,9 @@ public class SNMPHandler{
             logger.trace("\nto retieve switch (" + switchIP +"'s VLAN ports (OID: " + requestOID + "), get value: " + portsStr);
 
             //convert ports (ex. 1010011001000... to {1,3,6,7,10})
-            int ansTmp[] = new int[NUMBER_OF_PORT_IN_SNMP_VLAN_DLINK];
+            int ansTmp[] = new int[NUMBER_OF_PORT_IN_SNMP_VLAN];
             int index = 0;
-            for(int i = 0; i < NUMBER_OF_PORT_IN_SNMP_VLAN_DLINK; i++){
+            for(int i = 0; i < NUMBER_OF_PORT_IN_SNMP_VLAN; i++){
                 if(ports[i] !=0){
                     ansTmp[index] = i + 1;
                     index += 1;
@@ -2813,12 +3334,12 @@ public class SNMPHandler{
     //A byte can be convert to a list. For example, 129 to {1,0,0,0,0,0,0,1}
     //This function convert every byte in the byte[] to int[], getting a longer int[]
     private int[] convertPortBytesToList(byte portBytes[]){
-        if(portBytes.length != NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN_DLINK){
-            logger.debug("ERROR: convertPortBytesToList(), input portBytes's length = " + portBytes.length + ", but valid length should be " + NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN_DLINK);
+        if(portBytes.length != NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN){
+            logger.debug("ERROR: convertPortBytesToList(), input portBytes's length = " + portBytes.length + ", but valid length should be " + NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN);
             return null;
         }
         
-        int ports[] = new int[NUMBER_OF_PORT_IN_SNMP_VLAN_DLINK];
+        int ports[] = new int[NUMBER_OF_PORT_IN_SNMP_VLAN];
         int index = 0;
         for(int i = 0; i < portBytes.length; i++){
             int seg = portBytes[i] & 0xff;//convert a byte to an int
@@ -2979,12 +3500,12 @@ public class SNMPHandler{
 
     private List<NodeConnector> snmpValueToNcList(SNMPOctetString value, long nodeID){
             byte[] valueBytes = (byte[])value.getValue();
-            byte[] portBytes = new byte[NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN_DLINK];
+            byte[] portBytes = new byte[NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN];
             if(valueBytes.length < portBytes.length){
-                logger.debug("ERROR: snmpValueToNcList(): length of retrieved port list = " + valueBytes.length +" is abnormal, it should be a much longer lengh than NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN_DLINK " + NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN_DLINK);
+                logger.debug("ERROR: snmpValueToNcList(): length of retrieved port list = " + valueBytes.length +" is abnormal, it should be a much longer lengh than NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN " + NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN);
                 return null;
             }
-            System.arraycopy(valueBytes, 0, portBytes, 0, NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN_DLINK);
+            System.arraycopy(valueBytes, 0, portBytes, 0, NUMBER_BYTES_TO_REPRESENT_ALL_PORTS_ON_SWITCH_IN_SNMP_VLAN);
 
             int ports[] = convertPortBytesToList(portBytes);
             if(ports == null)
@@ -2994,9 +3515,9 @@ public class SNMPHandler{
             logger.trace("snmpValueToNcList(): convert SNMPOctetString {} to port list: {}", value, portsStr);
 
             //convert ports (ex. 1010011001000... to {1,3,6,7,10})
-            int ansTmp[] = new int[NUMBER_OF_PORT_IN_SNMP_VLAN_DLINK];
+            int ansTmp[] = new int[NUMBER_OF_PORT_IN_SNMP_VLAN];
             int index = 0;
-            for(int i = 0; i < NUMBER_OF_PORT_IN_SNMP_VLAN_DLINK; i++){
+            for(int i = 0; i < NUMBER_OF_PORT_IN_SNMP_VLAN; i++){
                 if(ports[i] !=0){
                     ansTmp[index] = i + 1;
                     index += 1;

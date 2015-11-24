@@ -156,7 +156,7 @@ public class SNMPMessage implements Serializable{
      * @return "ofmsg=v=$version;t=$type:l=$len:xid=$xid"
      */
     public String toString() {
-        return "ofmsg" +
+        return "snmpmsg" +
             ":v=" + U8.f(this.getVersion()) +
             ";t=" + this.getType() +
             ";l=" + this.getLengthU() +

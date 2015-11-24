@@ -33,4 +33,7 @@ public interface ISwitchStateListener {
 
     public void doTopoDiscover();
 
+    public void disableNewInventoryTriggerDiscovery();
+    public void enableNewInventoryTriggerDiscovery();
+
 }

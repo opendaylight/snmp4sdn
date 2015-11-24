@@ -39,11 +39,13 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.opendaylight.controller.sal.core.Config;
 import org.opendaylight.controller.sal.utils.Status;
 
 import org.opendaylight.snmp4sdn.core.IController;
 import org.opendaylight.snmp4sdn.core.ISwitch;
 import org.opendaylight.snmp4sdn.core.IMessageReadWrite;
+import org.opendaylight.snmp4sdn.internal.SNMPHandler;
 import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
 import org.openflow.protocol.OFBarrierReply;
 import org.openflow.protocol.OFBarrierRequest;
@@ -371,9 +373,12 @@ public class SwitchHandler implements ISwitch {
 
     public void handleMessages(SNMPMessage msg) {//s4s: modify OF's handleMessages()
         SNMPType type = msg.getType();
+        //logger.debug("handleMessages(): now will call processPortStatusMsg(), with msg: {}", msg);
         if(type == SNMPType.PORT_STATUS)
             processPortStatusMsg((SNMPPortStatus) msg);
-        ((Controller) core).takeSwitchEventMsg(thisISwitch, msg);
+        //logger.debug("handleMessages(): now will call Controller.notifyMessageListener(), with switch {} msg: {}", thisISwitch.getId(), msg);
+        //((Controller) core).takeSwitchEventMsg(thisISwitch, msg);
+        ((Controller) core).notifyMessageListener(thisISwitch, msg);//replace the line above for 'topology discovery 2 step to 1 step"
     }
 
     public void handleMessages() {/*//s4s: OF's code, now adopt some as s4s's
@@ -589,7 +594,7 @@ public class SwitchHandler implements ISwitch {
         Short portNumber = port.getPortNumber();
         physicalPorts.put(portNumber, port);
         portBandwidth
-                .put(portNumber, SNMPPortFeatures.SNMPPPF_10MB_FD.getValue()
+                .put(portNumber, SNMPPortFeatures.SNMPPPF_10MB_FD.getValue()//TODO: should not hard-code!
                         /*port.getCurrentFeatures()
                                 & (OFPortFeatures.OFPPF_10MB_FD.getValue()
                                         | OFPortFeatures.OFPPF_10MB_HD
@@ -714,6 +719,55 @@ public class SwitchHandler implements ISwitch {
             messageWaitingDone.remove(xid);
             worker.wakeup();
         }
+    }
+
+    private boolean setPhysicalPortState(SNMPPhysicalPort phyPort, Integer portState){
+                if(portState == null){
+                    logger.error("ERROR: setPhysicalPortState(): given portState is null, for SNMPPhysicalPort phyPort whose portID is {}", phyPort.getPortNumber());
+                    return false;
+                }
+                if(portState == 1){//standard snmp MIB: ifAdminStatus: 1 as up, 2 as down
+                    logger.trace("setPhysicalPortState(): set portState as UP for SNMPPhysicalPort phyPort whose portID is {}", phyPort.getPortNumber());
+                    phyPort.setConfig(Config.ADMIN_UP);
+                }
+                else if(portState ==2){//standard snmp MIB: ifAdminStatus: 1 as up, 2 as down
+                    logger.trace("setPhysicalPortState(): set portState as DOWN for SNMPPhysicalPort phyPort whose portID is {}", phyPort.getPortNumber());
+                    phyPort.setConfig(Config.ADMIN_DOWN);
+                }
+                else{
+                    logger.info("WARNING: setPhysicalPortState(): given portState is {} (unkown value), for SNMPPhysicalPort phyPort whose portID is {}", portState, phyPort.getPortNumber());
+                    return false;
+                }
+
+                return true;
+    }
+
+    @Override
+    public boolean refreshPhysicalPorts(){//Bug fix: port on/off update depends link-down/up trap, but sometime trap lost, so need using snmp to request switch for completely correct ports states.
+        boolean isSuccess = false;
+        Map<Short, String> portIDTable = (new SNMPHandler(cmethUtil)).readLLDPLocalPortIDs(sid);
+        Map<Short, Integer> portStateTable = (new SNMPHandler(cmethUtil)).readPortState(sid);
+
+        for(Map.Entry<Short, String> entry : portIDTable.entrySet()){
+            Short portId = entry.getKey();
+            String portName = entry.getValue();
+            SNMPPhysicalPort phyPort = physicalPorts.get(portId);
+            if(phyPort == null){//so, add this new discovered port //TODO:inform inventory
+                phyPort = new SNMPPhysicalPort(portId.shortValue());
+                phyPort.setName(portName);
+                updatePhysicalPort(phyPort);
+                return false;
+                //Issue: updatePhysicalPort() will add port. As for delete port, we ignore it, since Ethernet switch hardware can't remove port
+            }
+
+            //TODO: how about integrate setPhysicalPortState() into updatePhysicalPort()
+            isSuccess = setPhysicalPortState(phyPort, portStateTable.get(portId));
+            if(!isSuccess){
+                logger.debug("ERROR: call setPhysicalPortState() fail, for switch {} port {}", this.sid, portId);
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

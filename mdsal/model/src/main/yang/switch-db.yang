@@ -1,0 +1,108 @@
+module switch-db {
+    yang-version 1;
+
+    namespace "urn:opendaylight:snmp4sdn:md:switchdb";
+    prefix switch-db;
+
+    import snmp4sdn-types {prefix types;}
+
+    organization "Industrial Technology Research Institute of Taiwan";
+    contact "Yi-Ling Hsieh <ylhsieh@itri.org.tw>";
+
+    description "YANG version of the SNMP4SDN Switch List DB Service MIB.";
+
+    revision "2015-09-01" {//TODO: update date
+        description
+            "SNMP4SDN Switch DB";
+    }
+
+    grouping switch-info {
+        leaf node-ip {
+            type string;
+        }
+        leaf node-mac {
+            type string;
+        }
+        leaf community {
+            type string;
+        }
+        leaf cli-user-name {
+            type string;
+        }
+        leaf cli-password {
+            type string;
+        }
+        leaf model {
+            type string;
+        }
+    }
+
+    rpc reload-db {
+        description
+            "Reload switch list DB";
+        /*input {
+            leaf db-file-path {
+                type string;
+            }
+        }*///use default path: "/etc/snmp4sdn_swdb.csv"//TODO: using curl to trigger REST API, can't deal with "/".
+        output {
+            leaf reload-db-result{
+                type types:result;
+            }
+        }
+    } 
+
+    rpc add-switch-entry {
+        description
+            "Add a switch entry to DB";
+        input {
+            uses switch-info;
+        }
+        output {
+            leaf add-switch-entry-result{
+                type types:result;
+            }
+        }
+    }
+
+    rpc delete-switch-entry {
+        description
+            "Delete a switch entry in DB";
+        input {
+            leaf node-ip {
+                type string;
+            }
+        }
+        output {
+            leaf delete-switch-entry-result{
+                type types:result;
+            }
+        }
+    }
+
+    rpc clear-db {
+        description
+            "Clear DB";
+        output {
+            leaf clear-db-result{
+                type types:result;
+            }
+        }
+    }
+
+    rpc update-db {
+        description
+            "Update DB, replace existing data with the given data";
+        input {
+            list all-switch-entry {
+                uses switch-info;
+            }
+        }
+        output {
+            leaf update-db-result {
+                type types:result;
+            }
+        }
+    }
+
+}

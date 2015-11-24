@@ -78,8 +78,9 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
     private CLIHandler cli = null;
     private CmethUtil cmethUtil = null;
 
-    private int NUMBER_OF_PORT_DLINK = 24;
-    private int NUMBER_OF_PORT_IN_SNMP_VLAN_DLINK = 48;
+    private int NUMBER_OF_PORT = 64;
+    //TODO: the vendor-specific parameteres, like NUMBER_OF_PORT_DLINK, need a way to apply in code. Now tempararily we use general parameter name, as above, in code
+    //private int NUMBER_OF_PORT_DLINK = 24;
 
     /**
      * Function called by the dependency manager when all the required
@@ -387,7 +388,7 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
         for(int i = 0; i < nodeConns.size(); i++){
             NodeConnector nc = (NodeConnector)(nodeConns.get(i));
             int portNum = ((Short)(nc.getID())).intValue();
-            if(portNum < 1 || portNum > NUMBER_OF_PORT_DLINK){//TODO: max port number as upper bound
+            if(portNum < 1 || portNum > NUMBER_OF_PORT){//TODO: max port number as upper bound
                 logger.debug("ERROR: VLANService.setVLANPorts(): Port number as " + portNum + " is invalid, when setVLANPorts to node " + getNodeIP((Long)node.getID()) + "'s VLAN " + vlanID);
                 return new Status(StatusCode.NOTACCEPTABLE, "VLANService.setVLANPorts(): Port number as " + portNum + " is invalid, when setVLANPorts to node " + getNodeIP((Long)node.getID()) + "'s VLAN " + vlanID);
             }
@@ -427,7 +428,7 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
         for(int i = 0; i < nodeConns.size(); i++){
             NodeConnector nc = (NodeConnector)(nodeConns.get(i));
             int portNum = ((Short)(nc.getID())).intValue();
-            if(portNum < 1 || portNum > NUMBER_OF_PORT_DLINK){//TODO: max port number as upper bound
+            if(portNum < 1 || portNum > NUMBER_OF_PORT){//TODO: max port number as upper bound
                 logger.debug("ERROR: VLANService.addVLANandSetPorts(): when add and set VLAN ports to node " + getNodeIP((Long)node.getID()) + ", VLAN " + vlanID + ", port number " + portNum + " is invalid");
                 return new Status(StatusCode.NOTACCEPTABLE, "VLANService.addVLANandSetPorts(): when add and set VLAN ports to node " + getNodeIP((Long)node.getID()) + ", VLAN " + vlanID + ", port number " + portNum + " is invalid");
             }
@@ -462,7 +463,7 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
         for(int i = 0; i < taggedNodeConns.size(); i++){
             NodeConnector nc = (NodeConnector)(taggedNodeConns.get(i));
             int portNum = ((Short)(nc.getID())).intValue();
-            if(portNum < 1 || portNum > NUMBER_OF_PORT_DLINK){//TODO: max port number as upper bound
+            if(portNum < 1 || portNum > NUMBER_OF_PORT){//TODO: max port number as upper bound
                 logger.debug("ERROR: VLANService.setVLANPorts(): tagged port number as " + portNum + " is invalid, when setVLANPorts to node " + getNodeIP((Long)node.getID()) + "'s VLAN " + vlanID);
                 return new Status(StatusCode.NOTACCEPTABLE, "VLANService.setVLANPorts(): tagged p number as " + portNum + " is invalid, when setVLANPorts to node " + getNodeIP((Long)node.getID()) + "'s VLAN " + vlanID);
             }
@@ -472,7 +473,7 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
         for(int i = 0; i < untaggedNodeConns.size(); i++){
             NodeConnector nc = (NodeConnector)(untaggedNodeConns.get(i));
             int portNum = ((Short)(nc.getID())).intValue();
-            if(portNum < 1 || portNum > NUMBER_OF_PORT_DLINK){//TODO: max port number as upper bound
+            if(portNum < 1 || portNum > NUMBER_OF_PORT){//TODO: max port number as upper bound
                 logger.debug("ERROR: VLANService.setVLANPorts(): untagged port number as " + portNum + " is invalid, when setVLANPorts to node " + getNodeIP((Long)node.getID()) + "'s VLAN " + vlanID);
                 return new Status(StatusCode.NOTACCEPTABLE, "VLANService.setVLANPorts(): untagged p number as " + portNum + " is invalid, when setVLANPorts to node " + getNodeIP((Long)node.getID()) + "'s VLAN " + vlanID);
             }
@@ -513,7 +514,7 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
         for(int i = 0; i < taggedNodeConns.size(); i++){
             NodeConnector nc = (NodeConnector)(taggedNodeConns.get(i));
             int portNum = ((Short)(nc.getID())).intValue();
-            if(portNum < 1 || portNum > NUMBER_OF_PORT_DLINK){//TODO: max port number as upper bound
+            if(portNum < 1 || portNum > NUMBER_OF_PORT){//TODO: max port number as upper bound
                 logger.debug("ERROR: VLANService.addVLANandSetPorts(): when add and set VLAN tagged ports to node " + getNodeIP((Long)node.getID()) + ", VLAN " + vlanID + ", port number " + portNum + " is invalid");
                 return new Status(StatusCode.NOTACCEPTABLE, "VLANService.addVLANandSetPorts(): when add and set tagged VLAN ports to node " + getNodeIP((Long)node.getID()) + ", VLAN " + vlanID + ", port number " + portNum + " is invalid");
             }
@@ -523,7 +524,7 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
         for(int i = 0; i < untaggedNodeConns.size(); i++){
             NodeConnector nc = (NodeConnector)(untaggedNodeConns.get(i));
             int portNum = ((Short)(nc.getID())).intValue();
-            if(portNum < 1 || portNum > NUMBER_OF_PORT_DLINK){//TODO: max port number as upper bound
+            if(portNum < 1 || portNum > NUMBER_OF_PORT){//TODO: max port number as upper bound
                 logger.debug("ERROR: VLANService.addVLANandSetPorts(): when add and set untagged VLAN ports to node " + getNodeIP((Long)node.getID()) + ", VLAN " + vlanID + ", port number " + portNum + " is invalid");
                 return new Status(StatusCode.NOTACCEPTABLE, "VLANService.addVLANandSetPorts(): when add and set untagged VLAN ports to node " + getNodeIP((Long)node.getID()) + ", VLAN " + vlanID + ", port number " + portNum + " is invalid");
             }
@@ -535,7 +536,8 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
         int vlanId = vlanID.intValue();
         int portListT[] = convertNcListToPortList(taggedNodeConns);
         int portListU[] = convertNcListToPortList(untaggedNodeConns);
-        status = new SNMPHandler(cmethUtil).addVLANandSetPorts(nodeId, vlanName, vlanId, portListT, portListU);
+        //status = new SNMPHandler(cmethUtil).addVLANandSetPorts(nodeId, vlanName, vlanId, portListT, portListU);
+        status = new VenderSpecificHandler(cmethUtil).addVLANandSetPorts(nodeId, vlanName, vlanId, portListT, portListU);
         if(!status.isSuccess())
             logger.debug("ERROR: addVLANandSetPorts(): Set VLAN Ports (node:" + nodeId + "(" + getNodeIP(nodeId) + ")" + ", vlanId:" + vlanId + ", taggedPortList: " + Arrays.toString(portListT) + ", untaggedPortList: " + Arrays.toString(portListU) + ") to switch fail: " + status);
 
@@ -651,8 +653,8 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
         }
         NodeConnector nc = null;
         int portNum = -1;
-        int portList[] = new int[NUMBER_OF_PORT_DLINK];
-        byte[] answer = new byte[NUMBER_OF_PORT_DLINK/8];
+        int portList[] = new int[NUMBER_OF_PORT];
+        byte[] answer = new byte[NUMBER_OF_PORT/8];
         int index = 0;
         for(int i = 0; i < nodeConns.size(); i++){
             nc = (NodeConnector)(nodeConns.get(i));
@@ -660,7 +662,7 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
             portList[portNum] = 1;
         }
         String portListStr = "";
-        for(int k = 0; k < NUMBER_OF_PORT_DLINK; k++)
+        for(int k = 0; k < NUMBER_OF_PORT; k++)
             portListStr += portList[k];
         logger.trace("convertNcListToPortList(): converted port list: {}", portListStr);
         return portList;
@@ -677,6 +679,7 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
             ci.println();
             ci.println("Please use: s4sVLAN [add <sw_id(or mac_addr)> <vlan_id> <vlan_name> | ");
             ci.println("\t\t  setPorts <sw_id(or mac_addr)> <vlan_id> <tagged ports> <untagged ports> | ");
+            ci.println("\t\t  setPortsOnlytagged <sw_id(or mac_addr)> <vlan_id> <tagged ports> | ");
             ci.println("\t\t  addVLANSetPorts <sw_id(or mac_addr)> <vlan_id> <vlan_name> <tagged ports> <untagged ports> | ");
             ci.println("\t\t  delete <sw_mac> <vlan_id> | getPorts <sw_id(or mac_addr)> <vlan_id> | getVLANTable <sw_id(or mac_addr)>]");
             ci.println("\t\t  (ports seperated by comma)");
@@ -691,6 +694,11 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
         else if(arg1.compareToIgnoreCase("setPorts") == 0){
             ci.println();
             _s4sSetVLANPorts(ci);
+            ci.println();
+        }
+        else if(arg1.compareToIgnoreCase("setPortsOnlytagged") == 0){
+            ci.println();
+            _s4sSetVLANPortsOnlyTagged(ci);
             ci.println();
         }
         else if(arg1.compareToIgnoreCase("addVLANSetPorts") == 0){
@@ -717,6 +725,7 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
             ci.println();
             ci.println("Please use: s4sVLAN [add <sw_id(or mac_addr)> <vlan_id> <vlan_name> | ");
             ci.println("\t\t  setPorts <sw_id(or mac_addr)> <vlan_id> <tagged ports> <untagged ports> | ");
+            ci.println("\t\t  setPortsOnlytagged <sw_id(or mac_addr)> <vlan_id> <tagged ports> | ");
             ci.println("\t\t  addVLANSetPorts <sw_id(or mac_addr)> <vlan_id> <vlan_name> <tagged ports> <untagged ports> | ");
             ci.println("\t\t  delete <sw_mac> <vlan_id> | getPorts <sw_id(or mac_addr)> <vlan_id> | getVLANTable <sw_id(or mac_addr)>]");
             ci.println("\t\t  (ports seperated by comma)");
@@ -821,11 +830,8 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
                 return;
             }
         }
-        String portListChkT = "";//convert the ports int array to String, later can print for check correctness
-        for(int i = 0; i < portsT.length; i++)
-            portListChkT += portsT[i] + ",";
 
-        //parse arg5: String tagged ports to int value array
+        //parse arg5: String untagged ports to int value array
         String portListU = new String(arg5);
         int portsU[];
         if(portListU.compareToIgnoreCase("none") == 0)
@@ -837,9 +843,6 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
                 return;
             }
         }
-        String portListChkU= "";//convert the ports int array to String, later can print for check correctness
-        for(int i = 0; i < portsU.length; i++)
-            portListChkU += portsU[i] + ",";
 
 
         Node node = createSNMPNode(nodeId);
@@ -848,12 +851,76 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
         Status status = this.setVLANPorts(node, new Integer(vlanId), ncListT, ncListU);
         if(status.isSuccess()){
             ci.println();
-            ci.println("Success: Set VLAN Ports (node:" + nodeId + "(" + getNodeIP(nodeId) + ")" + ", vlanId:" + vlanId + ", taggedPortList:" + portListChkT + ", untaggedPortList:" + portListChkU + ") to switch successfully");
+            ci.println("Success: Set VLAN Ports (node:" + nodeId + "(" + getNodeIP(nodeId) + ")" + ", vlanId:" + vlanId + ", taggedPortList:" + Arrays.toString(portsT) + ", untaggedPortList:" + Arrays.toString(portsU) + ") to switch successfully");
             ci.println();
         }
         else{
             ci.println();
-            ci.println("Fail: Set VLAN Ports (node:" + nodeId + "(ip: " + getNodeIP(nodeId) + ")" + ", vlanId:" + vlanId + ", taggedPortList:" + portListChkT + ", untaggedPortList:" + portListChkU + ") to switch fail: " + status);
+            ci.println("Fail: Set VLAN Ports (node:" + nodeId + "(ip: " + getNodeIP(nodeId) + ")" + ", vlanId:" + vlanId + ", taggedPortList:" + Arrays.toString(portsT) + ", untaggedPortList:" + Arrays.toString(portsU) + ") to switch fail: " + status);
+            ci.println();
+        }
+    }
+
+    //CLI: s4sVLAN setPortsOnlyTagged <sw_mac> <vlan_id> <tagged ports> (seperated ports by comma)
+    public void _s4sSetVLANPortsOnlyTagged(CommandInterpreter ci){
+        String arg2 = ci.nextArgument();
+        String arg3 = ci.nextArgument();
+        String arg4 = ci.nextArgument();
+        String garbage = ci.nextArgument();
+
+        if(arg2 == null || arg3 == null || arg4 == null || garbage != null){
+            ci.println("Please use: s4sVLAN setPortsOnlyTagged <sw_mac> <vlan_id> <tagged ports> (seperated ports by comma)");
+            return;
+        }
+
+        //parse arg2: String sw_mac to int value nodeId
+        long nodeId = -1;
+        try{
+            if(arg2.indexOf(":") < 0)
+                nodeId = Long.parseLong(arg2);
+            else
+                nodeId = HexString.toLong(arg2);
+        }catch(NumberFormatException e1){
+            ci.println("Error: convert argument " + arg2 + " to long value error: " + e1);
+            return;
+        }
+
+        //parse arg3: String vlan_id to int value vlanId
+        int vlanId = -1;
+        try{
+            vlanId = Integer.parseInt(arg3);
+        }catch(NumberFormatException e1){
+            ci.println("Error: convert argument " + arg3 + " to int value error: " + e1);
+            return;
+        }
+
+        //parse arg4: String tagged ports to int value array
+        String portListT = new String(arg4);
+        int portsT[];
+        if(portListT.compareToIgnoreCase("none") == 0)
+            portsT = new int[0];
+        else{
+            portsT = convertPortListString2IntArray(arg4);
+            if(portsT == null){
+                ci.println("Error: the given port list \"" + arg4 + "\", convert to int array fail");
+                return;
+            }
+        }
+        String portListChkT = "";//convert the ports int array to String, later can print for check correctness
+        for(int i = 0; i < portsT.length; i++)
+            portListChkT += portsT[i] + ",";
+
+        Node node = createSNMPNode(nodeId);
+        List<NodeConnector> ncListT = ports2NcList(portsT, nodeId);
+        Status status = this.setVLANPorts(node, new Integer(vlanId), ncListT);
+        if(status.isSuccess()){
+            ci.println();
+            ci.println("Success: Set VLAN Ports (node:" + nodeId + "(" + getNodeIP(nodeId) + ")" + ", vlanId:" + vlanId + ", taggedPortList:" + portListChkT + ") to switch successfully");
+            ci.println();
+        }
+        else{
+            ci.println();
+            ci.println("Fail: Set VLAN Ports (node:" + nodeId + "(ip: " + getNodeIP(nodeId) + ")" + ", vlanId:" + vlanId + ", taggedPortList:" + portListChkT + ") to switch fail: " + status);
             ci.println();
         }
     }
@@ -908,9 +975,6 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
                 return;
             }
         }
-        String portListChkT = "";//convert the ports int array to String, later can print for check correctness
-        for(int i = 0; i < portsT.length; i++)
-            portListChkT += portsT[i] + ",";
 
         //parse arg6: String tagged ports to int value array
         String portListU = new String(arg6);
@@ -924,9 +988,6 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
                 return;
             }
         }
-        String portListChkU= "";//convert the ports int array to String, later can print for check correctness
-        for(int i = 0; i < portsU.length; i++)
-            portListChkU += portsU[i] + ",";
 
 
         Node node = createSNMPNode(nodeId);
@@ -935,12 +996,12 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
         Status status = this.addVLANandSetPorts(node, new Integer(vlanId), vlanName, ncListT, ncListU);
         if(status.isSuccess()){
             ci.println();
-            ci.println("Success: Add VLAN and set ports (node:" + nodeId + "(" + getNodeIP(nodeId) + ")" + ", vlanId:" + vlanId + ", vlanName: " + vlanName + ", taggedPortList:" + portListChkT + ", untaggedPortList:" + portListChkU + ") to switch successfully");
+            ci.println("Success: Add VLAN and set ports (node:" + nodeId + "(" + getNodeIP(nodeId) + ")" + ", vlanId:" + vlanId + ", vlanName: " + vlanName + ", taggedPortList:" + Arrays.toString(portsT) + ", untaggedPortList:" + Arrays.toString(portsU) + ") to switch successfully");
             ci.println();
         }
         else{
             ci.println();
-            ci.println("Fail: Add VLAN and set ports (node:" + nodeId + "(ip: " + getNodeIP(nodeId) + ")" + ", vlanId:" + vlanId + ", vlanName: " + vlanName + ", taggedPortList:" + portListChkT + ", untaggedPortList:" + portListChkU + ") to switch fail: " + status);
+            ci.println("Fail: Add VLAN and set ports (node:" + nodeId + "(ip: " + getNodeIP(nodeId) + ")" + ", vlanId:" + vlanId + ", vlanName: " + vlanName + ", taggedPortList:" + Arrays.toString(portsT) + ", untaggedPortList:" + Arrays.toString(portsU) + ") to switch fail: " + status);
             ci.println();
         }
     }

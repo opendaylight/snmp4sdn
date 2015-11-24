@@ -52,6 +52,7 @@
               org.opendaylight.controller.sal.inventory,
               org.opendaylight.controller.sal.match,
               org.opendaylight.controller.sal.utils,
+              <!--org.opendaylight.controller.topologymanager,--><!--remove this because nsf.managers feature can't be installed successfully--><!--need this due to snmp4sdn's waitOtherNecessaryBundle()-->
               <!--org.opendaylight.controller.sal.vlan,//ad-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.types.rev150126,<!--md-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev150515,<!--md-sal-->
@@ -61,6 +62,8 @@
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126,<!--md-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.get.fdb.table.output,<!--md-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901,<!--md-sal-->
               <!--com.google.common.collect,//md-sal-->
               org.opendaylight.yangtools.yang.common,<!--md-sal copy from ping example-->
               org.opendaylight.yangtools.yang.binding,<!--md-sal copy from ping example-->
@@ -74,6 +77,8 @@
               org.eclipse.osgi.framework.console,
               org.osgi.framework,
               javax.net.ssl,
+              org.dom4j,<!--xml parser-->
+              org.dom4j.io,<!--xml parser-->
               <!--org.expect4j //TODO: with this, the following packages are not needed to be listed here?-->
               <!--(a) the following line is needed when expect4j is included in the "Embed-Dependency" section below; otherwise can't build-->
               com.jcraft.jsch, org.apache.commons.net.io, org.apache.commons.net.telnet, org.apache.oro.text, org.apache.oro.text.regex, sunlabs.brazil.util.regexp, tcl.lang.reflect,
@@ -92,6 +97,8 @@
               ;-split-package:=merge-first<!--add this line due to when building, "org.apache.oro.text, org.apache.oro.text.regex" above requires to add this parameter-->
             </Export-Package>
             <Embed-Dependency>
+              org.dom4j,
+              javax.xml,
               org.openflow.openflowj,
               org.snmpj,
               org.expect4j
@@ -123,6 +130,12 @@
       <artifactId>sal</artifactId>
       <version>0.7.0</version><!--0.7.0-withVLAN--><!--//prg. custom ad-sal-->
     </dependency>
+    <!--remove topologymanager because nsf.managers feature can't be installed successfully-->
+    <!--<dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>topologymanager</artifactId> < ! - -need this bundle due to snmp4sdn's waitOtherNecessaryBundle() - - >
+      <version>0.4.1</version>
+    </dependency>-->
     <dependency>
       <groupId>org.opendaylight.controller.thirdparty</groupId>
       <artifactId>org.openflow.openflowj</artifactId>
@@ -201,6 +214,17 @@
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>md-model</artifactId>
       <version>0.3.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <!--jar1 http://ebr.springsource.com/repository/app/bundle/version/detail?name=com.springsource.org.dom4j&version=1.6.1 -->
+      <!--jar2 https://nexus.opendaylight.org/content/repositories/central/dom4j/dom4j/1.6.1/ -->
+      <!--for jar1, groupId is org.dom4j; for jar2, groupId is dom4j-->
+      <!--when compile, use groupId of jar2; for execution, put jar1 in plugins directory-->
+      <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.dom4j</artifactId>
+      <!--<groupId>org.dom4j</groupId>
+      <artifactId>com.springsource.org.dom4j</artifactId>-->
+      <version>1.6.1_5</version>
     </dependency>
   </dependencies>
 </project>
