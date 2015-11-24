@@ -398,7 +398,7 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
                     .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             c.add(createServiceDependency()
                     .setService(DiscoveryServiceAPI.class/*, "(name=XXX)"*/)/*Memo: name=XXX was given, then setService() fails!*/
-                    .setCallbacks("setDiscoveryService", "setDiscoveryService").setRequired(true));
+                    .setCallbacks("setDiscoveryService", "unsetDiscoveryService").setRequired(true));
             logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and DiscoveryServiceAPI, for TopologyService");
         }
 
