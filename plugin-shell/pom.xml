@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
-  <!--<parent>
-    <groupId>org.opendaylight.ovsdb</groupId>
-    <artifactId>commons</artifactId>
-    <version>1.3.0-SNAPSHOT</version>
-    <relativePath>../commons/parent</relativePath>
-  </parent>-->
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.snmp4sdn</artifactId>
@@ -16,8 +11,34 @@
 
   <artifactId>plugin-shell</artifactId>
   <version>0.3.0-SNAPSHOT</version>
-  <name>OpenDaylight SNMP4SDN Plugin Shell</name>
   <packaging>bundle</packaging>
+
+  <name>snmp4sn plugin shell</name>
+  <description>Provide shell command for snmp4sdn plugin in Karaf</description>
+  <url>https://wiki.opendaylight.org/view/SNMP4SDN:Main</url>
+
+  <licenses>
+    <license>
+      <name>Eclipse Public License v1.0</name>
+      <url>http://www.eclipse.org/legal/epl-v10.html</url>
+    </license>
+  </licenses>
+  
+  <developers>
+    <developer>
+      <name>Yi-Ling Hsieh</name>
+      <email>ylhsieh@itri.org.tw</email>
+      <organization>Industrial Technology Research Institute of Taiwan</organization>
+      <organizationUrl>https://www.itri.org.tw</organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:https://git.opendaylight.org/snmp4sdn.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://git.opendaylight.org/gerrit/gitweb?p=snmp4sdn.git;a=summary</url>
+  </scm>
 
   <properties>
     <karaf.shell.version>3.0.0</karaf.shell.version><!--copy from ovsdb's /commons/parent/pom.xml-->

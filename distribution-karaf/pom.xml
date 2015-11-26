@@ -14,10 +14,36 @@
     not be correct.
   -->
 
-  <!--<groupId>org.opendaylight.snmp4sdn</groupId>-->
   <artifactId>distribution-karaf</artifactId>
   <version>0.3.0-SNAPSHOT</version>
   <packaging>pom</packaging>
+
+  <name>Karaf distribution</name>
+  <description>distribution with Karaf</description>
+  <url>https://wiki.opendaylight.org/view/SNMP4SDN:Main</url>
+  
+  <licenses>
+    <license>
+      <name>Eclipse Public License v1.0</name>
+      <url>http://www.eclipse.org/legal/epl-v10.html</url>
+    </license>
+  </licenses>
+  
+  <developers>
+    <developer>
+      <name>Yi-Ling Hsieh</name>
+      <email>ylhsieh@itri.org.tw</email>
+      <organization>Industrial Technology Research Institute of Taiwan</organization>
+      <organizationUrl>https://www.itri.org.tw</organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:https://git.opendaylight.org/snmp4sdn.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://git.opendaylight.org/gerrit/gitweb?p=snmp4sdn.git;a=summary</url>
+  </scm>
 
   <prerequisites>
     <maven>3.0</maven>
@@ -308,10 +334,4 @@
       </plugin>
     </plugins>
   </build>
-  <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</developerConnection>
-    <tag>HEAD</tag>
-    <url>https://git.opendaylight.org/gerrit/gitweb?p=snmp4sdn.git;a=summary</url>
-  </scm>
 </project>
