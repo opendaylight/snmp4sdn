@@ -56,7 +56,6 @@
     <!--<exam.version>3.0.0</exam.version>--><!--removed in ODL gerrit #15339-->
     <!--<url.version>1.5.0</url.version>--><!--removed in ODL gerrit #15339-->
     <!--<enunciate.version>1.26.2</enunciate.version>--><!--removed in ODL gerrit #15339-->
-    <sonar.branch>${user.name}-private-view</sonar.branch>
     <sonar.skippedModules>org.openflow.openflowj,net.sf.jung2</sonar.skippedModules>
     <!--<logback.version>1.0.9</logback.version>--><!--removed in ODL gerrit #15339-->
     <!--<slf4j.version>1.7.2</slf4j.version>--><!--removed in ODL gerrit #15339-->
@@ -464,30 +463,6 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <!--<version>${surefire.version}</version>--><!--removed in ODL gerrit #15339-->
       </plugin>
-      <plugin><!--this<plugin>section is assigned from https://wiki.opendaylight.org/view/CrossProject:Integration_Group:Code_Coverage_using_Jacoco-->
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <configuration>
-          <includes>
-            <include>org.opendaylight.snmp4sdn.*</include> <!--MODIFY this with your project's groupID-->
-          </includes>
-        </configuration>
-        <executions>
-          <execution>
-            <id>pre-test</id>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>post-test</id>
-            <goals>
-              <goal>report</goal>
-            </goals>
-            <phase>test</phase>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
@@ -631,11 +606,6 @@
             <linkJavadoc>true</linkJavadoc>
             <javadocDir>target/apidocs</javadocDir>
           </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.jacoco</groupId>
-          <artifactId>jacoco-maven-plugin</artifactId>
-          <version>${jacoco.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -1085,6 +1055,6 @@
             <version>1.4.1</version>
         </dependency>
 
-    
+
   </dependencies>
 </project>
