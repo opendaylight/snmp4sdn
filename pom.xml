@@ -11,12 +11,12 @@
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.parent</artifactId>
-    <version>0.2.3-SNAPSHOT</version>
+    <version>0.2.3-Lithium-SR3</version>
     <relativePath>commons/parent</relativePath>
   </parent>
 
   <artifactId>snmp4sdn_distribution</artifactId>
-  <version>0.2.3-SNAPSHOT</version>
+  <version>0.2.3-Lithium-SR3</version>
   <name>snmp4sdn</name><!-- Used by Sonar to set project name -->
   <packaging>pom</packaging>
 

@@ -4,18 +4,18 @@
   <!--<parent>
     <groupId>org.opendaylight.ovsdb</groupId>
     <artifactId>commons</artifactId>
-    <version>1.2.3-SNAPSHOT</version>
+    <version>1.2.3-Lithium-SR3</version>
     <relativePath>../commons/parent</relativePath>
   </parent>-->
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.snmp4sdn</artifactId>
-    <version>0.2.3-SNAPSHOT</version><!--0.1.6-SNAPSHOT, before post-Helium update-->
+    <version>0.2.3-Lithium-SR3</version><!--0.1.6-Lithium-SR3, before post-Helium update-->
     <relativePath>../commons/snmp4sdn</relativePath>
   </parent>
 
   <artifactId>plugin-shell</artifactId>
-  <version>0.2.3-SNAPSHOT</version><!--0.1.6-SNAPSHOT, before post-Helium update-->
+  <version>0.2.3-Lithium-SR3</version><!--0.1.6-Lithium-SR3, before post-Helium update-->
   <name>OpenDaylight SNMP4SDN Plugin Shell</name>
   <packaging>bundle</packaging>
 
@@ -41,7 +41,7 @@
     <dependency><!--add by s4s-->
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>snmp4sdn</artifactId>
-      <version>0.2.3-SNAPSHOT</version><!--0.1.6-SNAPSHOT, before post-Helium update-->
+      <version>0.2.3-Lithium-SR3</version><!--0.1.6-Lithium-SR3, before post-Helium update-->
     </dependency>
   </dependencies>
 
