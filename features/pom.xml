@@ -141,13 +141,13 @@
           <classifier>features</classifier>
           <type>xml</type>
         </dependency>
-        <dependency>
+        <!--<dependency>//odl-nsf-managers can't be installed successfully, many dependency missing
           <groupId>org.opendaylight.controller</groupId>
-          <artifactId>features-nsf</artifactId><!--for feature "odl-adsal-northbound"-->
+          <artifactId>features-nsf</artifactId>
           <version>${nsf.version}</version>
           <classifier>features</classifier>
           <type>xml</type>
-        </dependency>
+        </dependency>-->
         <!--<dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>features-base</artifactId>
