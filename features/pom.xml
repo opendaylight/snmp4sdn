@@ -54,20 +54,6 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>features-adsal</artifactId>
-            <version>${sal.version}</version>
-            <classifier>features</classifier>
-            <type>xml</type>
-            <!-- declare the exclusion here -->
-            <exclusions>
-                <exclusion>
-                    <groupId>org.ops4j.pax.exam</groupId>
-                    <artifactId>pax-exam-container-native</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.dom4j</artifactId><!--xml parser-->
             <version>1.6.1_5</version>
@@ -141,13 +127,6 @@
           <classifier>features</classifier>
           <type>xml</type>
         </dependency>
-        <!--<dependency>//odl-nsf-managers can't be installed successfully, many dependency missing
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>features-nsf</artifactId>
-          <version>${nsf.version}</version>
-          <classifier>features</classifier>
-          <type>xml</type>
-        </dependency>-->
         <!--<dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>features-base</artifactId>
