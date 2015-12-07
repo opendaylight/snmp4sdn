@@ -77,8 +77,8 @@
           <instructions>
             <Import-Package>
               <!--org.opendaylight.yang.gen.v1.urn.opendaylight.ping.rev130911,-->
-              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815,<!--configmanager add-->
-              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.get.arp.table.output,<!--configmanager add-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207,<!--configmanager add-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.get.arp.table.output,<!--configmanager add-->
               org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924,
               org.opendaylight.yangtools.yang.common,
               org.opendaylight.yangtools.yang.binding,
