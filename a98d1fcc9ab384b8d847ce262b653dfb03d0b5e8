@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa7f18b_2db9b5e9",
+        "filename": "mdsal/model/src/main/yang/misc-config.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2015-12-07T17:10:58Z",
+      "side": 1,
+      "message": "Proper naming of ODL models was not yet agreed upon, but I believe \"odl-snmp4sdn-config\" (or \"odl-snmp4sdn-miscconfig\") will be closer to the final agreement.",
+      "range": {
+        "startLine": 1,
+        "startChar": 7,
+        "endLine": 1,
+        "endChar": 18
+      },
+      "revId": "a98d1fcc9ab384b8d847ce262b653dfb03d0b5e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa7f18b_edcabd6d",
+        "filename": "mdsal/model/src/main/yang/misc-config.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2015-12-07T17:10:58Z",
+      "side": 1,
+      "message": "Perhaps fix whitespace too.",
+      "range": {
+        "startLine": 111,
+        "startChar": 8,
+        "endLine": 111,
+        "endChar": 9
+      },
+      "revId": "a98d1fcc9ab384b8d847ce262b653dfb03d0b5e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa7f18b_cdcd8188",
+        "filename": "mdsal/model/src/main/yang/misc-config.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2015-12-07T17:10:58Z",
+      "side": 1,
+      "message": "Update also this.",
+      "range": {
+        "startLine": 229,
+        "startChar": 13,
+        "endLine": 229,
+        "endChar": 19
+      },
+      "revId": "a98d1fcc9ab384b8d847ce262b653dfb03d0b5e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
