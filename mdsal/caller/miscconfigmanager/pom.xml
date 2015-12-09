@@ -1,0 +1,136 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<!---->
+<!--Code base: ping service example-->
+<!---->
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opendaylight.snmp4sdn</groupId>
+    <artifactId>commons.snmp4sdn</artifactId>
+    <version>0.3.0-SNAPSHOT</version>
+    <relativePath>../../../commons/snmp4sdn</relativePath>
+  </parent>
+  <artifactId>miscconfigmanager</artifactId>
+  <packaging>bundle</packaging>
+  <version>0.3.0-SNAPSHOT</version>
+
+  <name>miscconfig manager</name>
+  <description>misc config manager, as a consumer of snmp4sdn, for demo snmp4sdn misc config service</description>
+  <url>https://wiki.opendaylight.org/view/SNMP4SDN:Main</url>
+  
+  <licenses>
+    <license>
+      <name>Eclipse Public License v1.0</name>
+      <url>http://www.eclipse.org/legal/epl-v10.html</url>
+    </license>
+  </licenses>
+  
+  <developers>
+    <developer>
+      <name>Yi-Ling Hsieh</name>
+      <email>ylhsieh@itri.org.tw</email>
+      <organization>Industrial Technology Research Institute of Taiwan</organization>
+      <organizationUrl>https://www.itri.org.tw</organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:https://git.opendaylight.org/snmp4sdn.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/snmp4sdn.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://git.opendaylight.org/gerrit/gitweb?p=snmp4sdn.git;a=summary</url>
+  </scm>
+
+  <properties>
+    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
+    <yangtools.version>0.6.1</yangtools.version>
+    <mdsal.version>1.0</mdsal.version>
+  </properties>
+
+  <distributionManagement>
+    <!-- OpenDayLight Released artifact -->
+    <repository>
+      <id>opendaylight-release</id>
+      <url>${nexusproxy}/repositories/opendaylight.release/</url>
+    </repository>
+    <!-- OpenDayLight Snapshot artifact -->
+    <snapshotRepository>
+      <id>opendaylight-snapshot</id>
+      <url>${nexusproxy}/repositories/opendaylight.snapshot/</url>
+    </snapshotRepository>
+    <!-- Site deployment -->
+    <site>
+      <id>website</id>
+      <url>${sitedeploy}</url>
+    </site>
+  </distributionManagement>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.4.0</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>
+              <!--org.opendaylight.yang.gen.v1.urn.opendaylight.ping.rev130911,-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207,<!--configmanager add-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.get.arp.table.output,<!--configmanager add-->
+              org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924,
+              org.opendaylight.yangtools.yang.common,
+              org.opendaylight.yangtools.yang.binding,
+              org.opendaylight.controller.sal.binding.api,
+              org.slf4j,
+              org.eclipse.osgi.framework.console,
+              org.osgi.framework
+            </Import-Package>
+            <!--<Export-Package>org.opendaylight.controller.ping.service.api</Export-Package>-->
+            <Bundle-Activator>org.opendaylight.miscconfigmanager.impl.MiscConfigManagerImpl</Bundle-Activator><!--configmanager add-->
+          </instructions>
+          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <!--<dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+    </dependency>-->
+    <!--<dependency>
+      <groupId>org.opendaylight.controller.model</groupId>
+      <artifactId>model-ping</artifactId>
+      <version>1.0</version>
+    </dependency>-->
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-api</artifactId>
+      <version>${mdsal.version}</version>
+    </dependency>
+    <dependency>
+     <groupId>org.opendaylight.yangtools</groupId>
+     <artifactId>yang-common</artifactId>
+     <version>${yangtools.version}</version>
+    </dependency>
+    <dependency>
+     <groupId>org.opendaylight.yangtools</groupId>
+     <artifactId>yang-binding</artifactId>
+     <version>${yangtools.version}</version>
+    </dependency>
+    <!--configmanager add-->
+    <!--<dependency>
+      <groupId>org.opendaylight.snmp4sdn</groupId>
+      <artifactId>configmd-model</artifactId>
+      <version>0.2.0-SNAPSHOT</version>
+    </dependency>--><!--this bundle is packaged in 'md-model'-->
+    <dependency>
+      <groupId>org.opendaylight.snmp4sdn</groupId>
+      <artifactId>md-model</artifactId>
+      <version>0.3.0-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+</project>
