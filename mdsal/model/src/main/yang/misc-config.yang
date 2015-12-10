@@ -1,16 +1,16 @@
-module config {
+module misc-config {
     yang-version 1;
-    namespace "urn:opendaylight:snmp4sdn:md:config";
-    prefix config;
+    namespace "urn:opendaylight:snmp4sdn:md:miscconfig";
+    prefix miscconfig;
 
     organization "Industrial Technology Research Institute of Taiwan";
     contact "Yi-Ling Hsieh <ylhsieh@itri.org.tw>";
 
-    description "YANG version of the SNMP4SDN Config Service MIB.";
+    description "YANG version of the SNMP4SDN Misc Config Service MIB.";
 
-    revision "2014-08-15" {//TODO: update date
+    revision "2015-12-07" {//TODO: update date
         description
-            "SNMP4SDN Config Service";
+            "SNMP4SDN Misc Config Service";
     }
 
     typedef stp-port-state{
