@@ -15,7 +15,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.ConfigService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.MiscConfigService;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.osgi.framework.BundleContext;
 
@@ -24,22 +24,22 @@ import org.opendaylight.snmp4sdn.core.IController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConfigProvider implements BindingAwareProvider, AutoCloseable {
-    private static final Logger logger = LoggerFactory.getLogger(ConfigProvider.class);
+public class MiscConfigProvider implements BindingAwareProvider, AutoCloseable {
+    private static final Logger logger = LoggerFactory.getLogger(MiscConfigProvider.class);
 
     private BindingAwareBroker broker;
     private BundleContext context;
 
-    ConfigServiceImpl configImpl;
+    MiscConfigServiceImpl configImpl;
 
     IController controller = null;
 
-    public ConfigProvider() {
-        configImpl = new ConfigServiceImpl();
+    public MiscConfigProvider() {
+        configImpl = new MiscConfigServiceImpl();
         if(configImpl == null){
-            logger.debug("ERROR: ConfigProvider: ConfigProviderImpl() creation fail");
+            logger.debug("ERROR: MiscConfigProvider: MiscConfigProviderImpl() creation fail");
         }
-        logger.debug("ConfigProvider creation complete");
+        logger.debug("MiscConfigProvider creation complete");
     }
 
     //The following three functions (getImplementations(), getFunctionality(), onSessionInitialized()), seems to be deprecated in yangtools ver. 0.7.0-SNAPSHOT
@@ -62,9 +62,9 @@ public class ConfigProvider implements BindingAwareProvider, AutoCloseable {
     @Override
     public void onSessionInitiated(ProviderContext session) {
         configImpl.init();
-        logger.trace("ConfigProvider: onSessionInitiated(): before session.addRpcImpl()");//OK
-        session.addRpcImplementation(ConfigService.class, configImpl);
-        logger.debug("ConfigProvider: onSessionInitiated(): done");//OK
+        logger.trace("MiscConfigProvider: onSessionInitiated(): before session.addRpcImpl()");//OK
+        session.addRpcImplementation(MiscConfigService.class, configImpl);
+        logger.debug("MiscConfigProvider: onSessionInitiated(): done");//OK
 
         //TODO: strange!! When session.addRpcImplementation() is called, then the following lines would not happen
 

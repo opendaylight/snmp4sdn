@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.configmanager.impl;
+package org.opendaylight.miscconfigmanager.impl;
 
 import java.util.concurrent.ExecutionException;
 import java.util.List;
@@ -16,30 +16,30 @@ import org.opendaylight.controller.sal.binding.api.AbstractBindingAwareConsumer;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.ConfigService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.StpPortState;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.ArpEntry;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.get.arp.table.output.ArpTableEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.MiscConfigService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.StpPortState;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.ArpEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.get.arp.table.output.ArpTableEntry;
 
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.DisableStpInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.DisableStpOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.EnableStpInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.EnableStpOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.SetStpPortStateInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.SetStpPortStateOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.DeleteArpEntryInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.DeleteArpEntryOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.GetStpPortStateInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.GetStpPortStateOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.GetArpEntryInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.GetArpEntryOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.SetArpEntryInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.SetArpEntryOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.GetArpTableInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.GetArpTableOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.GetStpPortRootInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.GetStpPortRootInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.GetStpPortRootOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.DisableStpInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.DisableStpOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.EnableStpInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.EnableStpOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.SetStpPortStateInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.SetStpPortStateOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.DeleteArpEntryInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.DeleteArpEntryOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetStpPortStateInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetStpPortStateOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetArpEntryInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetArpEntryOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.SetArpEntryInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.SetArpEntryOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetArpTableInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetArpTableOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetStpPortRootInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetStpPortRootInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetStpPortRootOutput;
 
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
@@ -53,19 +53,19 @@ import org.eclipse.osgi.framework.console.CommandProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
+public class MiscConfigManagerImpl extends AbstractBindingAwareConsumer implements
         BundleActivator, BindingAwareConsumer, CommandProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(ConfigManagerImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(MiscConfigManagerImpl.class);
 
-    private ConfigService config;
+    private MiscConfigService config;
     private ConsumerContext session;
 
     @Override
     public void onSessionInitialized(ConsumerContext session) {
         this.session = session;
         registerWithOSGIConsole();
-        logger.debug("ConfigManagerImpl: onSessionInitialized() completed");
+        logger.debug("MiscConfigManagerImpl: onSessionInitialized() completed");
     }
 
     @Override
@@ -81,11 +81,11 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
 
     public boolean disableStp(Long nodeId){
 
-        //check ConfigService exists?
+        //check MiscConfigService exists?
         if (config == null) {
-            config = this.session.getRpcService(ConfigService.class);
+            config = this.session.getRpcService(MiscConfigService.class);
             if (config == null) {
-                logger.debug("ERROR: ConfigManager: disableStp(): ConfigService is null, nodeId = {}", nodeId);
+                logger.debug("ERROR: MiscConfigManagerImpl: disableStp(): MiscConfigService is null, nodeId = {}", nodeId);
                 return false;
             }
         }
@@ -95,11 +95,11 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
         try {
             RpcResult<DisableStpOutput> result = config.disableStp(ib.build()).get();
             if(result == null){
-                logger.debug("ERROR: ConfigManager: disableStp(): call ConfigService.disableStp() fail (null result), nodeId = {}", nodeId);
+                logger.debug("ERROR: MiscConfigManagerImpl: disableStp(): call MiscConfigService.disableStp() fail (null result), nodeId = {}", nodeId);
                 return false;
             }
             if(result.getResult() == null){
-                logger.debug("ERROR: ConfigManager: disableStp(): call ConfigService.disableStp() fail (null in result), nodeId = {}", nodeId);
+                logger.debug("ERROR: MiscConfigManagerImpl: disableStp(): call MiscConfigService.disableStp() fail (null in result), nodeId = {}", nodeId);
                 return false;
             }
             switch (result.getResult().getDisableStpResult()) {
@@ -110,10 +110,10 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
                 return false;
             }
         } catch (InterruptedException ie) {
-            logger.debug("ERROR: ConfigManager: disableStp(): nodeId = {}, InterruptedException: {}", nodeId, ie);
+            logger.debug("ERROR: MiscConfigManagerImpl: disableStp(): nodeId = {}, InterruptedException: {}", nodeId, ie);
             return false;
         } catch (ExecutionException ee) {
-            logger.debug("ERROR: ConfigManager: disableStp(): nodeId = {}, ExecutionException: {}", nodeId, ee);
+            logger.debug("ERROR: MiscConfigManagerImpl: disableStp(): nodeId = {}, ExecutionException: {}", nodeId, ee);
             return false;
         }
 
@@ -121,11 +121,11 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
 
     public boolean enableStp(Long nodeId){
 
-        //check ConfigService exists?
+        //check MiscConfigService exists?
         if (config == null) {
-            config = this.session.getRpcService(ConfigService.class);
+            config = this.session.getRpcService(MiscConfigService.class);
             if (config == null) {
-                logger.debug("ERROR: ConfigManager: enableStp(): ConfigService is null, nodeId = {}", nodeId);
+                logger.debug("ERROR: MiscConfigManagerImpl: enableStp(): MiscConfigService is null, nodeId = {}", nodeId);
                 return false;
             }
         }
@@ -135,11 +135,11 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
         try {
             RpcResult<EnableStpOutput> result = config.enableStp(ib.build()).get();
             if(result == null){
-                logger.debug("ERROR: ConfigManager: enableStp(): call ConfigService.enableStp() fail (null result), nodeId = {}", nodeId);
+                logger.debug("ERROR: MiscConfigManagerImpl: enableStp(): call MiscConfigService.enableStp() fail (null result), nodeId = {}", nodeId);
                 return false;
             }
             if(result.getResult() == null){
-                logger.debug("ERROR: ConfigManager: enableStp(): call ConfigService.ensableStp() fail (null in result), nodeId = {}", nodeId);
+                logger.debug("ERROR: MiscConfigManagerImpl: enableStp(): call MiscConfigService.ensableStp() fail (null in result), nodeId = {}", nodeId);
                 return false;
             }
             switch (result.getResult().getEnableStpResult()) {
@@ -150,10 +150,10 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
                 return false;
             }
         } catch (InterruptedException ie) {
-            logger.debug("ERROR: ConfigManager: enableStp(): nodeId = {}, InterruptedException: {}", nodeId, ie);
+            logger.debug("ERROR: MiscConfigManagerImpl: enableStp(): nodeId = {}, InterruptedException: {}", nodeId, ie);
             return false;
         } catch (ExecutionException ee) {
-            logger.debug("ERROR: ConfigManager: enableStp(): nodeId = {}, ExecutionException: {}", nodeId, ee);
+            logger.debug("ERROR: MiscConfigManagerImpl: enableStp(): nodeId = {}, ExecutionException: {}", nodeId, ee);
             return false;
         }
 
@@ -161,11 +161,11 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
 
     public boolean setStpPortState(Long nodeId, Short port, Boolean isEnable){
 
-        //check ConfigService exists?
+        //check MiscConfigService exists?
         if (config == null) {
-            config = this.session.getRpcService(ConfigService.class);
+            config = this.session.getRpcService(MiscConfigService.class);
             if (config == null) {
-                logger.debug("ERROR: ConfigManager: setStpPortState(): ConfigService is null, nodeId = {}", nodeId);
+                logger.debug("ERROR: MiscConfigManagerImpl: setStpPortState(): MiscConfigService is null, nodeId = {}", nodeId);
                 return false;
             }
         }
@@ -177,11 +177,11 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
         try {
             RpcResult<SetStpPortStateOutput> result = config.setStpPortState(ib.build()).get();
             if(result == null){
-                logger.debug("ERROR: ConfigManager: setStpPortState(): call ConfigService.setStpPortState() fail (null result), nodeId {} port {} isEnable {}", nodeId, port, isEnable);
+                logger.debug("ERROR: MiscConfigManagerImpl: setStpPortState(): call MiscConfigService.setStpPortState() fail (null result), nodeId {} port {} isEnable {}", nodeId, port, isEnable);
                 return false;
             }
             if(result.getResult() == null){
-                logger.debug("ERROR: ConfigManager: setStpPortState(): call ConfigService.setStpPortState() fail (null in result), nodeId = {}", nodeId);
+                logger.debug("ERROR: MiscConfigManagerImpl: setStpPortState(): call MiscConfigService.setStpPortState() fail (null in result), nodeId = {}", nodeId);
                 return false;
             }
             switch (result.getResult().getSetStpPortStateResult()) {
@@ -192,10 +192,10 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
                 return false;
             }
         } catch (InterruptedException ie) {
-            logger.debug("ERROR: ConfigManager: setStpPortState(): nodeId = {}, InterruptedException: {}", nodeId, ie);
+            logger.debug("ERROR: MiscConfigManagerImpl: setStpPortState(): nodeId = {}, InterruptedException: {}", nodeId, ie);
             return false;
         } catch (ExecutionException ee) {
-            logger.debug("ERROR: ConfigManager: setStpPortState(): nodeId = {}, ExecutionException: {}", nodeId, ee);
+            logger.debug("ERROR: MiscConfigManagerImpl: setStpPortState(): nodeId = {}, ExecutionException: {}", nodeId, ee);
             return false;
         }
 
@@ -203,16 +203,16 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
 
     public StpPortState getStpPortState(Long nodeId, Short port){
 
-        //check ConfigService exists?
+        //check MiscConfigService exists?
         if (config == null) {
-            config = this.session.getRpcService(ConfigService.class);
+            config = this.session.getRpcService(MiscConfigService.class);
             if (config == null) {
-                logger.debug("ERROR: ConfigManager: getStpPortState(): ConfigService is null, nodeId = {}", nodeId);
+                logger.debug("ERROR: MiscConfigManagerImpl: getStpPortState(): MiscConfigService is null, nodeId = {}", nodeId);
                 return null;
             }
         }
 
-        //prepare parameters to ConfigService
+        //prepare parameters to MiscConfigService
         GetStpPortStateInputBuilder ib = new GetStpPortStateInputBuilder();
         ib.setNodeId(nodeId);
         ib.setPort(port);
@@ -221,29 +221,29 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
         try {
             Future<RpcResult<GetStpPortStateOutput>> ret = config.getStpPortState(ib.build());
             if(ret == null){
-                logger.debug("ERROR: ConfigManager: getStpPortState(): call ConfigService.getStpPortState() fail (return null), nodeId {} port {}", nodeId, port);
+                logger.debug("ERROR: MiscConfigManagerImpl: getStpPortState(): call MiscConfigService.getStpPortState() fail (return null), nodeId {} port {}", nodeId, port);
                 return null;
             }
             RpcResult<GetStpPortStateOutput> result = ret.get();
             if(result == null){
-                logger.debug("ERROR: ConfigManager: getStpPortState(): call ConfigService.getStpPortState() fail (null result), nodeId {} port {}", nodeId, port);
+                logger.debug("ERROR: MiscConfigManagerImpl: getStpPortState(): call MiscConfigService.getStpPortState() fail (null result), nodeId {} port {}", nodeId, port);
                 return null;
             }
             if(result.getResult() == null){
-                logger.debug("ERROR: ConfigManager: getStpPortState(): call ConfigService.getStpPortState() fail (null in result), nodeId = {}", nodeId);
+                logger.debug("ERROR: MiscConfigManagerImpl: getStpPortState(): call MiscConfigService.getStpPortState() fail (null in result), nodeId = {}", nodeId);
                 return null;
             }
             StpPortState state = result.getResult().getStpPortState();
             if(state == null){
-                logger.debug("ERROR: ConfigManager: getStpPortState(): call ConfigService.getStpPortState() with nodeId {} port {}, return null", nodeId, port);
+                logger.debug("ERROR: MiscConfigManagerImpl: getStpPortState(): call MiscConfigService.getStpPortState() with nodeId {} port {}, return null", nodeId, port);
                 return null;
             }
             return state;
         } catch (InterruptedException ie) {
-            logger.debug("ERROR: ConfigManager: getStpPortState(): nodeId = {}, InterruptedException: {}", nodeId, ie);
+            logger.debug("ERROR: MiscConfigManagerImpl: getStpPortState(): nodeId = {}, InterruptedException: {}", nodeId, ie);
             return null;
         } catch (ExecutionException ee) {
-            logger.debug("ERROR: ConfigManager: getStpPortState(): nodeId = {}, ExecutionException: {}", nodeId, ee);
+            logger.debug("ERROR: MiscConfigManagerImpl: getStpPortState(): nodeId = {}, ExecutionException: {}", nodeId, ee);
             return null;
         }
 
@@ -251,16 +251,16 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
 
     public ArpEntry getArpEntry(Long nodeId, String ipAddress){
 
-        //check ConfigService exists?
+        //check MiscConfigService exists?
         if (config == null) {
-            config = this.session.getRpcService(ConfigService.class);
+            config = this.session.getRpcService(MiscConfigService.class);
             if (config == null) {
-                logger.debug("ERROR: ConfigManager: getArpEntry(): ConfigService is null, nodeId = {}", nodeId);
+                logger.debug("ERROR: MiscConfigManagerImpl: getArpEntry(): MiscConfigService is null, nodeId = {}", nodeId);
                 return null;
             }
         }
 
-        //prepare parameters to ConfigService
+        //prepare parameters to MiscConfigService
         GetArpEntryInputBuilder ib = new GetArpEntryInputBuilder();
         ib.setNodeId(nodeId);
         ib.setIpAddress(ipAddress);
@@ -269,29 +269,29 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
         try {
             Future<RpcResult<GetArpEntryOutput>> ret = config.getArpEntry(ib.build());
             if(ret == null){
-                logger.debug("ERROR: ConfigManager: getArpEntry(): call ConfigService.getArpEntry() fail (return null), nodeId {} ipAddress {}", nodeId, ipAddress);
+                logger.debug("ERROR: MiscConfigManagerImpl: getArpEntry(): call MiscConfigService.getArpEntry() fail (return null), nodeId {} ipAddress {}", nodeId, ipAddress);
                 return null;
             }
             RpcResult<GetArpEntryOutput> result = ret.get();
             if(result == null){
-                logger.debug("ERROR: ConfigManager: getArpEntry(): call ConfigService.getArpEntry() fail (null result), nodeId {} ipAddress {}", nodeId, ipAddress);
+                logger.debug("ERROR: MiscConfigManagerImpl: getArpEntry(): call MiscConfigService.getArpEntry() fail (null result), nodeId {} ipAddress {}", nodeId, ipAddress);
                 return null;
             }
             if(result.getResult() == null){
-                logger.debug("ERROR: ConfigManager: getArpEntry(): call ConfigService.getArpEntry() fail (null in result), nodeId {} ipAddress {}", nodeId, ipAddress);
+                logger.debug("ERROR: MiscConfigManagerImpl: getArpEntry(): call MiscConfigService.getArpEntry() fail (null in result), nodeId {} ipAddress {}", nodeId, ipAddress);
                 return null;
             }
             ArpEntry entry = result.getResult();
             if(entry == null){
-                logger.debug("ERROR: ConfigManager: getArpEntry(): call ConfigService.getArpEntry() with , nodeId {} ipAddress {}, return null", nodeId, ipAddress);
+                logger.debug("ERROR: MiscConfigManagerImpl: getArpEntry(): call MiscConfigService.getArpEntry() with , nodeId {} ipAddress {}, return null", nodeId, ipAddress);
                 return null;
             }
             return entry;
         } catch (InterruptedException ie) {
-            logger.debug("ERROR: ConfigManager: getArpEntry(): nodeId {} ipAddress {}, InterruptedException: {}", nodeId, ipAddress, ie);
+            logger.debug("ERROR: MiscConfigManagerImpl: getArpEntry(): nodeId {} ipAddress {}, InterruptedException: {}", nodeId, ipAddress, ie);
             return null;
         } catch (ExecutionException ee) {
-            logger.debug("ERROR: ConfigManager: getArpEntry(): nodeId {} ipAddress {}, ExecutionException: {}", nodeId, ipAddress, ee);
+            logger.debug("ERROR: MiscConfigManagerImpl: getArpEntry(): nodeId {} ipAddress {}, ExecutionException: {}", nodeId, ipAddress, ee);
             return null;
         }
 
@@ -299,11 +299,11 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
 
     public boolean setArpEntry(Long nodeId, String ipAddress, Long macAddress){
 
-        //check ConfigService exists?
+        //check MiscConfigService exists?
         if (config == null) {
-            config = this.session.getRpcService(ConfigService.class);
+            config = this.session.getRpcService(MiscConfigService.class);
             if (config == null) {
-                logger.debug("ERROR: ConfigManager: setArpEntry(): ConfigService is null, nodeId = {}", nodeId);
+                logger.debug("ERROR: MiscConfigManagerImpl: setArpEntry(): MiscConfigService is null, nodeId = {}", nodeId);
                 return false;
             }
         }
@@ -315,11 +315,11 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
         try {
             RpcResult<SetArpEntryOutput> result = config.setArpEntry(ib.build()).get();
             if(result == null){
-                logger.debug("ERROR: ConfigManager: setArpEntry(): call ConfigService.setArpEntry() fail (null result), nodeId {} ipAddress {} macAddress {}", nodeId, ipAddress, macAddress);
+                logger.debug("ERROR: MiscConfigManagerImpl: setArpEntry(): call MiscConfigService.setArpEntry() fail (null result), nodeId {} ipAddress {} macAddress {}", nodeId, ipAddress, macAddress);
                 return false;
             }
             if(result.getResult() == null){
-                logger.debug("ERROR: ConfigManager: setArpEntry(): call ConfigService.setArpEntry() fail (null in result), nodeId {} ipAddress {} macAddress {}", nodeId, ipAddress, macAddress);
+                logger.debug("ERROR: MiscConfigManagerImpl: setArpEntry(): call MiscConfigService.setArpEntry() fail (null in result), nodeId {} ipAddress {} macAddress {}", nodeId, ipAddress, macAddress);
                 return false;
             }
             switch (result.getResult().getSetArpEntryResult()) {
@@ -330,10 +330,10 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
                 return false;
             }
         } catch (InterruptedException ie) {
-            logger.debug("ERROR: ConfigManager: setArpEntry(): nodeId {} ipAddress {} macAddress {}, InterruptedException: {}", nodeId, ipAddress, macAddress, ie);
+            logger.debug("ERROR: MiscConfigManagerImpl: setArpEntry(): nodeId {} ipAddress {} macAddress {}, InterruptedException: {}", nodeId, ipAddress, macAddress, ie);
             return false;
         } catch (ExecutionException ee) {
-            logger.debug("ERROR: ConfigManager: setArpEntry(): nodeId {} ipAddress {} macAddress {}, ExecutionException: {}", nodeId, ipAddress, macAddress, ee);
+            logger.debug("ERROR: MiscConfigManagerImpl: setArpEntry(): nodeId {} ipAddress {} macAddress {}, ExecutionException: {}", nodeId, ipAddress, macAddress, ee);
             return false;
         }
 
@@ -341,16 +341,16 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
 
     public List<ArpTableEntry> getArpTable(Long nodeId){
 
-        //check ConfigService exists?
+        //check MiscConfigService exists?
         if (config == null) {
-            config = this.session.getRpcService(ConfigService.class);
+            config = this.session.getRpcService(MiscConfigService.class);
             if (config == null) {
-                logger.debug("ERROR: ConfigManager: getArpTable(): ConfigService is null, nodeId = {}", nodeId);
+                logger.debug("ERROR: MiscConfigManagerImpl: getArpTable(): MiscConfigService is null, nodeId = {}", nodeId);
                 return null;
             }
         }
 
-        //prepare parameters to ConfigService
+        //prepare parameters to MiscConfigService
         GetArpTableInputBuilder ib = new GetArpTableInputBuilder();
         ib.setNodeId(nodeId);
 
@@ -358,29 +358,29 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
         try {
             Future<RpcResult<GetArpTableOutput>> ret = config.getArpTable(ib.build());
             if(ret == null){
-                logger.debug("ERROR: ConfigManager: getArpTable(): call ConfigService.getArpTable() fail (return null), nodeId {}", nodeId);
+                logger.debug("ERROR: MiscConfigManagerImpl: getArpTable(): call MiscConfigService.getArpTable() fail (return null), nodeId {}", nodeId);
                 return null;
             }
             RpcResult<GetArpTableOutput> result = ret.get();
             if(result == null){
-                logger.debug("ERROR: ConfigManager: getArpTable(): call ConfigService.getArpTable() fail (null result), nodeId {}", nodeId);
+                logger.debug("ERROR: MiscConfigManagerImpl: getArpTable(): call MiscConfigService.getArpTable() fail (null result), nodeId {}", nodeId);
                 return null;
             }
             if(result.getResult() == null){
-                logger.debug("ERROR: ConfigManager: getArpTable(): call ConfigService.getArpTable() fail (null in result), nodeId {}", nodeId);
+                logger.debug("ERROR: MiscConfigManagerImpl: getArpTable(): call MiscConfigService.getArpTable() fail (null in result), nodeId {}", nodeId);
                 return null;
             }
             List<ArpTableEntry> entryList = result.getResult().getArpTableEntry();
             if(entryList == null){
-                logger.debug("ERROR: ConfigManager: getArpTable(): call ConfigService.getArpTable() with nodeId {}, fail", nodeId);
+                logger.debug("ERROR: MiscConfigManagerImpl: getArpTable(): call MiscConfigService.getArpTable() with nodeId {}, fail", nodeId);
                 return null;
             }
             return entryList;
         } catch (InterruptedException ie) {
-            logger.debug("ERROR: ConfigManager: getArpTable(): call ConfigService.getArpTable() with nodeId {}, InterruptedException: {}", nodeId, ie);
+            logger.debug("ERROR: MiscConfigManagerImpl: getArpTable(): call MiscConfigService.getArpTable() with nodeId {}, InterruptedException: {}", nodeId, ie);
             return null;
         } catch (ExecutionException ee) {
-            logger.debug("ERROR: ConfigManager: getArpTable(): call ConfigService.getArpTable() with nodeId {}, ExecutionException: {}", nodeId, ee);
+            logger.debug("ERROR: MiscConfigManagerImpl: getArpTable(): call MiscConfigService.getArpTable() with nodeId {}, ExecutionException: {}", nodeId, ee);
             return null;
         }
 
@@ -388,11 +388,11 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
 
     public boolean deleteArpEntry(Long nodeId, String ipAddress){
 
-        //check ConfigService exists?
+        //check MiscConfigService exists?
         if (config == null) {
-            config = this.session.getRpcService(ConfigService.class);
+            config = this.session.getRpcService(MiscConfigService.class);
             if (config == null) {
-                logger.debug("ERROR: ConfigManager: deleteArpEntry(): ConfigService is null, nodeId = {}", nodeId);
+                logger.debug("ERROR: MiscConfigManagerImpl: deleteArpEntry(): MiscConfigService is null, nodeId = {}", nodeId);
                 return false;
             }
         }
@@ -403,11 +403,11 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
         try {
             RpcResult<DeleteArpEntryOutput> result = config.deleteArpEntry(ib.build()).get();
             if(result == null){
-                logger.debug("ERROR: ConfigManager: deleteArpEntry(): call ConfigService.deleteArpEntry() fail (null result), nodeId {} and ipAddress {}", nodeId, ipAddress);
+                logger.debug("ERROR: MiscConfigManagerImpl: deleteArpEntry(): call MiscConfigService.deleteArpEntry() fail (null result), nodeId {} and ipAddress {}", nodeId, ipAddress);
                 return false;
             }
             if(result.getResult() == null){
-                logger.debug("ERROR: ConfigManager: deleteArpEntry(): call ConfigService.deleteArpEntry() fail (null in result), nodeId = {}", nodeId);
+                logger.debug("ERROR: MiscConfigManagerImpl: deleteArpEntry(): call MiscConfigService.deleteArpEntry() fail (null in result), nodeId = {}", nodeId);
                 return false;
             }
             switch (result.getResult().getDeleteArpEntryResult()) {
@@ -418,10 +418,10 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
                 return false;
             }
         } catch (InterruptedException ie) {
-            logger.debug("ERROR: ConfigManager: deleteArpEntry(): nodeId = {}, InterruptedException: {}", nodeId, ie);
+            logger.debug("ERROR: MiscConfigManagerImpl: deleteArpEntry(): nodeId = {}, InterruptedException: {}", nodeId, ie);
             return false;
         } catch (ExecutionException ee) {
-            logger.debug("ERROR: ConfigManager: deleteArpEntry(): nodeId = {}, ExecutionException: {}", nodeId, ee);
+            logger.debug("ERROR: MiscConfigManagerImpl: deleteArpEntry(): nodeId = {}, ExecutionException: {}", nodeId, ee);
             return false;
         }
 
@@ -628,11 +628,11 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
         }
 
 
-        //check ConfigService exists?
+        //check MiscConfigService exists?
         if (config == null) {
-            config = this.session.getRpcService(ConfigService.class);
+            config = this.session.getRpcService(MiscConfigService.class);
             if (config == null) {
-                logger.debug("Can't get ConfigService, can't proceed!");
+                logger.debug("Can't get MiscConfigService, can't proceed!");
                 return;
             }
         }
@@ -977,7 +977,7 @@ public class ConfigManagerImpl extends AbstractBindingAwareConsumer implements
 
     @Override//CommandProvider's
     public String getHelp() {
-        return new String("ConfigManagerImpl.getHelp():null");
+        return new String("MiscMiscConfigManagerImpl.getHelp():null");
     }
 }
 

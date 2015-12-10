@@ -10,7 +10,7 @@
 This code reused the code of OpenFlow Java package. The authors' efforts are appreciated.
 */
 
-package org.opendaylight.configmanager.impl;
+package org.opendaylight.miscconfigmanager.impl;
 
 import java.math.BigInteger;
 
