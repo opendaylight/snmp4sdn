@@ -2,7 +2,7 @@ module fdb {
     yang-version 1;
 
     namespace "urn:opendaylight:snmp4sdn:md:fdb";
-    prefix config;
+    prefix fdb;
 
     import snmp4sdn-types {prefix types;}
 

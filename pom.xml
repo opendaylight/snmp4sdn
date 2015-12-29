@@ -47,7 +47,7 @@
     <module>commons/snmp4sdn</module>
     <module>mdsal/model</module>
     <module>mdsal/caller/aclmanager</module>
-    <module>mdsal/caller/configmanager</module>
+    <module>mdsal/caller/miscconfigmanager</module>
     <module>mdsal/caller/fdbmanager</module>
     <module>mdsal/caller/vlanmanager</module>
     <module>snmp4sdn</module>

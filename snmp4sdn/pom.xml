@@ -69,8 +69,8 @@
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.types.rev150126,<!--md-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev150515,<!--md-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev150515.get.vlan.table.output,<!--md-sal-->
-              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815,<!--md-sal-->
-              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.get.arp.table.output,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.get.arp.table.output,<!--md-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126,<!--md-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.get.fdb.table.output,<!--md-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119,<!--md-sal-->

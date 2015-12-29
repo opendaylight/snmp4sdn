@@ -11,12 +11,12 @@
     <version>0.3.0-SNAPSHOT</version>
     <relativePath>../../../commons/snmp4sdn</relativePath>
   </parent>
-  <artifactId>configmanager</artifactId>
+  <artifactId>miscconfigmanager</artifactId>
   <packaging>bundle</packaging>
   <version>0.3.0-SNAPSHOT</version>
 
-  <name>config manager</name>
-  <description>config manager, as a consumer of snmp4sdn, for demo snmp4sdn config service</description>
+  <name>miscconfig manager</name>
+  <description>misc config manager, as a consumer of snmp4sdn, for demo snmp4sdn misc config service</description>
   <url>https://wiki.opendaylight.org/view/SNMP4SDN:Main</url>
   
   <licenses>
@@ -77,8 +77,8 @@
           <instructions>
             <Import-Package>
               <!--org.opendaylight.yang.gen.v1.urn.opendaylight.ping.rev130911,-->
-              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815,<!--configmanager add-->
-              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.config.rev140815.get.arp.table.output,<!--configmanager add-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207,<!--configmanager add-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.get.arp.table.output,<!--configmanager add-->
               org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924,
               org.opendaylight.yangtools.yang.common,
               org.opendaylight.yangtools.yang.binding,
@@ -88,7 +88,7 @@
               org.osgi.framework
             </Import-Package>
             <!--<Export-Package>org.opendaylight.controller.ping.service.api</Export-Package>-->
-            <Bundle-Activator>org.opendaylight.configmanager.impl.ConfigManagerImpl</Bundle-Activator><!--configmanager add-->
+            <Bundle-Activator>org.opendaylight.miscconfigmanager.impl.MiscConfigManagerImpl</Bundle-Activator><!--configmanager add-->
           </instructions>
           <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>

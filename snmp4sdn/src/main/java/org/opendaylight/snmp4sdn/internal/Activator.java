@@ -84,8 +84,9 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
     protected static final Logger logger = LoggerFactory
             .getLogger(Activator.class);
 
-    private ConfigProvider config = new ConfigProvider();//md-sal
+    private MiscConfigProvider config = new MiscConfigProvider();//md-sal
     private FdbProvider fdb = new FdbProvider();//md-sal
+
     private AclProvider acl = new AclProvider();//md-sal
     private VlanProvider vlan = new VlanProvider();//md-sal
     private SwitchDbProvider switchdb = new SwitchDbProvider();//md-sal
