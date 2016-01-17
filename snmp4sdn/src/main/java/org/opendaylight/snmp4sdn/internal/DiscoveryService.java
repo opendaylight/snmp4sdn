@@ -1754,7 +1754,9 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
 
             Map<Short, String> portToRemotePortID = snmp.readLLDPRemotePortIDs(switchID);
             portToRemotePortIDOnSwitches.put(switchID, portToRemotePortID);
-            portToRemotePortIDOnSwitchesTmp.put(switchID, portToRemotePortID);
+            /* Author: Nanfei Chen. For Bug 4526: the result of calling rpc get-edge-list defined in topology.yang is false. */
+            Map<Short, String> portToRemotePortIDCopy = new HashMap(portToRemotePortID);
+            portToRemotePortIDOnSwitchesTmp.put(switchID, portToRemotePortIDCopy);
             logger.trace("--> remote port id " + portToRemotePortID.size() + "entries");
             for(Map.Entry<Short, String> entryp: portToRemotePortID.entrySet()){
                 logger.trace("\tlocal port " + entryp.getKey() + " ==> remote port id\"" + entryp.getValue() + "\"");
@@ -1805,7 +1807,9 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
                 //System.out.println("\tchecking local port (num: " + localPortNum + ", id: " +localPortID + ", remote switch's chassis: " + remoteChassis + "), so look into this remote switch (ip: " + remoteIP + ")");
                 for(Map.Entry<Short, String> entryR : remotePortIDs.entrySet()){
                     //System.out.println("...compare with remote port of id: " + entryR.getValue());
-                    if(entryR.getValue().compareToIgnoreCase(localPortID) == 0){
+                	/* Author: Nanfei Chen. For Bug 4526: the result of calling rpc get-edge-list defined in topology.yang is false. */
+                    if(entryR.getValue().compareToIgnoreCase(localPortID) == 0 &&
+                    		portToRemoteChassisOnSwitches.get(remoteSwitchID).get(entryR.getKey()).compareToIgnoreCase(localChassis) ==0){
                         Short remotePortNum = entryR.getKey();
 
                         //report the edge found in this for loop
