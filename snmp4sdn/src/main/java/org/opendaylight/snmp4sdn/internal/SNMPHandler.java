@@ -119,6 +119,7 @@ public class SNMPHandler{
     String lldpRemotePortIdOID = "1.0.8802.1.1.2.1.4.1.1.7";//s4s
     int portIdType_MacAddr = 3;
     int portIdType_LocallyAssigned = 7;
+    int portIdType_InterfaceName = 5;
 
     String vlanNameOID = "1.3.6.1.2.1.17.7.1.4.3.1.1";
     String vlanEgressPortsOID = "1.3.6.1.2.1.17.7.1.4.3.1.2";
@@ -1763,6 +1764,10 @@ public class SNMPHandler{
                 int portIdType = remotePortIDTypeTable.get(portNum).intValue();
                 if(portIdType == portIdType_MacAddr){
                     valueStr = HexString.toHexString(valueBytes);
+                }
+                /* Author: Nanfei Chen. For Bug 4524: can not support PortID subtype Interface name. */
+                else if (portIdType == portIdType_InterfaceName) {
+                	valueStr = HexString.toHexString(valueBytes);
                 }
                 else if(portIdType == portIdType_LocallyAssigned){
                     valueStr = new String(valueBytes);
