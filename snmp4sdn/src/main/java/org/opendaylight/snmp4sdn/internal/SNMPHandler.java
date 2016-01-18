@@ -114,10 +114,12 @@ public class SNMPHandler{
 
     String lldpRemoteChassisIdOID = "1.0.8802.1.1.2.1.4.1.1.5";//s4s
     String lldpLocalChassisIdOID = "1.0.8802.1.1.2.1.3.2.0";//s4s
+    String lldpLocalPortIdTypeOID = "1.0.8802.1.1.2.1.3.7.1.2";//s4s
     String lldpLocalPortIdOID = "1.0.8802.1.1.2.1.3.7.1.3";//s4s
     String lldpRemotePortIdTypeOID = "1.0.8802.1.1.2.1.4.1.1.6";//s4s
     String lldpRemotePortIdOID = "1.0.8802.1.1.2.1.4.1.1.7";//s4s
     int portIdType_MacAddr = 3;
+    int portIdType_ifName = 5;
     int portIdType_LocallyAssigned = 7;
 
     String vlanNameOID = "1.3.6.1.2.1.17.7.1.4.3.1.1";
@@ -1639,6 +1641,12 @@ public class SNMPHandler{
                return null;
            }
 
+            Map<Short, Integer> localPortIDTypeTable = readLLDPLocalPortIDTypeEntries(comInterface);
+            if(localPortIDTypeTable == null){
+                logger.debug("ERROR: readLLDPLocalPortIDEntries(): call readLLDPLocalPortIDTypeEntries() fail, given SNMP interface of node {}", comInterface.getHostAddress());
+                return null;
+            }
+
             try{
                 comInterface.closeConnection();
             }
@@ -1657,9 +1665,28 @@ public class SNMPHandler{
                 Short portNum = retrievePortNumFromPortOID(snmpOIDstr);
 
                 byte[] valueBytes = (byte[])value.getValue();
-                String valueStr = HexString.toHexString(valueBytes);
+                String valueStr;
 
-                table.put(portNum, valueStr);
+                if(localPortIDTypeTable.get(portNum) == null){
+                    logger.debug("ERROR: readLLDPLocalPortIDEntries(), localPortIDTypeTable of node {} has no entry for port {}", comInterface.getHostAddress(), portNum);
+                    return null;
+                }
+                int portIdType = localPortIDTypeTable.get(portNum).intValue();
+                if(portIdType == portIdType_MacAddr){
+                    valueStr = HexString.toHexString(valueBytes);
+                }
+                else if(portIdType == portIdType_ifName){
+                    valueStr = new String(valueBytes);
+                }
+                else if(portIdType == portIdType_LocallyAssigned){
+                    valueStr = new String(valueBytes);
+                }
+                else{
+                    logger.debug("ERROR: readLLDPLocalPortIDEntries(), portIdType {} is unkown for node {} port {}", portIdType, comInterface.getHostAddress(), portNum);
+                    return null;
+                }
+
+                table.put(portNum, valueStr.trim());
                 //logger.debug("Retrieved OID: " + snmpOID + " (so port num=" + portNum + "), value: " + valueStr);
             }
             return table;
@@ -1739,6 +1766,10 @@ public class SNMPHandler{
         }
 
         Map<Short, Integer> remotePortIDTypeTable = readLLDPRemotePortIDTypeEntries(comInterface);
+        if(remotePortIDTypeTable == null){
+            logger.debug("ERROR: readLLDPRemotePortIDEntries(): call readLLDPRemotePortIDTypeEntries() fail, given SNMP interface of node {}", comInterface.getHostAddress());
+            return null;
+        }
 
         try{
             comInterface.closeConnection();
@@ -1760,19 +1791,25 @@ public class SNMPHandler{
                 byte[] valueBytes = (byte[])value.getValue();
                 String valueStr;
 
+                if(remotePortIDTypeTable.get(portNum) == null){
+                    logger.debug("ERROR: readLLDPRemotePortIDEntries(), remotePortIDTypeTable of node {} has no entry for port {}", comInterface.getHostAddress(), portNum);
+                    return null;
+                }
                 int portIdType = remotePortIDTypeTable.get(portNum).intValue();
                 if(portIdType == portIdType_MacAddr){
                     valueStr = HexString.toHexString(valueBytes);
                 }
+                else if(portIdType == portIdType_ifName){
+                    valueStr = new String(valueBytes);
+                }
                 else if(portIdType == portIdType_LocallyAssigned){
                     valueStr = new String(valueBytes);
-                    //System.out.println("remote OF portID = " + valueStr);
                 }
                 else{
                     logger.debug("ERROR: readLLDPRemotePortIDEntries(), portIdType {} is unkown for node {} port {}", portIdType, comInterface.getHostAddress(), portNum);
                     return null;
                 }
-                table.put(portNum, valueStr);
+                table.put(portNum, valueStr.trim());
                 //logger.debug("Retrieved OID: " + snmpOID + ", value: " + valueStr);
         }
         return table;
@@ -1823,6 +1860,50 @@ public class SNMPHandler{
 
                 String snmpOIDstr = snmpOID.toString();
                 Short portNum = retrievePortNumFromChassisOID(snmpOIDstr);//TODO: suggest to change a function name?  
+
+                int valueInt = ((BigInteger)value.getValue()).intValue();
+
+                table.put(portNum, new Integer(valueInt));
+                //logger.debug("Retrieved OID: " + snmpOID + ", value: " + valueInt);
+        }
+        return table;
+    }
+
+    private Map<Short, Integer> readLLDPLocalPortIDTypeEntries(SNMPv1CommunicationInterface comInterface){
+        //logger.trace("enter readLLDPLocalPortIDTypeEntries()...");
+
+        Map<Short, Integer> table =  new HashMap<Short, Integer>();
+        SNMPVarBindList tableVars;
+
+        try{
+            //logger.debug("to retieve oid " + lldpLocalPortIdOID + "'s values...");
+
+            tableVars = comInterface.retrieveMIBTable(lldpLocalPortIdTypeOID);
+        }
+        catch(Exception e1)
+        {
+            logger.debug("ERROR: readLLDPLocalPortIDTypeEntries(), Exception during SNMP retrieveMIBTable() for node {}: {}", comInterface.getHostAddress(), e1);
+            //TODO: call comInterface.closeConnection()? (An innter try..catch here?)
+            return null;
+        }
+
+        /*//TODO: snmp connection should be created and closed here inpendently? (but need fix that comInterface had been closed before entering here, and here we don't know the switchIP for create snmp)
+        try{
+            comInterface.closeConnection();
+        }
+        catch(SocketException e2){
+            logger.debug("ERROR: readLLDPLocalPortIDTypeEntries(), Exception during SNMPv1CommunicationInterface.closeConnection() for node {}: {}", comInterface.getHostAddress(), e2);
+            return null;
+        }*/
+
+        //logger.debug("Number of table entries: " + tableVars.size());
+        for(int i = 0; i < tableVars.size(); i++){
+                SNMPSequence pair = (SNMPSequence)(tableVars.getSNMPObjectAt(i));
+                SNMPObjectIdentifier snmpOID = (SNMPObjectIdentifier)pair.getSNMPObjectAt(0);
+                SNMPInteger value = (SNMPInteger)pair.getSNMPObjectAt(1);
+
+                String snmpOIDstr = snmpOID.toString();
+                Short portNum = retrievePortNumFromPortOID(snmpOIDstr);//TODO: suggest to change a function name?  
 
                 int valueInt = ((BigInteger)value.getValue()).intValue();
 
