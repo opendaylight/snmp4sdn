@@ -30,8 +30,8 @@ import org.opendaylight.snmp4sdn.VlanAttributeTag;
 
 import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
 
-public class VenderSpecificHandler implements CommandProvider{
-    private static final Logger logger = LoggerFactory.getLogger(VenderSpecificHandler.class);
+public class VendorSpecificHandler implements CommandProvider{
+    private static final Logger logger = LoggerFactory.getLogger(VendorSpecificHandler.class);
 
     CmethUtil cmethUtil;
 
@@ -41,11 +41,11 @@ public class VenderSpecificHandler implements CommandProvider{
     String defaultConfigFilePath = "/etc/snmp4sdn_VendorSpecificSwitchConfig.xml";
     //String defaultConfigFilePath = "D:\\svns4s\\controller\\opendaylight\\protocol_plugins\\snmp4sdn\\snmp4sdn_VendorSpecificSwitchConfig.xml";
 
-    public VenderSpecificHandler(CmethUtil cmethUtil){
+    public VendorSpecificHandler(CmethUtil cmethUtil){
         this.cmethUtil = cmethUtil;
         boolean bool = readConfigFile(defaultConfigFilePath);
         if(!bool){
-            logger.debug("ERROR: VenderSpecificHandler(): call readConfigFile() given config file {} fail", defaultConfigFilePath);
+            logger.debug("ERROR: VendorSpecificHandler(): call readConfigFile() given config file {} fail", defaultConfigFilePath);
         }
     }
 
@@ -156,7 +156,7 @@ public class VenderSpecificHandler implements CommandProvider{
     @Override
     public String getHelp() {
         StringBuffer help = new StringBuffer();
-        help.append("---SNMP4SDN VenderSpecificHandler---\n");
+        help.append("---SNMP4SDN VendorSpecificHandler---\n");
         help.append("\t readVsConfig <config file path>\n");
         return help.toString();
     }
