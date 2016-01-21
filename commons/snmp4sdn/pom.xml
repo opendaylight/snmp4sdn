@@ -72,7 +72,7 @@
     <sal.version>0.11.0-SNAPSHOT</sal.version>
     <mdsal.version>1.4.0-SNAPSHOT</mdsal.version>
     <nsf.version>0.7.0-SNAPSHOT</nsf.version>
-    <yangtools.version>0.9.0-SNAPSHOT</yangtools.version>
+    <yangtools.version>1.0.0-SNAPSHOT</yangtools.version>
     <commons.opendaylight.version>1.7.0-SNAPSHOT</commons.opendaylight.version>
   </properties>
 
