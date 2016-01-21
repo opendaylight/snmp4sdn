@@ -537,7 +537,7 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
         int portListT[] = convertNcListToPortList(taggedNodeConns);
         int portListU[] = convertNcListToPortList(untaggedNodeConns);
         //status = new SNMPHandler(cmethUtil).addVLANandSetPorts(nodeId, vlanName, vlanId, portListT, portListU);
-        status = new VenderSpecificHandler(cmethUtil).addVLANandSetPorts(nodeId, vlanName, vlanId, portListT, portListU);
+        status = new VendorSpecificHandler(cmethUtil).addVLANandSetPorts(nodeId, vlanName, vlanId, portListT, portListU);
         if(!status.isSuccess())
             logger.debug("ERROR: addVLANandSetPorts(): Set VLAN Ports (node:" + nodeId + "(" + getNodeIP(nodeId) + ")" + ", vlanId:" + vlanId + ", taggedPortList: " + Arrays.toString(portListT) + ", untaggedPortList: " + Arrays.toString(portListU) + ") to switch fail: " + status);
 

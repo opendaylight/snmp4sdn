@@ -151,7 +151,7 @@ public class SNMPHandler{
     iso.3.6.1.2.1.4.22.1.2.5121.192.168.18.1 = Hex-STRING: 00 A0 D1 EA 3C 7C
     */
     String arpTableEntryPhyAddrOID = "1.3.6.1.2.1.4.22.1.2";    
-    String midStuffForArpTableEntryOID = "5121";//TODO: d-link. vender-specific?
+    String midStuffForArpTableEntryOID = "5121";//TODO: d-link. vendor-specific?
 
     /*ipNetToMediaType
     root@ubuntu:~# snmpwalk -v 2c -c private 192.168.0.32 1.3.6.1.2.1.4.22.1.4
@@ -2481,7 +2481,7 @@ public class SNMPHandler{
         return true;
     }
 
-    //modify existing addVLANandSetPortsWithUntaggedPorts(), adding the cmdList given from VenderSpecificHandler
+    //modify existing addVLANandSetPortsWithUntaggedPorts(), adding the cmdList given from VendorSpecificHandler
     public Status addVLANandSetPorts(long nodeID, String vlanName, int vlanID, int taggedPortList[], int untaggedPortList[], List<List<String>> cmdList){
         Long sw_macAddr = new Long(nodeID);
         String switchIP;
