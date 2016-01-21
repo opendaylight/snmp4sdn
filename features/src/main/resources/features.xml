@@ -21,7 +21,7 @@
     </feature>
     <feature name='odl-snmp4sdn-snmp4sdn' version='${project.version}' description='OpenDaylight :: SNMP4SDN :: Plugin'>
             <!--these marked are in Helium first release-->
-            <feature version='${yangtools.version}'>odl-mdsal-models</feature>
+            <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
             <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
 
             <feature version='${mdsal.version}'>odl-mdsal-apidocs</feature>
