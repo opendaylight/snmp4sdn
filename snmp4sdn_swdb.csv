@@ -1,0 +1,4 @@
+MAC,IP,SNMP_Community,CLI_Username,CLI_Password,Model
+90:94:e4:23:13:e0,192.168.0.32,private,admin,password,D-Link_DGS3650
+90:94:e4:23:0b:00,192.168.0.33,private,admin,password,D-Link_DGS3650
+90:94:e4:23:0b:20,192.168.0.34,private,admin,password,D-Link_DGS3650

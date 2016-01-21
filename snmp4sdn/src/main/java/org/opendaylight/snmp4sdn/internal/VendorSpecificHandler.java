@@ -88,7 +88,7 @@ public class VendorSpecificHandler implements CommandProvider{
             }
         }
 
-        logger.debug("ERROR: getSwitchFunctionConfig(): can't find the config for switch {} function_name {}", modelName, funcName);
+        logger.debug("INFO: getSwitchFunctionConfig(): can't find the config for switch {} function_name {}", modelName, funcName);
         return null;
     }
 
@@ -115,8 +115,8 @@ public class VendorSpecificHandler implements CommandProvider{
     public Status addVLANandSetPorts(long nodeID, String vlanName, int vlanID, int taggedPortList[], int untaggedPortList[]){
         Element funcCfg = getSwitchFunctionConfig(nodeID, VsFunctionName.addVLANandSetPorts);
         if(funcCfg == null){
-            logger.debug("ERROR: addVLANandSetPorts(): for setting nodeID {} vlanID {}, call getSwitchFunctionConfig(), given nodeID {} and function name {}, fail", nodeID, vlanID, nodeID, VsFunctionName.addVLANandSetPorts);
-            return new Status(StatusCode.INTERNALERROR, "ERROR");
+            logger.debug("INFO: addVLANandSetPorts(): for setting nodeID {} vlanID {}, call getSwitchFunctionConfig(), given nodeID {} and function name {}, fail (may mean the configuration is not provided)", nodeID, vlanID, nodeID, VsFunctionName.addVLANandSetPorts);
+            return new Status(StatusCode.UNSUPPORTED, "INFO: addVLANandSetPorts(): vendor-specific configuration of " + VsFunctionName.addVLANandSetPorts + " for node " + nodeID + " is not provided");
         }
 
             String channel = funcCfg.elementText("channel");

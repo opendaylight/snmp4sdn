@@ -1,0 +1,281 @@
+<VsConfig>
+
+<SwitchConfig>
+    <model>D-Link_DGS-3650</model>
+    <port_number>24</port_number><!--generic ports-->
+    <login><!--CLI login-->
+        <channel>telnet</channel>
+        <prompt_in_order><!--TODO: if the xml parser can correctly read items in order, we don't need the <order> item-->
+            <prompt>
+                <order>1</order>
+                <prompt_string>UserName:</prompt_string>
+            </prompt>
+            <prompt>
+                <order>2</order>
+                <prompt_string>PassWord:</prompt_string>
+            </prompt>
+            <prompt>
+                <order>3</order>
+                <prompt_string>admin#</prompt_string>
+            </prompt>
+        </prompt_in_order>
+    </login>
+
+    <!--add_vlan_and_set_port-->
+    <FunctionConfig>
+        <function_name>add_vlan_and_set_port</function_name>
+        <channel>snmp</channel>
+        <commands_with_items_in_order>
+            <command>${vlan_name}$${egress_ports}$${untagged_ports}$${vlan_create}$</command>
+        </commands_with_items_in_order>
+    </FunctionConfig>
+
+    <!--create_acl_profile-->
+    <FunctionConfig>
+        <function_name>create_acl_profile</function_name>
+        <channel>telnet</channel>
+        <command>
+            <layer>mac</layer>
+            <cmd>
+                create access_profile profile_id ${profile_id}$ profile_name ${profile_name}$ ethernet {vlan ${vlan_mask}$ | source_mac_mask ${src_mac_mask}$ | destination_mac_mask ${dest_mac_mask}$}
+             </cmd>
+        </command>
+        <command>
+            <layer>ip</layer>
+            <cmd>
+                create access_profile {profile_id ${profile_id} | $ profile_name ${profile_name}$} ip {vlan ${vlan_mask}$ | source_ip_mask ${src_ip_mask}$ | destination_ip_mask ${dest_ip_mask}$}
+            </cmd>
+        </command>        
+    </FunctionConfig>
+
+    <!--delete_acl_profile-->
+    <FunctionConfig>
+        <function_name>delete_acl_profile</function_name>
+        <channel>telnet</channel>
+        <type>2</type>
+        <command>
+            delete access_profile {profile_id ${profile_id}$ | profile_name ${profile_name}$}
+        </command>        
+    </FunctionConfig>
+
+    <!--clear_acl_profile-->
+    <FunctionConfig>
+        <function_name>clear_acl_profile</function_name>
+        <channel>telnet</channel>
+        <command>
+            delete access_profile all
+        </command>        
+    </FunctionConfig>
+
+    <!--set_acl_rule-->
+    <FunctionConfig>
+        <function_name>set_acl_rule</function_name>
+        <channel>telnet</channel>
+        <permit_tag>permit</permit_tag>
+        <deny_tag>deny</deny_tag>
+        <command>
+            <layer>mac</layer>
+            <cmd>
+                config access_profile {profile_id ${profile_id}$} ethernet {vlan_id ${vlan_id}$ [mask ${vlan_mask]$} | source_mac ${src_mac_addr}$ | destination_mac ${dest_mac_addr}$ | 802.1p | ethernet_type ${ethernet_type}$ ${permit_or_deny}$
+                <!--complete command string is as follows, we neglect some attibutes in the comman string above:
+                config access_profile {profile_id ${profile_id}$ | profile_name ${profile_name}$} [add access_id {${access_id}$ | auto_assign}] ethernet {{vlan ${vlan_name}$ | vlan_id ${vlan_id}$} [mask ${vlan_mask}$] | source_mac ${src_mac_addr}$ | destination_mac ${dest_mac_addr}$ | 802.1p | ethernet_type ${ethernet_type}$ ${permit_or_deny}$
+                -->
+            </cmd>
+        </command>
+        <command>
+            <layer>ip</layer>
+            <cmd>
+                ...
+            </cmd>
+        </command>
+        <command>
+            <layer>ipv6</layer>
+            <cmd>
+                ...
+            </cmd>
+        </command>
+    </FunctionConfig>
+
+    <!--set_acl_rule (multiple levels example)-->
+    <FunctionConfig>
+        <function_name>set_acl_rule (multiple levels)</function_name>
+        <channel>telnet</channel>
+        <levels>3</levels>
+        <permit_tag>permit</permit_tag>
+        <deny_tag>deny</deny_tag>
+        
+        <!--level 1 command-->
+        <command>
+            <level>1</level>
+            <cmd>
+                config
+            </cmd>
+        </command>
+
+        <!--level 2 command-->
+        <command>
+            <level>2</level>
+            <layer>mac</layer>
+            <cmd>
+                mac access-list ${access-list-name}$ ...
+            </cmd>
+        </command>
+        <command>
+            <level>2</level>
+            <layer>ip</layer>
+            <cmd>
+                ip access-list ${access-list-name}$ ...
+            </cmd>
+        </command>
+        <command>
+            <level>2</level>
+            <layer>ipv6</layer>
+            <cmd>
+                ipv6 access-list ${access-list-name}$ ...
+            </cmd>
+        </command>
+
+        <!--level 3 command-->
+        <command>
+            <level>3</level>
+            <layer>mac</layer>
+            <cmd>
+                ...
+            </cmd>
+        </command>
+        <command>
+            <level>3</level>
+            <layer>ip</layer>
+            <cmd>
+                ${permit_or_deny}$ ip {${src_ip_addr}$ [${ip_mask}$] | any}
+            </cmd>
+        </command>
+        <command>
+            <level>3</level>
+            <layer>ipv6</layer>
+            <cmd>
+                ...
+            </cmd>
+        </command>
+    </FunctionConfig>
+
+    <!--delete_acl_rule (two level example)-->
+    <FunctionConfig>
+        <function_name>delete_acl_rule (two level)</function_name>
+        <channel>telnet</channel>
+        <!--
+            type:
+                1: In Level 1 set profile (whether exists or not), level 2 set rule
+                2: No multiple levels. Profile exists, then set rule
+            tag:
+                permit_tag
+                deny_tag
+        -->
+        ...
+    </FunctionConfig>
+</SwitchConfig>
+
+
+<SwitchConfig>
+    <model>D-Link_DGS-3120</model>
+    <port_number>24</port_number><!--generic ports--><!-- with Dell switch, we found some OIDs returns many port entries, much more than physical port number-->
+
+    <FunctionConfig>
+        <function_name>add_vlan_and_set_port</function_name>
+        <channel>snmp</channel>
+        <commands_with_items_in_order>
+            <command>${vlan_name}$${egress_ports}$${untagged_ports}$${vlan_create}$</command>
+        </commands_with_items_in_order>
+    </FunctionConfig>
+</SwitchConfig>
+
+
+<SwitchConfig>
+    <model>D-Link_DGS-1510-28X</model>
+    <port_number>24</port_number><!--generic ports--><!-- with Dell switch, we found some OIDs returns many port entries, much more than physical port number-->
+    <vlan_port_list_value_hex_string_length>96</vlan_port_list_value_hex_string_length><!--D-Link_DGS-1510-28X requires this for setting vlan port, but general switch may not-->
+
+    <FunctionConfig>
+        <function_name>add_vlan_and_set_port</function_name>
+        <channel>snmp</channel>
+        <commands_with_items_in_order>
+            <command>${vlan_name}$${egress_ports}$${untagged_ports}$${vlan_create}$</command>
+        </commands_with_items_in_order>
+    </FunctionConfig>
+</SwitchConfig>
+
+<SwitchConfig>
+    <model>Dell_PowerConnect-5548</model>
+    <port_number>48</port_number><!--generic ports-->
+    <login>
+        <channel>telnet</channel>
+        <prompt_in_order>
+            <prompt_number>4</prompt_number><!--TODO: do we need this item?-->
+            <prompt>
+                <order>1</order>
+                <prompt_string>"Password:"</prompt_string>
+                <send_string>${password}$</send_string>
+            </prompt>
+            <prompt>
+                <order>2</order>
+                <prompt_string>"console> "</prompt_string>
+                <send_string>"enable"</send_string>
+            </prompt>
+            <prompt>
+                <order>3</order>
+                <prompt_string>Password:</prompt_string>
+                <send_string>${password}$</send_string>
+            </prompt>
+            <prompt>
+                <order>4</order>
+                <prompt_string>"console# "</prompt_string>
+                <send_string></send_string>
+                <!--if <send_string> is not given, snmp4sdn automatically send an "\r\n"-->
+            </prompt>
+        </prompt_in_order>
+    </login>
+
+    <FunctionConfig><!--currently snmp4sdn can't support this switch to add vlan-->
+        <function_name>add_vlan_and_set_port</function_name>
+        <channel>snmp</channel>
+        <commands_with_items_in_order>
+            <command>${vlan_name}$${egress_ports}$${untagged_ports}$${vlan_create}$</command>
+        </commands_with_items_in_order>
+    </FunctionConfig>
+
+</SwitchConfig>
+
+
+<SwitchConfig>
+    <model>Accton_XXXX</model>
+    <port_number>24</port_number><!--generic ports-->
+
+    <FunctionConfig>
+        <function_name>add_vlan_and_set_port</function_name>
+        <channel>snmp</channel>
+        <commands_with_items_in_order>
+            <!--two commands in order: create vlan, then set parameters-->
+            <command>${vlan_create}$</command>
+            <command>${vlan_name}$${egress_ports}$${untagged_ports}$</command>
+        </commands_with_items_in_order>
+    </FunctionConfig>
+
+</SwitchConfig>
+
+<SwitchConfig>
+    <model>Inventec_ECS4610</model>
+    <port_number></port_number><!--generic ports-->
+
+    <FunctionConfig>
+        <function_name>add_vlan_and_set_port</function_name>
+        <channel>snmp</channel>
+        <commands_with_items_in_order>
+            <!--two commands in order: create vlan, then set parameters-->
+            <command>${vlan_create}$</command>
+            <command>${vlan_name}$${egress_ports}$${untagged_ports}$</command>
+        </commands_with_items_in_order>
+    </FunctionConfig>
+
+</SwitchConfig>
+
+</VsConfig>
