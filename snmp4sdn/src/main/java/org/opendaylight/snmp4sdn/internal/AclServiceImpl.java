@@ -372,9 +372,11 @@ public class AclServiceImpl implements AclService, CommandProvider{
             logger.debug("ERROR: delAclProfile(): given invalid nodeId {}", nodeId);
             return createDelAclProfileFailRpcResult();
         }
-        if(profileId < 0){//TODO1: profileId valid range? //TODO2:bug, using curl with only profileName, would fail here
-            logger.debug("ERROR: delAclProfile(): given invalid profileId {}", profileId);
-            return createDelAclProfileFailRpcResult();
+        if(profileId != null){
+            if(profileId < 0){//TODO1: profileId valid range?
+                logger.debug("ERROR: delAclProfile(): given invalid profileId {}", profileId);
+                return createDelAclProfileFailRpcResult();
+            }
         }
 
         //execute CLIHandler.delAclProfile()
