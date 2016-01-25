@@ -306,8 +306,9 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
                     Thread.sleep(100);
                 }catch(Exception e1){
                     logger.debug("DiscoveryTimerTask: run(): Thread.sleep() error: {}", e1);
+                    freeLocks();
+                    return;
                 }
-                continue;
             }
 
             checkTimeout();
@@ -1138,11 +1139,15 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
             edgeMap.remove(nodeConnector);
         }
 
+        //bug fix: we found a bug that we want to remove an PR1->SNMP2 edge, so the code below ("prodMap.remove(nodeConnector)") will do this. But, the code above ("edgeMap.remove(nodeConnector)") is also executed and remove an SNMP3->SNMP2 edge, which is wrong!
+        //so the solution should be: since we have another function, removeProdEdge(), we should remove SNMP-SNMP egde by here removeEdge(), and remove PR-SNMP edge by removeProdEdge()
+        //so we disable the code below
+        /*
         Set<NodeConnector> edgeKeySetPr = prodMap.keySet();//For PR edges
         if ((edgeKeySetPr != null) && (edgeKeySetPr.contains(nodeConnector))) {
             edge = prodMap.get(nodeConnector);
             prodMap.remove(nodeConnector);
-        }
+        }*/
 
         // notify Topology
         if (this.discoveryListener != null) {
@@ -1841,8 +1846,11 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
      *
      */
     void stop() {
-        shuttingDown = true;
-        //discoveryTimer.cancel();//snmp4sdn. OF's need
+        isDoingTopologyDiscovery = false;//in some code, including thread or timertask..., isDoingTopologyDiscovery is used to decide whether program keep going, so we set isDoingTopologyDiscovery as false to stop program going
+        //bug fix: when uninstall snmp4sdn plugin, a null exception occurs due to that in destroy() the linkupPendingMap is set as null, but linkupPendingMap is still used in the checkTimeout() which is called in DiscoveryTimerTask. So we should correctly cancel DiscoveryTimerTask first. To cancel DiscoveryTimerTask, just cancel discoveryTimer.
+        discoveryTimer.cancel();
+        doTopoDiscovTimer.cancel();
+        shuttingDown = true;//shuttingDown as true will make the following transmitThread stop (transmitThread wraps transmitThreadBody, transmitThreadBody is a DiscoveryTransmit. DiscoveryTransmit is about processing link-up event)
         transmitThread.interrupt();
     }
 
@@ -2673,7 +2681,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
                 logger.trace("updateProdEdgesAgainstKnownEdges(): removeEdge() for Edge {} is canceled due to the flag 'isNotifyCancelTopoDiscov' is on", kEdge);//lg.dbug-trc
                 break;
             }
-            removeEdge(kEdge.getHeadNodeConnector());
+            removeProdEdge(kEdge.getHeadNodeConnector());
         }
     }
 
