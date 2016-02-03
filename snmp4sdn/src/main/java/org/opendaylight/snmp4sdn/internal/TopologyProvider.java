@@ -19,6 +19,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.osgi.framework.BundleContext;
 
+import org.opendaylight.snmp4sdn.ITopologyService;
+import org.opendaylight.snmp4sdn.IInventoryProvider;
 import org.opendaylight.snmp4sdn.DiscoveryServiceAPI;
 
 import org.slf4j.Logger;
@@ -32,6 +34,8 @@ public class TopologyProvider implements BindingAwareProvider, AutoCloseable {
 
     TopologyImpl topoImpl;
 
+    private ITopologyService topo = null;
+    private IInventoryProvider inv = null;
     private DiscoveryServiceAPI service = null;
 
     public TopologyProvider() {
@@ -108,6 +112,34 @@ public class TopologyProvider implements BindingAwareProvider, AutoCloseable {
         if(hasAllDependencies()) {
             this.broker.registerProvider(this,context);
         }
+    }
+
+    public void setTopologyServiceShim(ITopologyService topo) {
+        if(topo == null)
+            logger.debug("ERROR: TopologyServiceImpl: setTopologyServiceShim(): given null ITopologyService");
+        this.topo = topo;
+    }
+
+    public void unsetTopologyServiceShim(ITopologyService topo) {
+        if (this.topo == topo) {
+            this.topo = null;
+        }
+        else
+            logger.debug("ERROR: TopologyServiceImpl: unsetTopologyServiceShim(): given ITopologyService is not the local one");
+    }
+
+    public void setInventoryService(IInventoryProvider inv) {
+        if(inv == null)
+            logger.debug("ERROR: TopologyServiceImpl: setInventoryService(): given null IInventoryProvider");
+        this.inv = inv;
+    }
+
+    public void unsetInventoryService(IInventoryProvider inv) {
+        if (this.inv == inv) {
+            this.inv = null;
+        }
+        else
+            logger.debug("ERROR: TopologyServiceImpl: unsetInventoryService(): given IInventoryProvider is not the local one");
     }
 
     public void setDiscoveryService(DiscoveryServiceAPI service) {

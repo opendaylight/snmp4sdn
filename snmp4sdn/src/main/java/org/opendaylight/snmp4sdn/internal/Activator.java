@@ -40,6 +40,7 @@ import org.opendaylight.controller.protocol_plugin.openflow.core.internal.Contro
     import org.opendaylight.snmp4sdn.IPluginReadServiceFilter;
     import org.opendaylight.snmp4sdn.IRefreshInternalProvider;
     import org.opendaylight.snmp4sdn.IStatisticsListener;
+    import org.opendaylight.snmp4sdn.ITopologyService;
     import org.opendaylight.snmp4sdn.ITopologyServiceShimListener;
     import org.opendaylight.snmp4sdn.DiscoveryServiceAPI;
     import org.opendaylight.snmp4sdn.core.IController;
@@ -397,6 +398,12 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
         if (imp == topo) {
             c.add(createServiceDependency().setService(BindingAwareBroker.class)
                     .setCallbacks("setBroker", "unsetBroker").setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(ITopologyService.class)
+                    .setCallbacks("setTopologyServiceShim", "unsetTopologyServiceShim").setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(IInventoryProvider.class)
+                    .setCallbacks("setInventoryService", "unsetInventoryService").setRequired(true));
             c.add(createServiceDependency()
                     .setService(DiscoveryServiceAPI.class/*, "(name=XXX)"*/)/*Memo: name=XXX was given, then setService() fails!*/
                     .setCallbacks("setDiscoveryService", "unsetDiscoveryService").setRequired(true));
