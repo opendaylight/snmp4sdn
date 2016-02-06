@@ -67,7 +67,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
 
     private ITopologyService topo = null;
     private IInventoryProvider inv = null;
-    private DiscoveryServiceAPI service = null;
+    private DiscoveryServiceAPI discov = null;
 
     /**
      * Function called by the dependency manager when all the required
@@ -87,7 +87,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
 
     public void setTopologyServiceShim(ITopologyService topo) {
         if(topo == null)
-            logger.debug("ERROR: TopologyServiceImpl: setTopologyServiceShim(): given null ITopologyService");
+            logger.debug("ERROR: setTopologyServiceShim(): given null ITopologyService");
         this.topo = topo;
     }
 
@@ -96,12 +96,12 @@ public class TopologyImpl implements TopologyService, CommandProvider{
             this.topo = null;
         }
         else
-            logger.debug("ERROR: TopologyServiceImpl: unsetTopologyServiceShim(): given ITopologyService is not the local one");
+            logger.debug("ERROR: unsetTopologyServiceShim(): given ITopologyService is not the local one");
     }
 
     public void setInventoryService(IInventoryProvider inv) {
         if(inv == null)
-            logger.debug("ERROR: TopologyServiceImpl: setInventoryService(): given null IInventoryProvider");
+            logger.debug("ERROR: setInventoryService(): given null IInventoryProvider");
         this.inv = inv;
     }
 
@@ -110,17 +110,21 @@ public class TopologyImpl implements TopologyService, CommandProvider{
             this.inv = null;
         }
         else
-            logger.debug("ERROR: TopologyServiceImpl: unsetInventoryService(): given IInventoryProvider is not the local one");
+            logger.debug("ERROR: unsetInventoryService(): given IInventoryProvider is not the local one");
     }
 
-    public void setDiscoveryService(DiscoveryServiceAPI service) {
-        this.service = service;
+    public void setDiscoveryService(DiscoveryServiceAPI discov) {
+        if(discov == null)
+            logger.debug("ERROR: setDiscoveryService(): given null DiscoveryServiceAPI");
+        this.discov = discov;
     }
 
-    public void unsetDiscoveryService(DiscoveryServiceAPI service) {
-        if (this.service == service) {
-            this.service = null;
+    public void unsetDiscoveryService(DiscoveryServiceAPI discov) {
+        if (this.discov == discov) {
+            this.discov = null;
         }
+        else
+            logger.debug("ERROR: unsetDiscoveryService(): given DiscoveryServiceAPI is not the local one");
     }
 
     private Future<RpcResult<GetEdgeListOutput>> createGetEdgeListFailRpcResult(){
@@ -536,7 +540,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
 
         logger.info("SNMP4SDN: Receive the Topology Discovery request!");
 
-        boolean isSuccess = service.doTopologyDiscovery();
+        boolean isSuccess = discov.doTopologyDiscovery();
         if(isSuccess){
             RediscoverOutputBuilder ob = new RediscoverOutputBuilder().setRediscoverResult(Result.SUCCESS);
             RpcResult<RediscoverOutput> rpcResult =
@@ -571,7 +575,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
         }
 
         //set the interval, return success
-        service.setPeriodicTopologyDiscoveryIntervalTime(interval.intValue());
+        discov.setPeriodicTopologyDiscoveryIntervalTime(interval.intValue());
 
         logger.info("SNMP4SDN: Periodic Topology Discovery interval time has been set as {} second", interval);
 
