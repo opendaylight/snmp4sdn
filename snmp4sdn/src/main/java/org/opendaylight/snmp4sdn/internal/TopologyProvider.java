@@ -34,9 +34,10 @@ public class TopologyProvider implements BindingAwareProvider, AutoCloseable {
 
     TopologyImpl topoImpl;
 
-    private ITopologyService topo = null;
+    //no need to maintain them here, directly pass them to topoImpl
+    /*private ITopologyService topo = null;
     private IInventoryProvider inv = null;
-    private DiscoveryServiceAPI service = null;
+    private DiscoveryServiceAPI service = null;*/
 
     public TopologyProvider() {
         topoImpl = new TopologyImpl();
@@ -116,42 +117,32 @@ public class TopologyProvider implements BindingAwareProvider, AutoCloseable {
 
     public void setTopologyServiceShim(ITopologyService topo) {
         if(topo == null)
-            logger.debug("ERROR: TopologyServiceImpl: setTopologyServiceShim(): given null ITopologyService");
-        this.topo = topo;
+            logger.debug("ERROR: setTopologyServiceShim(): given null ITopologyService");
+        topoImpl.setTopologyServiceShim(topo);
     }
 
     public void unsetTopologyServiceShim(ITopologyService topo) {
-        if (this.topo == topo) {
-            this.topo = null;
-        }
-        else
-            logger.debug("ERROR: TopologyServiceImpl: unsetTopologyServiceShim(): given ITopologyService is not the local one");
+        topoImpl.unsetTopologyServiceShim(topo);
     }
 
     public void setInventoryService(IInventoryProvider inv) {
         if(inv == null)
-            logger.debug("ERROR: TopologyServiceImpl: setInventoryService(): given null IInventoryProvider");
-        this.inv = inv;
+            logger.debug("ERROR: setInventoryService(): given null IInventoryProvider");
+        topoImpl.setInventoryService(inv);
     }
 
     public void unsetInventoryService(IInventoryProvider inv) {
-        if (this.inv == inv) {
-            this.inv = null;
-        }
-        else
-            logger.debug("ERROR: TopologyServiceImpl: unsetInventoryService(): given IInventoryProvider is not the local one");
+        topoImpl.unsetInventoryService(inv);
     }
 
-    public void setDiscoveryService(DiscoveryServiceAPI service) {
-        this.service = service;
-        topoImpl.setDiscoveryService(service);
+    public void setDiscoveryService(DiscoveryServiceAPI discov) {
+        if(discov == null)
+            logger.debug("ERROR: setDiscoveryService(): given null DiscoveryServiceAPI");
+        topoImpl.setDiscoveryService(discov);
     }
 
-    public void unsetDiscoveryService(DiscoveryServiceAPI service) {
-        if (this.service == service) {
-            this.service = null;
-            topoImpl.unsetDiscoveryService(service);
-        }
+    public void unsetDiscoveryService(DiscoveryServiceAPI discov) {
+        topoImpl.unsetDiscoveryService(discov);
     }
 
 }
