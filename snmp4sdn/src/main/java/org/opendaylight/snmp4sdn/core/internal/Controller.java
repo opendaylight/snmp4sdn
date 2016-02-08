@@ -469,6 +469,11 @@ public class Controller implements IController, ICore, CommandProvider {
     }
 
     @Override//karaf
+    public void printDB(){
+        cmethUtil.printDB();
+    }
+
+    @Override//karaf
     public void topoDiscover(){
         int count = 0;
         while(switchStateListener == null){
@@ -491,6 +496,31 @@ public class Controller implements IController, ICore, CommandProvider {
         //TODO Issue: in topologyDiscoverSwitchesAndPorts(), new port triggers edges discovery, but maybe due to the racing of 'new port' and 'detected edge's remote port not yet detected", which cause discovery completion delay (with retry mechanism in DiscoveryService, finally complete discovery). So we also directly do topologyDiscoverEdges() to finish.
         //TODO: if the issue sovled, remember to modify topoDiscover() accordingly
     }
+
+    @Override//karaf
+    //Just copy topoDiscover()'s code, but remove calling the topologyDiscoverEdges()
+    public void topoDiscoverSwitch(){
+        int count = 0;
+        while(switchStateListener == null){
+            try{
+                logger.info("\nTopology Discovery halts, waiting for related modules to be ready, then can proceed\n");
+                Thread.sleep(1000);
+                count += 1;
+                if(count > 20){
+                    logger.info("\nTimeout of Topology Discovery waiting for related modules to be ready, cancel Topology Discovery\n");
+                    break;
+                }
+            }catch(Exception e1){
+                logger.debug("ERROR: topoDiscover(): Thread.sleept() error: {}", e1);
+            }
+        }
+        switchStateListener.disableNewInventoryTriggerDiscovery();
+        topologyDiscoverSwitchesAndPorts();
+        switchStateListener.enableNewInventoryTriggerDiscovery();
+        //TODO Issue: in topologyDiscoverSwitchesAndPorts(), new port triggers edges discovery, but maybe due to the racing of 'new port' and 'detected edge's remote port not yet detected", which cause discovery completion delay (with retry mechanism in DiscoveryService, finally complete discovery). So we also directly do topologyDiscoverEdges() to finish.
+        //TODO: if the issue sovled, remember to modify topoDiscover() accordingly
+    }
+
 
     @Override//karaf
     public void topoDiscoverEdge(){

@@ -12,13 +12,13 @@ import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.opendaylight.snmp4sdn.ICore;
 
-@Command(scope = "snmp4sdn", name = "TopoDiscoverSwitches", description="Inventory discovery (collect switches and ports)")
-public class TopoDiscoverSwitch extends OsgiCommandSupport{
+@Command(scope = "snmp4sdn", name = "TopoDiscover", description="Topology Discovery for Inventory and Edge, i.e. execute the two commands 'TopoDiscoverSwitches' and 'TopoDiscoverEdges' (collect switches, ports, and edges among switches)")
+public class TopoDiscover extends OsgiCommandSupport{
     private ICore controller;
 
     @Override
     protected Object doExecute() throws Exception {
-        controller.topoDiscoverSwitch();
+        controller.topoDiscover();
         return null;
     }
 
