@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014 Industrial Technology Research Institute of Taiwan. All rights reserved.
+ * Copyright (c) 2015 Industrial Technology Research Institute of Taiwan. All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -12,13 +12,13 @@ import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.opendaylight.snmp4sdn.ICore;
 
-@Command(scope = "snmp4sdn", name = "TopoDiscoverSwitches", description="Inventory discovery (collect switches and ports)")
-public class TopoDiscoverSwitch extends OsgiCommandSupport{
+@Command(scope = "snmp4sdn", name = "PrintDB", description="Read the switch list file")
+public class PrintDB extends OsgiCommandSupport{
     private ICore controller;
 
     @Override
     protected Object doExecute() throws Exception {
-        controller.topoDiscoverSwitch();
+        controller.printDB();
         return null;
     }
 

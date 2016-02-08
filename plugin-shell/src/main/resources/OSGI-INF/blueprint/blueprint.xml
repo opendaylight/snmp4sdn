@@ -7,6 +7,16 @@
           </action>
         </command>
         <command>
+          <action class="org.opendaylight.snmp4sdn.shell.PrintDB">
+            <property name="controller" ref="snmp4sdnICoreRef"/>
+          </action>
+        </command>
+        <command>
+          <action class="org.opendaylight.snmp4sdn.shell.TopoDiscover">
+            <property name="controller" ref="snmp4sdnICoreRef"/>
+          </action>
+        </command>
+        <command>
           <action class="org.opendaylight.snmp4sdn.shell.TopoDiscoverSwitch">
             <property name="controller" ref="snmp4sdnICoreRef"/>
           </action>
@@ -16,23 +26,5 @@
             <property name="controller" ref="snmp4sdnICoreRef"/>
           </action>
         </command>
-        <!-- Deprecated. The following methods are privided with VLAN Serivice's MD-SAL now-->
-        <!--
-        <command>
-          <action class="org.opendaylight.snmp4sdn.shell.AddVLANSetPorts">
-            <property name="controller" ref="snmp4sdnICoreRef"/>
-          </action>
-        </command>
-        <command>
-          <action class="org.opendaylight.snmp4sdn.shell.DeleteVlan">
-            <property name="controller" ref="snmp4sdnICoreRef"/>
-          </action>
-        </command>
-        <command>
-          <action class="org.opendaylight.snmp4sdn.shell.PrintVlanTable">
-            <property name="controller" ref="snmp4sdnICoreRef"/>
-          </action>
-        </command>
-        -->
     </command-bundle>
 </blueprint>
