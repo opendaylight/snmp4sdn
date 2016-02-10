@@ -15,6 +15,7 @@ import org.osgi.framework.FrameworkUtil;
 
 import org.opendaylight.snmp4sdn.protocol.util.HexString;
 
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.util.concurrent.ConcurrentHashMap;
@@ -108,6 +109,9 @@ public class CmethUtil implements CommandProvider{
 
             addEntry(HexString.toLong(mac), ip, snmp_community, cli_username, cli_password, model);
         }
+        }catch(FileNotFoundException e){
+            logger.info("CmethUtil.readDB() fail: {}", e.getMessage());
+            return false;
         }catch(Exception e){
             logger.info("CmethUtil.readDB() fail: {}", e);
             return false;
