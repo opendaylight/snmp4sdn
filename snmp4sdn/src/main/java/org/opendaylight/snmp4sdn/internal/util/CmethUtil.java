@@ -64,6 +64,13 @@ public class CmethUtil implements CommandProvider{
         try{
         logger.info("open file " + dbPath);//  "/home/christine/snmp4sdn/snmp4sdn/src/test/switch_login_db.csv"
         FileReader FileStream=new FileReader(dbPath); //"/home/christine/snmp4sdn/snmp4sdn/src/test/switch_login_db.csv"
+
+        }catch(Exception e){
+            logger.info("CmethUtil.readDB() fail: {}", e.getMessage());
+            return false;
+        }
+
+        try{
         BufferedReader BufferedStream=new BufferedReader(FileStream);
         String line;
 
