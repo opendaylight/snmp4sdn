@@ -109,7 +109,7 @@ public class CmethUtil implements CommandProvider{
             addEntry(HexString.toLong(mac), ip, snmp_community, cli_username, cli_password, model);
         }
         }catch(Exception e){
-            logger.info("CmethUtil.readDB() fail: {}", e);
+            logger.info("CmethUtil.readDB() fail: {}", e.getMessage());
             return false;
         }
 
