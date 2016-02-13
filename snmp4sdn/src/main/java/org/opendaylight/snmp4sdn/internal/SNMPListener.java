@@ -58,6 +58,7 @@ import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import java.net.SocketException;
 
 public class SNMPListener implements SNMPv2TrapListener, Runnable, CommandProvider{
     private static final Logger logger = LoggerFactory
@@ -95,13 +96,15 @@ public class SNMPListener implements SNMPv2TrapListener, Runnable, CommandProvid
 
     private static int recvTrapNum = 0;
 
-    public SNMPListener(IController controller, CmethUtil cmethUtil){
+    public SNMPListener(IController controller, CmethUtil cmethUtil) {
         this.controller = controller;
         this.cmethUtil = cmethUtil;
         try{
             trapReceiverInterface = new SNMPTrapReceiverInterface(new PrintWriter(new PipedWriter(new PipedReader())));
             trapReceiverInterface.addv2TrapListener(this);
             trapReceiverInterface.startReceiving();
+        }catch(SocketException e){
+            logger.warn("Unable to Bind to SNMP Trap Port: {} " , e.getMessage());
         }catch(Exception e){
             logger.warn("Problem starting SNMP Trap Interface: {}" , e);
         }
