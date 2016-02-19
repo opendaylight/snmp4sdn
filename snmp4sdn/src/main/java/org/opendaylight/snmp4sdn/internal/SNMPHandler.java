@@ -2077,7 +2077,15 @@ public class SNMPHandler{
         }
 
         //logger.debug("Number of table entries: " + tableVars.size());
-        int tmpCount = 0;//TODO: tmpCount's init value is 0, based on that port number begins from 1. Always ok?
+        
+        /*
+         * Bug fix: the valid port number in tableVars does not begin from 1 always. And the valid port number in
+         * tableVars does not be continuous always.
+         * For example, as to a device whose model is H3C S6800-4C, when the second slot is used only, the valid port
+         * number in tableVars will be 33~57, 61, 26446. There are also other similar situations.
+         * In those cases, there will be some problems when using tmpCount for decision.
+         * */
+        //int tmpCount = 0;//TODO: tmpCount's init value is 0, based on that port number begins from 1. Always ok?
         for(int i = 0; i < tableVars.size(); i++){
             SNMPSequence pair = (SNMPSequence)(tableVars.getSNMPObjectAt(i));
             SNMPObjectIdentifier snmpOID = (SNMPObjectIdentifier)pair.getSNMPObjectAt(0);
@@ -2091,12 +2099,12 @@ public class SNMPHandler{
                 logger.debug("ERROR: readPortStateEntries(): for node {}, call retrievePortNumFromChassisOIDAtEnd(), given snmpOIDstr {}, fail", comInterface.getHostAddress(), snmpOIDstr);
                 return null;
             }
-            if(portNum != tmpCount + 1){
-                logger.trace("readPortStateEntries(): for node {}, the {} port state entries, port {} is followed by port {}, so skip the ports afterward", comInterface.getHostAddress(), tmpCount, portNum);
-                return table;
-            }
-            else
-                tmpCount = portNum;
+            //if(portNum != tmpCount + 1){
+            //    logger.trace("readPortStateEntries(): for node {}, the {} port state entries, port {} is followed by port {}, so skip the ports afterward", comInterface.getHostAddress(), tmpCount, portNum);
+            //    return table;
+            //}
+            //else
+            //    tmpCount = portNum;
 
             int valueInt = ((BigInteger)value.getValue()).intValue();
 
