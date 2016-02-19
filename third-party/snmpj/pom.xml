@@ -4,7 +4,7 @@
 
   <groupId>org.opendaylight.snmp4sdn</groupId>
   <artifactId>org.snmpj</artifactId>
-  <version>1.6.0-Beryllium</version>
+  <version>1.6.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>SNMP Java</name>
