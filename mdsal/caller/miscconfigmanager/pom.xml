@@ -8,12 +8,12 @@
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.snmp4sdn</artifactId>
-    <version>0.3.0-SNAPSHOT</version>
+    <version>0.3.0-Beryllium</version>
     <relativePath>../../../commons/snmp4sdn</relativePath>
   </parent>
   <artifactId>miscconfigmanager</artifactId>
   <packaging>bundle</packaging>
-  <version>0.3.0-SNAPSHOT</version>
+  <version>0.3.0-Beryllium</version>
 
   <name>miscconfig manager</name>
   <description>misc config manager, as a consumer of snmp4sdn, for demo snmp4sdn misc config service</description>
@@ -125,12 +125,12 @@
     <!--<dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>configmd-model</artifactId>
-      <version>0.2.0-SNAPSHOT</version>
+      <version>0.2.0-Beryllium</version>
     </dependency>--><!--this bundle is packaged in 'md-model'-->
     <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>md-model</artifactId>
-      <version>0.3.0-SNAPSHOT</version>
+      <version>0.3.0-Beryllium</version>
     </dependency>
   </dependencies>
 </project>
