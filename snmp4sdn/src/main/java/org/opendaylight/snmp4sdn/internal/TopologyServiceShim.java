@@ -63,7 +63,7 @@ import org.opendaylight.controller.sal.utils.GlobalConstants;
 public class TopologyServiceShim implements IDiscoveryListener,
         IContainerListener, CommandProvider, IRefreshInternalProvider,
         IInventoryShimExternalListener, IContainerAware, ITopologyService {
-    protected static final Logger logger = LoggerFactory
+    protected static final jdk.internal.instrumentation.Logger logger = LoggerFactory
             .getLogger(TopologyServiceShim.class);
     private ConcurrentMap<String, ITopologyServiceShimListener> topologyServiceShimListeners = new ConcurrentHashMap<String, ITopologyServiceShimListener>();
     private ConcurrentMap<NodeConnector, List<String>> containerMap = new ConcurrentHashMap<NodeConnector, List<String>>();
@@ -135,8 +135,19 @@ public class TopologyServiceShim implements IDiscoveryListener,
                     if (notifyListeners) {
                         for (String container : teuMap.keySet()) {
                             // notify the listener
-                            topologyServiceShimListeners.get(container)
-                                    .edgeUpdate(teuMap.get(container));
+
+                        	// For Bug 4559
+                        	ITopologyServiceShimListener listener = topologyServiceShimListeners.get(container);
+
+                        	if (listener == null) {
+                        		logger.debug("TopologyNotify.run: Has gotten a null topology service shim listener "
+                        				+ "for [{}]", container);
+                        	} else {
+                        		listener.edgeUpdate(teuMap.get(container));
+                        		logger.debug("TopologyNotify.run: Has notified listener [{}] for [{}]",
+                        				listener, container);
+                        	}
+
                         }
                     }
 
