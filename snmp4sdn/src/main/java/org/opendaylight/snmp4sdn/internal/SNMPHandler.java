@@ -4438,7 +4438,16 @@ public class SNMPHandler{
     }
 
     private List<ARPTableEntry> getARPTableFromSwitch(SNMPv1CommunicationInterface comInterface){
-        String oid = arpTableEntryPhyAddrOID + "." + midStuffForArpTableEntryOID;
+        /*
+        * Fix Bug 5438: Result of calling rpc get-arp-table defined in misc-config.yang is false.
+        * The middle stuff between "1.3.6.1.2.1.4.22.1.2" and ip address in snmpOID is not 5121 always.
+        * For example, one actual snmpOID is "1.3.6.1.2.1.4.22.1.2.17.17.0.0.105".
+        * But the middle stuff is 17, not 5121.
+        * And the ip address is 17.0.0.105 .
+        * */
+        //String oid = arpTableEntryPhyAddrOID + "." + midStuffForArpTableEntryOID;
+        String oid = arpTableEntryPhyAddrOID;
+
         SNMPVarBindList tableVars;
 
         try{
@@ -4478,6 +4487,7 @@ public class SNMPHandler{
                                     comInterface.getHostAddress());
                 return null;
             }
+
             SNMPObjectIdentifier snmpOID = (SNMPObjectIdentifier)pair.getSNMPObjectAt(0);
             if(pair.getSNMPObjectAt(1).getClass() == SNMPUnknownObject.class){
                 logger.debug("ERROR: getARPTableFromSwitch(): requests arp entry for node {} fails",
@@ -4489,7 +4499,18 @@ public class SNMPHandler{
 
             ARPTableEntry entry = new ARPTableEntry();
             String snmpOIDStr = snmpOID.toString();
-            String ipAddress = snmpOIDStr.substring(oid.length() + 1);
+
+            /*
+            * Fix Bug 5438: Result of calling rpc get-arp-table defined in misc-config.yang is false.
+            * For example, one actual value of variable _ipAddress is 17.17.0.0.105 .
+            * But it is not an ip address.
+            * So we have to extract the actual ip address from _ipAddress again. 
+            * */
+            //String ipAddress = snmpOIDStr.substring(oid.length() + 1);
+            String _ipAddress = snmpOIDStr.substring(oid.length() + 1);
+            int index = _ipAddress.indexOf(".");
+            String ipAddress = _ipAddress.substring(index + 1);
+
             entry.ipAddress = new String(ipAddress);
             String macAddrStr = HexString.toHexString(valueBytes);
             entry.macAddress = HexString.toLong(macAddrStr);
