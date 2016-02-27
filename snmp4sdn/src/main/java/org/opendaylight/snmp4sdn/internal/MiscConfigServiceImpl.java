@@ -1117,45 +1117,68 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
 
     //md-sal
     @Override
-    public Future<RpcResult<GetArpTableOutput>> getArpTable(GetArpTableInput input){
+    public Future<RpcResult<GetArpTableOutput>> getArpTable(GetArpTableInput input) {
+        /*
+        * Fix Bug 5438: Result of calling rpc get-arp-table defined in misc-config.yang is false.
+        * */
+        GetArpTableOutputBuilder ob = new GetArpTableOutputBuilder();
+        List<ArpTableEntry> arpTable = new ArrayList<ArpTableEntry>();
+
         //check null input parameters
-        if(input == null){
+        if (input == null) {
             logger.debug("ERROR: getArpTable(): given null input");
-            return null;
+
+            ob.setArpTableEntry(arpTable);
+            RpcResult<GetArpTableOutput> rpcResult = Rpcs.<GetArpTableOutput> getRpcResult(true,
+                    ob.build(), Collections.<RpcError>emptySet());
+            return Futures.immediateFuture(rpcResult);
         }
+
         Long nodeId = input.getNodeId();
-        if(nodeId == null){
+        if (nodeId == null) {
             logger.debug("ERROR: getArpTable(): given nodeId is null");
-            return null;
+
+            ob.setArpTableEntry(arpTable);
+            RpcResult<GetArpTableOutput> rpcResult = Rpcs.<GetArpTableOutput> getRpcResult(true,
+                    ob.build(), Collections.<RpcError>emptySet());
+            return Futures.immediateFuture(rpcResult);
         }
 
         //create the node and check null
         Node node = createSNMPNode(nodeId.longValue());
-        if(node == null){
+        if (node == null) {
             logger.debug("ERROR: getArpTable(): call createSNMPNode() with nodeId {} fail", nodeId);
-            return null;
+
+            ob.setArpTableEntry(arpTable);
+            RpcResult<GetArpTableOutput> rpcResult = Rpcs.<GetArpTableOutput> getRpcResult(true,
+                    ob.build(), Collections.<RpcError>emptySet());
+            return Futures.immediateFuture(rpcResult);
         }
 
         //execute getARPTable   (Notice the ARP v.s. Arp !)
         List<ARPTableEntry> table = getARPTable(node);
-        if(table == null){
+        if (table == null) {
             logger.debug("ERROR: getArpTable(): call getARPTable() fail, nodeId {}", nodeId);
-            return null;
+
+            ob.setArpTableEntry(arpTable);
+            RpcResult<GetArpTableOutput> rpcResult = Rpcs.<GetArpTableOutput> getRpcResult(true,
+                    ob.build(), Collections.<RpcError>emptySet());
+            return Futures.immediateFuture(rpcResult);
         }
 
         //prepare the arp table to return
         List<ArpTableEntry> retTable = new ArrayList<ArpTableEntry>();
-        for(ARPTableEntry entry:table){
-            ArpTableEntryBuilder entryBuilder = new ArpTableEntryBuilder().setIpAddress(entry.ipAddress).setMacAddress(entry.macAddress);
+        for (ARPTableEntry entry : table) {
+            ArpTableEntryBuilder entryBuilder = new ArpTableEntryBuilder()
+                    .setIpAddress(entry.ipAddress)
+                    .setMacAddress(entry.macAddress);
             ArpTableEntry retEntry = entryBuilder.build();
             retTable.add(retEntry);
         }
-        GetArpTableOutputBuilder ob = new GetArpTableOutputBuilder().setArpTableEntry(retTable);
 
-        RpcResult<GetArpTableOutput> rpcResult =
-                    Rpcs.<GetArpTableOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-        List<ArpTableEntry> tmplist = rpcResult.getResult().getArpTableEntry();
+        ob.setArpTableEntry(retTable);
+        RpcResult<GetArpTableOutput> rpcResult = Rpcs.<GetArpTableOutput> getRpcResult(true,
+                ob.build(), Collections.<RpcError> emptySet());
         return Futures.immediateFuture(rpcResult);
     }
 
