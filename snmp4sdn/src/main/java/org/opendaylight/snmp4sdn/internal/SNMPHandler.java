@@ -4438,7 +4438,14 @@ public class SNMPHandler{
     }
 
     private List<ARPTableEntry> getARPTableFromSwitch(SNMPv1CommunicationInterface comInterface){
-        String oid = arpTableEntryPhyAddrOID + "." + midStuffForArpTableEntryOID;
+        /*
+        * Fix Bug 5438:
+        * The middle stuff between "1.3.6.1.2.1.4.22.1.2" and ip address in snmpOID is not 5121 always.
+        * For example, the snmpOID is "1.3.6.1.2.1.4.22.1.2.17.17.0.0.105", so the middle stuff is 17.
+        * */
+        //String oid = arpTableEntryPhyAddrOID + "." + midStuffForArpTableEntryOID;
+        String oid = arpTableEntryPhyAddrOID;
+
         SNMPVarBindList tableVars;
 
         try{
@@ -4478,6 +4485,13 @@ public class SNMPHandler{
                                     comInterface.getHostAddress());
                 return null;
             }
+
+            /*
+            * One actual example of snmpOID is "1.3.6.1.2.1.4.22.1.2.17.17.0.0.105".
+            * The arpTableEntryPhyAddrOID is "1.3.6.1.2.1.4.22.1.2".
+            * The middle stuff is 17, so it is not 5121 always.
+            * The ip address is 17.0.0.105.
+            * */
             SNMPObjectIdentifier snmpOID = (SNMPObjectIdentifier)pair.getSNMPObjectAt(0);
             if(pair.getSNMPObjectAt(1).getClass() == SNMPUnknownObject.class){
                 logger.debug("ERROR: getARPTableFromSwitch(): requests arp entry for node {} fails",
@@ -4485,11 +4499,21 @@ public class SNMPHandler{
                 return null;
             }
             SNMPOctetString value = (SNMPOctetString)pair.getSNMPObjectAt(1);
+
+            //for example, valueBytes is {0,12,41,97,-18,107} . It represents mac address of "00:0c:29:61:ee:6b".
             byte[] valueBytes = (byte[])value.getValue();
 
             ARPTableEntry entry = new ARPTableEntry();
             String snmpOIDStr = snmpOID.toString();
-            String ipAddress = snmpOIDStr.substring(oid.length() + 1);
+
+            /*
+            * Fix Bug 5438:
+            * for example, _ipAddress is "17.17.0.0.105", and it is not an ip address. */
+            //String ipAddress = snmpOIDStr.substring(oid.length() + 1);
+            String _ipAddress = snmpOIDStr.substring(oid.length() + 1);
+            int index = _ipAddress.indexOf(".");
+            String ipAddress = _ipAddress.substring(index + 1);
+
             entry.ipAddress = new String(ipAddress);
             String macAddrStr = HexString.toHexString(valueBytes);
             entry.macAddress = HexString.toLong(macAddrStr);
