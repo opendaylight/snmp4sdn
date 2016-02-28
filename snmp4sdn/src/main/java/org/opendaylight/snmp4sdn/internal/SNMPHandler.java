@@ -4006,62 +4006,38 @@ public class SNMPHandler{
     }
 
     private ARPTableEntry getARPEntryFromSwitch(SNMPv1CommunicationInterface comInterface, String ipAddress ){
-        String oid = arpTableEntryPhyAddrOID + "."
-                                + midStuffForArpTableEntryOID+ "." + ipAddress;
-        SNMPVarBindList newVars;
+        /*
+        * Fix bug 5367: exception error of rest api get-arp-entry due to OID incorrectness.
+        */
 
-        try{
-            newVars = comInterface.getMIBEntry(oid);
-        }catch(Exception e1){
-            logger.debug("ERROR: getARPEntryFromSwitch(): call SNMP getMIBEntry() fails, given node {} arp_entry_ip_addr {}: {}",
-                                comInterface.getHostAddress(), ipAddress, e1);
-            //TODO: call comInterface.closeConnection()? (An innter try..catch here?)
+        HashMap<String, Long> arpTable;
+
+        try {
+            arpTable = getARPTableMap(comInterface);
+        } catch (Exception e1) {
+            logger.debug("ERROR: getARPEntryFromSwitch(): call getARPTableMap fails, given node {} " +
+                            "arp_entry_ip_addr {}: {}", comInterface.getHostAddress(), ipAddress, e1);
             return null;
         }
 
-        try{
-            comInterface.closeConnection();
-        }
-        catch(SocketException e2){
-            logger.debug("ERROR: getARPEntryFromSwitch(), Exception during SNMPv1CommunicationInterface.closeConnection() for node {}: {}", comInterface.getHostAddress(), e2);
+        if (arpTable == null) {
+            logger.debug("ERROR: getARPEntryFromSwitch(): null in switch response content, given node {} " +
+                            "arp_entry_ip_addr {}: {}", comInterface.getHostAddress(), ipAddress);
             return null;
         }
 
-        if(newVars == null){
-            logger.debug("ERROR: getARPEntryFromSwitch(): null in switch response content, given node {} arp_entry_ip_addr {}: {}",
-                                comInterface.getHostAddress(), ipAddress);
-            return null;
-        }
-        if(newVars.getSNMPObjectAt(0) == null){
-            logger.debug("ERROR: getARPEntryFromSwitch(): null in switch response content, given node {} arp_entry_ip_addr {}: {}",
-                                comInterface.getHostAddress(), ipAddress);
-            return null;
-        }
-        SNMPSequence pair = (SNMPSequence)(newVars.getSNMPObjectAt(0));
-        if(pair.getSNMPObjectAt(1) == null){
-            logger.debug("ERROR: getARPEntryFromSwitch(): null in switch response content, given node {} arp_entry_ip_addr {}: {}",
-                                comInterface.getHostAddress(), ipAddress);
-            return null;
-        }
-        //SNMPObjectIdentifier snmpOID = (SNMPObjectIdentifier)pair.getSNMPObjectAt(0);
-        if(pair.getSNMPObjectAt(1).getClass() == SNMPUnknownObject.class){
-            logger.debug("ERROR: getARPEntryFromSwitch(): requests arp entry for node {} arp_entry_ip_addr {} fails",
-                                comInterface.getHostAddress(), ipAddress);
-            return null;
-        }
-        SNMPOctetString value = (SNMPOctetString)pair.getSNMPObjectAt(1);
-        byte[] valueBytes = (byte[])value.getValue();
+        Long macAddress = arpTable.get(ipAddress);
 
-        logger.trace("SNMPHandler.getARPEntryFromSwitch(node: {}, port: {})", comInterface.getHostAddress(), ipAddress);
-        logger.trace("\n[Send to switch]:\n  OID: {}\n    value = {}", oid, value.toString());
-        logger.trace("\n[Switch response]:\n  " + newVars.toString());
-
-        ARPTableEntry ret = new ARPTableEntry();
-        ret.ipAddress = new String(ipAddress);
-        String macAddrStr = HexString.toHexString(valueBytes);
-        ret.macAddress = HexString.toLong(macAddrStr);
-
-        return ret;
+        if (macAddress == null) {
+            logger.debug("ERROR: getARPEntryFromSwitch(): null in switch response content, given node {} " +
+                    "arp_entry_ip_addr {}: {}", comInterface.getHostAddress(), ipAddress);
+            return null;
+        } else {
+            ARPTableEntry result = new ARPTableEntry();
+            result.ipAddress = new String(ipAddress);
+            result.macAddress = macAddress.longValue();
+            return result;
+        }
     }
 
     public Status/*SNMP4SDNErrorCode*/ deleteARPTableEntry (long nodeID, String ipAddress){
@@ -4523,6 +4499,93 @@ public class SNMPHandler{
         logger.trace("\n[Switch response]:\n  " + tableVars.toString());
 
         return retList;
+    }
+
+
+    /**
+     * Fix bug 5367: exception error of rest api get-arp-entry due to OID incorrectness.
+     *
+     * This method is used to get a map according to the arp table on the specified switch.
+     * The key of the map is ip address, and the value of the map is mac address corresponding to the key.
+     *
+     * @author Nanfei Chen
+     */
+    private HashMap<String, Long> getARPTableMap(SNMPv1CommunicationInterface comInterface) {
+        String oid = arpTableEntryPhyAddrOID;
+        SNMPVarBindList tableVars;
+
+        try {
+            tableVars = comInterface.retrieveMIBTable(oid);
+        } catch (Exception e1) {
+            logger.debug("ERROR: getARPTableMap(): call SNMP retrieveMIBTable() fails, given node {}: {}",
+                    comInterface.getHostAddress(), e1);
+            //TODO: call comInterface.closeConnection()? (An innter try..catch here?)
+            return null;
+        }
+
+        try {
+            comInterface.closeConnection();
+        } catch (SocketException e2) {
+            logger.debug("ERROR: getARPTableMap(), Exception during SNMPv1CommunicationInterface.closeConnection() " +
+                    "for node {}: {}", comInterface.getHostAddress(), e2);
+            return null;
+        }
+
+        if (tableVars == null) {
+            logger.debug("ERROR: getARPTableMap(): null in switch response content, given node {}: {}",
+                    comInterface.getHostAddress());
+            return null;
+        }
+
+        HashMap<String, Long> resultMap = new HashMap<String, Long>();
+
+        for (int i = 0; i < tableVars.size(); i++) {
+            if (tableVars.getSNMPObjectAt(i) == null) {
+                logger.debug("ERROR: getARPTableMap(): null in switch response content, given node {}: {}",
+                        comInterface.getHostAddress());
+                return null;
+            }
+
+            SNMPSequence pair = (SNMPSequence)(tableVars.getSNMPObjectAt(i));
+            if (pair.getSNMPObjectAt(1) == null) {
+                logger.debug("ERROR: getARPTableMap(): null in switch response content, given node {}: {}",
+                        comInterface.getHostAddress());
+                return null;
+            }
+
+            /*
+            * One actual example of snmpOID is "1.3.6.1.2.1.4.22.1.2.17.17.0.0.105".
+            * The arpTableEntryPhyAddrOID is "1.3.6.1.2.1.4.22.1.2".
+            * The middle stuff is 17, adn the ip address is 17.0.0.105.
+            * */
+            SNMPObjectIdentifier snmpOID = (SNMPObjectIdentifier)pair.getSNMPObjectAt(0);
+            if (pair.getSNMPObjectAt(1).getClass() == SNMPUnknownObject.class) {
+                logger.debug("ERROR: getARPTableMap(): requests arp entry for node {} fails",
+                        comInterface.getHostAddress());
+                return null;
+            }
+            SNMPOctetString value = (SNMPOctetString)pair.getSNMPObjectAt(1);
+
+            /*for example, valueBytes is {0,12,41,97,-18,107} . It represents mac address of "00:0c:29:61:ee:6b".*/
+            byte[] valueBytes = (byte[])value.getValue();
+
+            String snmpOIDStr = snmpOID.toString();
+            String _ipAddress = snmpOIDStr.substring(oid.length() + 1);
+            int index = _ipAddress.indexOf(".");
+            String ipAddress = _ipAddress.substring(index + 1);
+
+            String macAddrStr = HexString.toHexString(valueBytes);
+            Long macAddress = new Long(HexString.toLong(macAddrStr));
+
+            logger.trace("SNMPHandler: getARPTableMap(): add entry <{}, {}>", ipAddress, macAddress);
+            resultMap.put(ipAddress, macAddress);
+        }
+
+        logger.trace("SNMPHandler.getARPTableMap(node: {}, port: {})", comInterface.getHostAddress());
+        logger.trace("\n[Send to switch]:\n  OID: {}", oid);
+        logger.trace("\n[Switch response]:\n  " + tableVars.toString());
+
+        return resultMap;
     }
 
     private String errorString(String phase, String action, String cause) {
