@@ -967,35 +967,51 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
     //md-sal
     @Override
     public Future<RpcResult<GetArpEntryOutput>> getArpEntry(GetArpEntryInput input){
+        /*
+        * Fix bug 5367: exception error of rest api get-arp-entry due to incorrect future value returned.
+        */
+        GetArpEntryOutputBuilder ob = new GetArpEntryOutputBuilder();
 
         //check null input parameters
-        if(input == null){
+        if (input == null) {
             logger.debug("ERROR: getArpEntry(): given null input");
-            return null;
+
+            RpcResult<GetArpEntryOutput> rpcResult = Rpcs.<GetArpEntryOutput> getRpcResult(true,
+                    ob.build(), Collections.<RpcError> emptySet());
+            return Futures.immediateFuture(rpcResult);
         }
+
         Long nodeId = input.getNodeId();
         String ipAddress = input.getIpAddress();
-        if(nodeId == null || ipAddress == null){
+        if (nodeId == null || ipAddress == null) {
             logger.debug("ERROR: getArpEntry(): given nodeId or ipAddress is null");
-            return null;
+
+            RpcResult<GetArpEntryOutput> rpcResult = Rpcs.<GetArpEntryOutput> getRpcResult(true,
+                    ob.build(), Collections.<RpcError> emptySet());
+            return Futures.immediateFuture(rpcResult);
         }
 
         //create the node and check null
         Node node = createSNMPNode(nodeId.longValue());
-        if(node == null){
+        if (node == null) {
             logger.debug("ERROR: getArpEntry(): call createSNMPNode() with nodeId {} fail", nodeId);
-            return null;
+
+            RpcResult<GetArpEntryOutput> rpcResult = Rpcs.<GetArpEntryOutput> getRpcResult(true,
+                    ob.build(), Collections.<RpcError> emptySet());
+            return Futures.immediateFuture(rpcResult);
         }
 
         //execute getARPEntry
         ARPTableEntry entry = getARPEntry(node, ipAddress);
-        if(entry == null){
+        if (entry == null) {
             logger.debug("ERROR: getArpEntry(): call getARPEntry() fail, nodeId {} ipAddress {}", nodeId, ipAddress);
-            return null;
+
+            RpcResult<GetArpEntryOutput> rpcResult = Rpcs.<GetArpEntryOutput> getRpcResult(true,
+                    ob.build(), Collections.<RpcError> emptySet());
+            return Futures.immediateFuture(rpcResult);
         }
         
-        GetArpEntryOutputBuilder ob = new GetArpEntryOutputBuilder().setIpAddress(entry.ipAddress).setMacAddress(entry.macAddress);
-
+        ob.setIpAddress(entry.ipAddress).setMacAddress(entry.macAddress);
         RpcResult<GetArpEntryOutput> rpcResult =
                     Rpcs.<GetArpEntryOutput> getRpcResult(true, ob.build(),
                             Collections.<RpcError> emptySet());
