@@ -40,21 +40,21 @@
     </feature>
 </features>
 <!--Debugging: Manual commands
-feature:repo-add mvn:org.opendaylight.yangtools/features-yangtools/0.7.4-Lithium-SR4/xml/features
+feature:repo-add mvn:org.opendaylight.yangtools/features-yangtools/0.7.5-SNAPSHOT/xml/features
 feature:install odl-yangtools-binding
 feature:install odl-yangtools-models
 
-feature:repo-add mvn:org.opendaylight.controller/features-adsal/0.9.4-Lithium-SR4/xml/features
+feature:repo-add mvn:org.opendaylight.controller/features-adsal/0.9.5-SNAPSHOT/xml/features
 feature:install odl-adsal-core
 
-feature:repo-add mvn:org.opendaylight.controller/features-mdsal/1.2.4-Lithium-SR4/xml/features
+feature:repo-add mvn:org.opendaylight.controller/features-mdsal/1.2.5-SNAPSHOT/xml/features
 feature:install odl-mdsal-broker
 feature:install odl-mdsal-apidocs
 
-feature:repo-add mvn:org.opendaylight.controller/features-restconf/1.2.4-Lithium-SR4/xml/features
+feature:repo-add mvn:org.opendaylight.controller/features-restconf/1.2.5-SNAPSHOT/xml/features
 feature:install odl-restconf
 
 //activate failure
-feature:repo-add mvn:org.opendaylight.controller/features-nsf/0.5.4-Lithium-SR4/xml/features
+feature:repo-add mvn:org.opendaylight.controller/features-nsf/0.5.5-SNAPSHOT/xml/features
 feature:install odl-adsal-northbound
 -->

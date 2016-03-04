@@ -12,13 +12,13 @@
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.snmp4sdn</artifactId><!--s4s: old value:commons-->
-    <version>0.2.4-Lithium-SR4</version>
+    <version>0.2.5-SNAPSHOT</version>
     <relativePath>../commons/snmp4sdn</relativePath><!--s4s: old value:../commons/opendaylight-->
   </parent>
 
   <!--<groupId>org.opendaylight.snmp4sdn</groupId>--><!--s4s:new add-->
   <artifactId>snmp4sdn</artifactId>
-  <version>0.2.4-Lithium-SR4</version>
+  <version>0.2.5-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <!--<scm>
@@ -125,7 +125,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
-      <version>0.9.4-Lithium-SR4</version><!--0.7.0-withVLAN--><!--//prg. custom ad-sal-->
+      <version>0.9.5-SNAPSHOT</version><!--0.7.0-withVLAN--><!--//prg. custom ad-sal-->
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller.thirdparty</groupId>
@@ -135,12 +135,12 @@
     <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>org.snmpj</artifactId>
-      <version>1.5.4-Lithium-SR4</version>
+      <version>1.5.5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>org.expect4j</artifactId>
-      <version>1.5.4-Lithium-SR4</version>
+      <version>1.5.5-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -168,12 +168,12 @@
     <dependency>
      <groupId>org.opendaylight.controller</groupId>
      <artifactId>sal-binding-api</artifactId>
-     <version>${mdsal.version}</version><!--yiling 1.1.4-Lithium-SR4-->
+     <version>${mdsal.version}</version><!--yiling 1.1.5-SNAPSHOT-->
    </dependency>
    <dependency>
      <groupId>org.opendaylight.controller</groupId>
      <artifactId>sal-common-util</artifactId>
-     <version>${mdsal.version}</version><!--yiling 1.1.4-Lithium-SR4-->
+     <version>${mdsal.version}</version><!--yiling 1.1.5-SNAPSHOT-->
    </dependency>
    <dependency>
      <groupId>org.opendaylight.yangtools</groupId>
@@ -189,22 +189,22 @@
     <!--<dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>vlanmd-model</artifactId>
-      <version>0.1.7-Lithium-SR4</version>
+      <version>0.1.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>configmd-model</artifactId>
-      <version>0.1.7-Lithium-SR4</version>
+      <version>0.1.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>fdbmd-model</artifactId>
-      <version>0.1.7-Lithium-SR4</version>
+      <version>0.1.8-SNAPSHOT</version>
     </dependency>--><!--the thee ones are marked, now they are packaged in one budle "md-model"-->
     <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>md-model</artifactId>
-      <version>0.2.4-Lithium-SR4</version>
+      <version>0.2.5-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
