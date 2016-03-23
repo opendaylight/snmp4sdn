@@ -8,13 +8,13 @@
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.snmp4sdn</artifactId>
-    <version>0.3.1-Beryllium-SR1</version>
+    <version>0.3.2-SNAPSHOT</version>
     <relativePath>../../../commons/snmp4sdn</relativePath>
   </parent>
 
   <artifactId>vlanmanager</artifactId>
   <packaging>bundle</packaging>
-  <version>0.3.1-Beryllium-SR1</version>
+  <version>0.3.2-SNAPSHOT</version>
 
   <name>vlan manager</name>
   <description>vlan manager, as a consumer of snmp4sdn, for demo snmp4sdn vlan service</description>
@@ -106,7 +106,7 @@
     <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>md-model</artifactId>
-      <version>0.3.1-Beryllium-SR1</version>
+      <version>0.3.2-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
