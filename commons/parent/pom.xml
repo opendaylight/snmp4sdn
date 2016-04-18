@@ -33,7 +33,6 @@
   </scm>-->
 
   <properties>
-    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
     <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
     <releaseplugin.version>2.3.2</releaseplugin.version>
   </properties>

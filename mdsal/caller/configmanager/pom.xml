@@ -22,7 +22,6 @@
   <version>0.2.5-SNAPSHOT</version>
 
   <properties>
-    <nexusproxy>http://nexus.opendaylight.org/content</nexusproxy>
     <yangtools.version>0.6.1</yangtools.version>
     <mdsal.version>1.0</mdsal.version>
   </properties>
