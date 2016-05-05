@@ -46,7 +46,7 @@
   <properties>
     <propertymavenplugin.version>1.0-alpha-2</propertymavenplugin.version>
     <sonar.host.url>https://sonar.opendaylight.org/</sonar.host.url>
-    <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
+    <sitedeploy>dav:https://nexus.opendaylight.org/content/sites/site</sitedeploy>
     <siteplugin>3.2</siteplugin>
     <projectinfo>2.6</projectinfo>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
