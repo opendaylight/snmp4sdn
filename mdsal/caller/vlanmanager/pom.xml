@@ -78,15 +78,10 @@
   </build>
 
   <dependencies>
-    <!--<dependency>
+    <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
-    </dependency>-->
-    <!--<dependency>
-      <groupId>org.opendaylight.controller.model</groupId>
-      <artifactId>model-ping</artifactId>
-      <version>1.0</version>
-    </dependency>-->
+    </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-binding-api</artifactId>
@@ -98,15 +93,17 @@
      <version>${yangtools.version}</version>
     </dependency>
     <dependency>
-     <groupId>org.opendaylight.yangtools</groupId>
-     <artifactId>yang-binding</artifactId>
-     <version>${yangtools.version}</version>
-    </dependency>
-    <!--vlanmanager add-->
-    <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>md-model</artifactId>
-      <version>0.4.0-SNAPSHOT</version>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.tycho</groupId>
+      <artifactId>org.eclipse.osgi</artifactId>
     </dependency>
   </dependencies>
 </project>
