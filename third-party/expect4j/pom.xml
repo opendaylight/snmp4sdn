@@ -185,34 +185,10 @@
 
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.2</version><!--1.7.5 was used and thus cause dependency skew from the rest of snmp4sdn and the controller which used 1.7.2 then-->
         </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j.adapters</groupId>
-            <artifactId>slf4j-impl</artifactId>
-            <version>2.0-beta2</version>
-            <scope>test</scope>
-        </dependency>
-        <!--
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
-        -->
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.oro</artifactId>
@@ -230,17 +206,14 @@
         </dependency>
         <dependency>
             <groupId>net.sourceforge.tcljava</groupId>
+            <artifactId>com.springsource.tcl.lang</artifactId>
+            <version>1.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.tcljava</groupId>
             <artifactId>com.springsource.tcl.lang.jacl</artifactId>
             <version>1.4.1</version>
         </dependency>
-
-    <dependency><!--add due to when install and then start expect4j's bundle, appear: "missing com.jcraft.jzlib", so I find this in jcraft's pom-->
-      <groupId>com.jcraft</groupId>
-      <artifactId>jzlib</artifactId>
-      <version>1.0.7</version>
-      <optional>true</optional>
-    </dependency>
-    
     </dependencies>
 </project>
 <!-- vim: set ts=4 expandtab: -->
