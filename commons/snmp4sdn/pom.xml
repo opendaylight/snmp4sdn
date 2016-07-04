@@ -48,7 +48,6 @@
     <sonar.host.url>https://sonar.opendaylight.org/</sonar.host.url>
     <sitedeploy>dav:https://nexus.opendaylight.org/content/sites/site</sitedeploy>
     <siteplugin>3.2</siteplugin>
-    <projectinfo>2.6</projectinfo>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <sonar.skippedModules>org.openflow.openflowj,net.sf.jung2</sonar.skippedModules>
     <jackson.version>2.3.0</jackson.version>
