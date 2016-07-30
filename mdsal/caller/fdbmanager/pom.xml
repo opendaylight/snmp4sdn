@@ -8,12 +8,12 @@
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.snmp4sdn</artifactId>
-    <version>0.3.3-SNAPSHOT</version>
+    <version>0.3.3-Beryllium-SR3</version>
     <relativePath>../../../commons/snmp4sdn</relativePath>
   </parent>
   <artifactId>fdbmanager</artifactId>
   <packaging>bundle</packaging>
-  <version>0.3.3-SNAPSHOT</version>
+  <version>0.3.3-Beryllium-SR3</version>
 
   <name>fdb manager</name>
   <description>fdb manager, as a consumer of snmp4sdn, for demo snmp4sdn fdb service</description>
@@ -103,7 +103,7 @@
     <!--<dependency>
       <groupId>org.opendaylight.controller.model</groupId>
       <artifactId>model-ping</artifactId>
-      <version>1.0</version>//yiling 1.2.3-SNAPSHOT
+      <version>1.0</version>//yiling 1.2.3-Beryllium-SR3
     </dependency>-->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -124,7 +124,7 @@
     <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>md-model</artifactId>
-      <version>0.3.3-SNAPSHOT</version>
+      <version>0.3.3-Beryllium-SR3</version>
     </dependency>
   </dependencies>
 </project>
