@@ -27,7 +27,7 @@
             <feature version='${mdsal.version}'>odl-mdsal-apidocs</feature>
             <feature version='${restconf.version}'>odl-restconf</feature>
 
-            <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.dom4j/1.6.1_5</bundle>
+            <bundle>wrap:mvn:org.dom4j/dom4j/2.0.0</bundle>
             <!--<bundle>mvn:org.opendaylight.controller/topologymanager/0.4.1</bundle>--><!--remove, because odl-nsf-managers can't be installed successfully, many dependency missing-->
             <bundle>mvn:org.opendaylight.snmp4sdn/md-model/${project.version}</bundle>
             <bundle>mvn:org.opendaylight.snmp4sdn/snmp4sdn/${project.version}</bundle>

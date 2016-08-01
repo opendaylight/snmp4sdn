@@ -53,16 +53,9 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.dom4j</artifactId><!--xml parser-->
-            <version>1.6.1_5</version>
-            <!-- declare the exclusion here -->
-            <exclusions>
-                <exclusion>
-                    <groupId>org.ops4j.pax.exam</groupId>
-                    <artifactId>pax-exam-container-native</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>2.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>

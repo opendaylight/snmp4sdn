@@ -231,15 +231,9 @@
       <version>0.4.0-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <!--jar1 http://ebr.springsource.com/repository/app/bundle/version/detail?name=com.springsource.org.dom4j&version=1.6.1 -->
-      <!--jar2 https://nexus.opendaylight.org/content/repositories/central/dom4j/dom4j/1.6.1/ -->
-      <!--for jar1, groupId is org.dom4j; for jar2, groupId is dom4j-->
-      <!--when compile, use groupId of jar2; for execution, put jar1 in plugins directory-->
-      <groupId>org.apache.servicemix.bundles</groupId>
-      <artifactId>org.apache.servicemix.bundles.dom4j</artifactId>
-      <!--<groupId>org.dom4j</groupId>
-      <artifactId>com.springsource.org.dom4j</artifactId>-->
-      <version>1.6.1_5</version>
+      <groupId>org.dom4j</groupId>
+      <artifactId>dom4j</artifactId>
+      <version>2.0.0</version>
     </dependency>
   </dependencies>
 </project>
