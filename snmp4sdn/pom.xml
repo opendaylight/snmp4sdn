@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.snmp4sdn</artifactId>
-    <version>0.3.3-SNAPSHOT</version>
+    <version>0.3.4-SNAPSHOT</version>
     <relativePath>../commons/snmp4sdn</relativePath>
   </parent>
 
   <artifactId>snmp4sdn</artifactId>
-  <version>0.3.3-SNAPSHOT</version>
+  <version>0.3.4-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>snmp4sdn plugin</name>
@@ -159,12 +159,12 @@
     <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>org.snmpj</artifactId>
-      <version>1.6.3-SNAPSHOT</version>
+      <version>1.6.4-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>org.expect4j</artifactId>
-      <version>1.6.3-SNAPSHOT</version>
+      <version>1.6.4-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -207,28 +207,28 @@
    <dependency>
      <groupId>org.opendaylight.mdsal</groupId>
      <artifactId>yang-binding</artifactId>
-     <version>0.8.3-SNAPSHOT</version><!--yiling-->
+     <version>0.8.4-SNAPSHOT</version><!--yiling-->
    </dependency>
    <!--following are md-sal-->
     <!--<dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>vlanmd-model</artifactId>
-      <version>0.2.3-SNAPSHOT</version>
+      <version>0.2.4-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>configmd-model</artifactId>
-      <version>0.2.3-SNAPSHOT</version>
+      <version>0.2.4-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>fdbmd-model</artifactId>
-      <version>0.2.3-SNAPSHOT</version>
+      <version>0.2.4-SNAPSHOT</version>
     </dependency>--><!--the thee ones are marked, now they are packaged in one budle "md-model"-->
     <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>md-model</artifactId>
-      <version>0.3.3-SNAPSHOT</version>
+      <version>0.3.4-SNAPSHOT</version>
     </dependency>
     <dependency>
       <!--jar1 http://ebr.springsource.com/repository/app/bundle/version/detail?name=com.springsource.org.dom4j&version=1.6.1 -->

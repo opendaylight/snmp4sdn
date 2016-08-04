@@ -8,12 +8,12 @@
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.snmp4sdn</artifactId>
-    <version>0.3.3-SNAPSHOT</version>
+    <version>0.3.4-SNAPSHOT</version>
     <relativePath>../../../commons/snmp4sdn</relativePath>
   </parent>
   <artifactId>aclmanager</artifactId>
   <packaging>bundle</packaging>
-  <version>0.3.3-SNAPSHOT</version>
+  <version>0.3.4-SNAPSHOT</version>
 
   <name>acl manager</name>
   <description>acl manager, as a consumer of snmp4sdn, for demo snmp4sdn acl service</description>
@@ -102,7 +102,7 @@
     <!--<dependency>
       <groupId>org.opendaylight.controller.model</groupId>
       <artifactId>model-ping</artifactId>
-      <version>1.0</version>//yiling 1.2.3-SNAPSHOT
+      <version>1.0</version>//yiling 1.2.4-SNAPSHOT
     </dependency>-->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -123,7 +123,7 @@
     <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>md-model</artifactId>
-      <version>0.3.3-SNAPSHOT</version>
+      <version>0.3.4-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>

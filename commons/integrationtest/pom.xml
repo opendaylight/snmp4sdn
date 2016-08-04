@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.snmp4sdn</artifactId>
-    <version>0.3.3-SNAPSHOT</version>
+    <version>0.3.4-SNAPSHOT</version>
     <relativePath>../snmp4sdn</relativePath>
   </parent>
 
@@ -37,7 +37,7 @@
   </scm>
 
   <artifactId>commons.integrationtest</artifactId>
-  <version>0.3.3-SNAPSHOT</version>
+  <version>0.3.4-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <dependencies>
@@ -109,7 +109,7 @@
           <dependency>
             <groupId>org.opendaylight.snmp4sdn</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>0.3.3-SNAPSHOT</version>
+            <version>0.3.4-SNAPSHOT</version>
           </dependency>
          </dependencies>
         <configuration>
