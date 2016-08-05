@@ -27,13 +27,11 @@ package org.opendaylight.snmp4sdn.internal;//s4s
 * 1. The whole program speed: connection by ExpectUtils.telnet() is faster than Expect4j(socket)
 */
 
-import org.expect4j.*;//e4j
-import org.expect4j.matches.*;
+import expect4j.Expect4j;
+import expect4j.ExpectState;
+import java.net.Socket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.*;
-import java.net.Socket;
-import java.net.InetAddress;
 
 public class ExpectHandler{
     private static Logger logger = LoggerFactory.getLogger(ExpectHandler.class);

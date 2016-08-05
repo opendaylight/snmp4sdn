@@ -94,32 +94,18 @@
               javax.net.ssl,
               org.dom4j,<!--xml parser-->
               org.dom4j.io,<!--xml parser-->
-              <!--org.expect4j //TODO: with this, the following packages are not needed to be listed here?-->
-              <!--(a) the following line is needed when expect4j is included in the "Embed-Dependency" section below; otherwise can't build-->
-              com.jcraft.jsch, org.apache.commons.net.io, org.apache.commons.net.telnet, org.apache.oro.text, org.apache.oro.text.regex, sunlabs.brazil.util.regexp, tcl.lang.reflect,
-
-              org.apache.commons.net.util,<!--this is needed due to those "org.apache.commons.net.*" above in (a)-->
-              org.apache.commons.net,<!--this is needed due to the two "org.apache.commons.net.util" above-->
-              javax.crypto,javax.crypto.spec,javax.net,<!--this line is needed due to "org.apache.commons.net" above, copy from in it's MANIFEST.MF listed "Import-Package" -->
-
-              org.apache.oro.util,<!--this is needed due to those "org.apache.oro.text" above in (a)-->
+              expect4j,
             </Import-Package>
             <Export-Package>
               org.opendaylight.snmp4sdn.internal,<!--should not export-->
               org.opendaylight.snmp4sdn,<!--TODO:vlan manager needs to import IVLANService when building, given that vlan manager call snmp4sdn directly-->
               org.opendaylight.snmp4sdn.protocol.util,<!--TODO:vlan manager needs to import this in OSGi loading. A more proper place to use this util?-->
-              com.jcraft.jsch, org.apache.commons.net, org.apache.commons.net.util, org.apache.commons.net.io, org.apache.commons.net.telnet, org.apache.oro.text, org.apache.oro.text.regex, sunlabs.brazil.util.regexp, tcl.lang.reflect,
-              ;-split-package:=merge-first<!--add this line due to when building, "org.apache.oro.text, org.apache.oro.text.regex" above requires to add this parameter-->
             </Export-Package>
             <Embed-Dependency>
               org.dom4j,
               javax.xml,
               org.openflow.openflowj,
               org.snmpj,
-              org.expect4j
-              <!--
-              ;scope=compile|runtime;inline=true
-              --> <!--with this line, the jar needed by expect4j would be included in s4s plugin's jar-->
             </Embed-Dependency>
             <Embed-Transitive>
               false
@@ -154,9 +140,9 @@
       <version>1.8.0-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.snmp4sdn</groupId>
-      <artifactId>org.expect4j</artifactId>
-      <version>1.8.0-SNAPSHOT</version>
+      <groupId>com.github.cverges</groupId>
+      <artifactId>expect4j</artifactId>
+      <version>1.9</version>
     </dependency>
     <dependency><!--need this dependency because "Import-Package" above listed "org.apache.oro.util"-->
       <groupId>org.apache.servicemix.bundles</groupId>
