@@ -42,7 +42,6 @@
 
   <modules>
     <module>third-party/snmpj</module>
-    <module>third-party/expect4j</module>
     <module>commons/parent</module>
     <module>commons/snmp4sdn</module>
     <module>mdsal/model</module>
