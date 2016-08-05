@@ -39,5 +39,7 @@
             <bundle>mvn:org.opendaylight.snmp4sdn/md-model/${project.version}</bundle>
             <bundle>mvn:org.opendaylight.snmp4sdn/snmp4sdn/${project.version}</bundle>
             <bundle>mvn:org.opendaylight.snmp4sdn/plugin-shell/${project.version}</bundle>
+
+            <bundle>wrap:mvn:com.github.cverges/expect4j/1.9</bundle>
     </feature>
 </features>
