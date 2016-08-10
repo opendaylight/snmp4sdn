@@ -41,6 +41,7 @@ import org.opendaylight.controller.protocol_plugin.openflow.core.internal.Contro
     import org.opendaylight.snmp4sdn.IRefreshInternalProvider;
     import org.opendaylight.snmp4sdn.IStatisticsListener;
     import org.opendaylight.snmp4sdn.ITopologyService;
+    import org.opendaylight.snmp4sdn.ITopologyServiceShim;
     import org.opendaylight.snmp4sdn.ITopologyServiceShimListener;
     import org.opendaylight.snmp4sdn.DiscoveryServiceAPI;
     import org.opendaylight.snmp4sdn.core.IController;
@@ -400,6 +401,9 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
                     .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             c.add(createServiceDependency()
                     .setService(ITopologyService.class)
+                    .setCallbacks("setTopologyService", "unsetTopologyService").setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(ITopologyServiceShim.class)
                     .setCallbacks("setTopologyServiceShim", "unsetTopologyServiceShim").setRequired(true));
             c.add(createServiceDependency()
                     .setService(IInventoryProvider.class)
@@ -601,7 +605,7 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
         if (imp.equals(TopologyServiceShim.class)) {
             c.setInterface(new String[] { IDiscoveryListener.class.getName(), IContainerListener.class.getName(),
                     IRefreshInternalProvider.class.getName(), IInventoryShimExternalListener.class.getName(),
-                    IContainerAware.class.getName(), ITopologyService.class.getName() }, null);
+                    IContainerAware.class.getName(), ITopologyServiceShim.class.getName() }, null);
             c.add(createServiceDependency()
                     .setService(ITopologyServiceShimListener.class)
                     .setCallbacks("setTopologyServiceShimListener",
@@ -646,7 +650,7 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
             // export the service to be used by SAL
             c.setInterface(
                     new String[] { IPluginInTopologyService.class.getName(),
-                            ITopologyServiceShimListener.class.getName() }, null);
+                            ITopologyServiceShimListener.class.getName(), ITopologyService.class.getName() }, null);
             // Hook the services coming in from SAL, as optional in
             // case SAL is not yet there, could happen
             /*c.add(createContainerServiceDependency(containerName)
