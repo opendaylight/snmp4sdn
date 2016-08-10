@@ -34,7 +34,7 @@ import org.opendaylight.snmp4sdn.IDiscoveryListener;
 import org.opendaylight.snmp4sdn.IInventoryShimExternalListener;
 import org.opendaylight.snmp4sdn.IOFStatisticsManager;
 import org.opendaylight.snmp4sdn.IRefreshInternalProvider;
-import org.opendaylight.snmp4sdn.ITopologyService;
+import org.opendaylight.snmp4sdn.ITopologyServiceShim;
 import org.opendaylight.snmp4sdn.ITopologyServiceShimListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -62,7 +62,7 @@ import org.opendaylight.controller.sal.utils.GlobalConstants;
  */
 public class TopologyServiceShim implements IDiscoveryListener,
         IContainerListener, CommandProvider, IRefreshInternalProvider,
-        IInventoryShimExternalListener, IContainerAware, ITopologyService {
+        IInventoryShimExternalListener, IContainerAware, ITopologyServiceShim {
     protected static final Logger logger = LoggerFactory
             .getLogger(TopologyServiceShim.class);
     private ConcurrentMap<String, ITopologyServiceShimListener> topologyServiceShimListeners = new ConcurrentHashMap<String, ITopologyServiceShimListener>();
