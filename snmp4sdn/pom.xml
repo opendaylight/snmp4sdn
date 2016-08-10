@@ -79,6 +79,8 @@
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.edge.list.output,<!--md-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.node.list.output,<!--md-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.node.connector.list.output,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819,<!--md-sal-->
               <!--com.google.common.collect,//md-sal-->
               org.opendaylight.yangtools.yang.common,<!--md-sal copy from ping example-->
               org.opendaylight.yangtools.yang.binding,<!--md-sal copy from ping example-->
@@ -159,6 +161,11 @@
       <optional>true</optional><!--must need this, otherwise seems this dependency has no effect in this pom-->
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.controller.model</groupId>
+      <artifactId>model-inventory</artifactId>
+      <version>${mdsal.version}</version>
+    </dependency>
+    <dependency>
      <groupId>org.opendaylight.controller</groupId>
      <artifactId>sal-binding-api</artifactId>
      <version>${mdsal.version}</version>
@@ -178,6 +185,16 @@
      <artifactId>yang-binding</artifactId>
      <version>0.9.0-SNAPSHOT</version><!--yiling-->
    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.openflowplugin.model</groupId>
+      <artifactId>model-flow-service</artifactId>
+      <version>0.3.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal.model</groupId>
+      <artifactId>ietf-topology</artifactId>
+      <version>2013.10.21.9-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>md-model</artifactId>
