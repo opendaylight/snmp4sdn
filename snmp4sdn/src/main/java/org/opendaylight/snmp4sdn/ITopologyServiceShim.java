@@ -10,9 +10,7 @@ package org.opendaylight.snmp4sdn;
 
 import java.util.List;
 import org.opendaylight.controller.sal.core.Edge;
-import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 
-public interface ITopologyService {
-    public void setMdNotifService(NotificationProviderService notifService);
-    public void unsetMdNotifService(NotificationProviderService notifService);
+public interface ITopologyServiceShim {
+    public List<Edge> getEdgeList();
 }
