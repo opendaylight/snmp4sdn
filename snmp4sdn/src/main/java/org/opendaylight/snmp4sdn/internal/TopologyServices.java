@@ -25,11 +25,27 @@ import org.opendaylight.controller.sal.topology.IPluginInTopologyService;
 import org.opendaylight.controller.sal.topology.IPluginOutTopologyService;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 
+import org.opendaylight.snmp4sdn.internal.util.TopologyServiceUtil;
+
+import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnector;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeConnectorRef;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node.NodeConnectorKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.LinkDiscovered;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.LinkDiscoveredBuilder;
+
 public class TopologyServices implements ITopologyServiceShimListener,
         IPluginInTopologyService {
     protected static final Logger logger = LoggerFactory
             .getLogger(TopologyServices.class);
     private IPluginOutTopologyService salTopoService = null;
+    private NotificationProviderService notifService = null;
     private IRefreshInternalProvider topoRefreshService = null;
     private String containerName;
 
@@ -128,13 +144,81 @@ public class TopologyServices implements ITopologyServiceShimListener,
         }
     }
 
+    public void setMdNotifService(NotificationProviderService s){
+        logger.trace("Setting IRefreshInternalProvider to: {}", s);
+        this.notifService = s;
+    }
+
+    public void unsetMdNotifService(NotificationProviderService s){
+        if (this.notifService == s) {
+            logger.trace("unsetMdNotifService(): UNSetting NotificationProviderService from: {}", notifService);
+            this.notifService = null;
+        }
+        else{
+            logger.debug("unsetMdNotifService(): the given NotificationProviderService to unset is {}, which is not the exising one {}, so remains the existing one", s, notifService);
+        }
+    }
+
     @Override
     public void edgeUpdate(List<TopoEdgeUpdate> topoedgeupdateList) {
+
+        //to ad-sal
         if (this.salTopoService != null) {
             logger.debug("edgeUpdate(): report edge list to SAL");
-            logger.trace("edgeUpdate(): edge list: " + "\n" + edgeListToString(topoedgeupdateList));//lg.dbug-trc
+            logger.debug("edgeUpdate(): edge list: " + "\n" + edgeListToString(topoedgeupdateList));//lg.dbug-trc
+            logger.trace("report to ad-sal...");
             this.salTopoService.edgeUpdate(topoedgeupdateList);
         }
+        else
+            logger.debug("ERROR: edgeUpdate(): IPluginOutTopologyService is null!");
+
+        //to md-sal
+        logger.trace("report to md-sal...");
+        this.edgeUpdateToMdSal(topoedgeupdateList);
+    }
+
+    public void edgeUpdateToMdSal(List<TopoEdgeUpdate> topoedgeupdateList) {
+        if (this.notifService == null) {
+            logger.debug("ERROR: edgeUpdateToMdSal(): NotificationProviderService is null!");
+            return;
+        }
+        for(TopoEdgeUpdate edgeU : topoedgeupdateList){
+            Edge edge = edgeU.getEdge();
+            LinkDiscovered link = makeLink(edge);
+            if(link == null)
+                logger.debug("ERROR: edgeUpdateToMdSal(): call makeLink() given edge {}, error!");
+            else
+                notifService.publish(link);
+        }
+    }
+
+    private LinkDiscovered makeLink(Edge edge){
+
+        String headNodeIdStr = null, tailNodeIdStr = null, headNcIdStr = null, tailNcIdStr = null;
+        boolean bool = TopologyServiceUtil.getNodeAndNcIdString(edge, headNodeIdStr, tailNodeIdStr, headNcIdStr, tailNcIdStr);
+        if(bool == false){
+            logger.debug("ERROR: makeLink(): given Edge {}, call TopologyServiceUtil.getNodeAndNcIdString() fail", edge);
+            return null;
+        }
+
+        NodeId localNodeId = new NodeId(headNodeIdStr);
+        NodeConnectorId localNodeConnectorId = new NodeConnectorId(headNcIdStr);
+        InstanceIdentifier<NodeConnector> localInstanceIdentifier = InstanceIdentifier.builder(Nodes.class)
+                        .child(Node.class, new NodeKey(localNodeId))
+                        .child(NodeConnector.class, new NodeConnectorKey(localNodeConnectorId)).toInstance();
+        NodeConnectorRef localNodeConnectorRef = new NodeConnectorRef(localInstanceIdentifier);
+
+        NodeId remoteNodeId = new NodeId(tailNodeIdStr);
+        NodeConnectorId remoteNodeConnectorId = new NodeConnectorId(tailNcIdStr);
+        InstanceIdentifier<NodeConnector> remoteInstanceIdentifier = InstanceIdentifier.builder(Nodes.class)
+                        .child(Node.class, new NodeKey(remoteNodeId))
+                        .child(NodeConnector.class, new NodeConnectorKey(remoteNodeConnectorId)).toInstance();
+        NodeConnectorRef remoteNodeConnectorRef = new NodeConnectorRef(remoteInstanceIdentifier);
+
+        LinkDiscoveredBuilder ldb = new LinkDiscoveredBuilder();
+        ldb.setSource(remoteNodeConnectorRef);
+        ldb.setDestination(localNodeConnectorRef);
+        return((ldb.build()));
     }
 
     @Override
