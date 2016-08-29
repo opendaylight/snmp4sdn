@@ -26,6 +26,7 @@ import org.opendaylight.controller.sal.topology.IPluginInTopologyService;
 import org.opendaylight.controller.sal.topology.IPluginOutTopologyService;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 
+import org.opendaylight.snmp4sdn.ITopologyService;
 import org.opendaylight.snmp4sdn.internal.util.TopologyServiceUtil;
 
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
@@ -44,7 +45,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819.LinkRemovedBuilder;
 
 public class TopologyServices implements ITopologyServiceShimListener,
-        IPluginInTopologyService {
+        IPluginInTopologyService, ITopologyService {
     protected static final Logger logger = LoggerFactory
             .getLogger(TopologyServices.class);
     private IPluginOutTopologyService salTopoService = null;
@@ -147,11 +148,13 @@ public class TopologyServices implements ITopologyServiceShimListener,
         }
     }
 
+    @Override
     public void setMdNotifService(NotificationProviderService s){
         logger.trace("Setting IRefreshInternalProvider to: {}", s);
         this.notifService = s;
     }
 
+    @Override
     public void unsetMdNotifService(NotificationProviderService s){
         if (this.notifService == s) {
             logger.trace("unsetMdNotifService(): UNSetting NotificationProviderService from: {}", notifService);
