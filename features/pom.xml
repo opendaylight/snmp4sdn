@@ -49,7 +49,6 @@
         <karaf.empty.version>1.7.0-SNAPSHOT</karaf.empty.version>
         <surefire.version>2.16</surefire.version>
         <restconf.version>1.4.0-SNAPSHOT</restconf.version>
-        <mdsal.model.version>0.9.0-SNAPSHOT</mdsal.model.version>
         <openflowplugin.version>0.3.0-SNAPSHOT</openflowplugin.version>
     </properties>
     <dependencies>
@@ -57,11 +56,6 @@
             <groupId>org.dom4j</groupId>
             <artifactId>dom4j</artifactId>
             <version>2.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>topologymanager</artifactId><!--need this bundle due to snmp4sdn's waitOtherNecessaryBundle()-->
-            <version>0.4.1</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.snmp4sdn</groupId>
@@ -79,6 +73,18 @@
             <groupId>org.opendaylight.snmp4sdn</groupId>
             <artifactId>snmp4sdn</artifactId>
             <version>${project.version}</version>
+            <!-- declare the exclusion here -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.ops4j.pax.exam</groupId>
+                    <artifactId>pax-exam-container-native</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.snmp4sdn</groupId>
+            <artifactId>sal</artifactId>
+            <version>0.7.0</version>
             <!-- declare the exclusion here -->
             <exclusions>
                 <exclusion>

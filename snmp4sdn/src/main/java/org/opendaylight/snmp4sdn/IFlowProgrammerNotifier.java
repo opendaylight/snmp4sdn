@@ -12,7 +12,7 @@ This code reused the code base of OpenFlow plugin contributed by Cisco Systems, 
 
 package org.opendaylight.snmp4sdn;
 
-import org.opendaylight.controller.sal.flowprogrammer.IPluginOutFlowProgrammerService;
+import org.opendaylight.snmp4sdn.sal.flowprogrammer.IPluginOutFlowProgrammerService;
 
 /**
  * Interface which defines the methods exposed by the Flow Programmer Notifier.
