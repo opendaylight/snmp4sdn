@@ -21,7 +21,7 @@ package org.opendaylight.snmp4sdn;
  * plugin
  */
 
-import org.opendaylight.controller.sal.packet.IPluginInDataPacketService;
+import org.opendaylight.snmp4sdn.sal.packet.IPluginInDataPacketService;
 
 /**
  * Simple wrapped interface for the IPluginInDataPacketService

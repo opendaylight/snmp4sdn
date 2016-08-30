@@ -22,7 +22,7 @@ import java.util.List;
 //import org.openflow.protocol.factory.OFActionFactoryAware;
 import org.openflow.util.U16;
 
-import org.opendaylight.controller.sal.flowprogrammer.Flow;//s4s add
+import org.opendaylight.snmp4sdn.sal.flowprogrammer.Flow;//s4s add
 //import org.openflow.protocol.OFFlowMod;//s4s add. may remove after revison done (no OF in this file)
 import org.openflow.protocol.OFMatch;//s4s add. may remove after revison done (no OF in this file)
 import org.openflow.protocol.OFPort;//s4s add. may remove after revison done (no OF in this file)

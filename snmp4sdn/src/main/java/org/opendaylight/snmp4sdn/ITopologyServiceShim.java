@@ -9,7 +9,7 @@
 package org.opendaylight.snmp4sdn;
 
 import java.util.List;
-import org.opendaylight.controller.sal.core.Edge;
+import org.opendaylight.snmp4sdn.sal.core.Edge;
 
 public interface ITopologyServiceShim {
     public List<Edge> getEdgeList();
