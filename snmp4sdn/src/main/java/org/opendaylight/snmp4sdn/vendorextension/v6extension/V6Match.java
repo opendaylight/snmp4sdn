@@ -18,7 +18,7 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import org.opendaylight.controller.sal.utils.HexEncode;
+import org.opendaylight.snmp4sdn.sal.utils.HexEncode;
 import org.openflow.protocol.OFMatch;
 import org.openflow.util.U16;
 import org.openflow.util.U8;

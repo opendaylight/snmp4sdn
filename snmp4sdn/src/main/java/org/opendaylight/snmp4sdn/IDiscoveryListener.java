@@ -12,7 +12,7 @@ This code reused the code base of OpenFlow plugin contributed by Cisco Systems, 
 
 package org.opendaylight.snmp4sdn;
 
-import org.opendaylight.controller.sal.discovery.IDiscoveryService;
+import org.opendaylight.snmp4sdn.sal.discovery.IDiscoveryService;
 
 /**
  * The interface provides method to notify the local plugin listener when an
