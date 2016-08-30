@@ -12,7 +12,7 @@ This code reused the code base of OpenFlow plugin contributed by Cisco Systems, 
 
 package org.opendaylight.snmp4sdn;
 
-import org.opendaylight.controller.sal.inventory.IPluginInInventoryService;
+import org.opendaylight.snmp4sdn.sal.inventory.IPluginInInventoryService;
 
 /**
  * The Interface provides inventory service to the local plugin modules

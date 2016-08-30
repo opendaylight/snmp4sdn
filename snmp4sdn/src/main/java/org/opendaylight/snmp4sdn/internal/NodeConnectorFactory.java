@@ -8,9 +8,9 @@
 
 package org.opendaylight.snmp4sdn.internal;
 
-import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.controller.sal.utils.INodeConnectorFactory;
-import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.snmp4sdn.sal.core.NodeConnector;
+import org.opendaylight.snmp4sdn.sal.utils.INodeConnectorFactory;
+import org.opendaylight.snmp4sdn.sal.core.Node;
 
 public class NodeConnectorFactory implements INodeConnectorFactory
     {
