@@ -14,7 +14,7 @@ package org.opendaylight.snmp4sdn.internal;
 
 import java.util.List;
 
-import org.opendaylight.controller.sal.reader.NodeDescription;
+import org.opendaylight.snmp4sdn.sal.reader.NodeDescription;
 import org.openflow.protocol.statistics.OFDescriptionStatistics;
 import org.openflow.protocol.statistics.OFStatistics;
 import org.slf4j.Logger;

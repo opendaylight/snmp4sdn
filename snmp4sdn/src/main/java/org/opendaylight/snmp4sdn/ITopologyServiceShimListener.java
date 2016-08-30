@@ -15,10 +15,10 @@ package org.opendaylight.snmp4sdn;
 import java.util.List;
 import java.util.Set;
 
-import org.opendaylight.controller.sal.core.Edge;
-import org.opendaylight.controller.sal.core.Property;
-import org.opendaylight.controller.sal.core.UpdateType;
-import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
+import org.opendaylight.snmp4sdn.sal.core.Edge;
+import org.opendaylight.snmp4sdn.sal.core.Property;
+import org.opendaylight.snmp4sdn.sal.core.UpdateType;
+import org.opendaylight.snmp4sdn.sal.topology.TopoEdgeUpdate;
 
 /**
  * The Interface provides Edge updates to the topology listeners
@@ -37,7 +37,7 @@ public interface ITopologyServiceShimListener {
      * Called when an Edge utilization is above the safe threshold configured on
      * the controller
      *
-     * @param {@link org.opendaylight.controller.sal.core.Edge}
+     * @param {@link org.opendaylight.snmp4sdn.sal.core.Edge}
      */
     public void edgeOverUtilized(Edge edge);
 
@@ -45,7 +45,7 @@ public interface ITopologyServiceShimListener {
      * Called when the Edge utilization is back to normal, below the safety
      * threshold level configured on the controller
      *
-     * @param {@link org.opendaylight.controller.sal.core.Edge}
+     * @param {@link org.opendaylight.snmp4sdn.sal.core.Edge}
      */
     public void edgeUtilBackToNormal(Edge edge);
 }

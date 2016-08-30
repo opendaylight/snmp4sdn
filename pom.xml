@@ -44,6 +44,7 @@
     <module>third-party/snmpj</module>
     <module>commons/parent</module>
     <module>commons/snmp4sdn</module>
+    <module>sal</module>
     <module>mdsal/model</module>
     <module>mdsal/caller/aclmanager</module>
     <module>mdsal/caller/miscconfigmanager</module>
