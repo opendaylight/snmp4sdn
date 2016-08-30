@@ -10,8 +10,8 @@ package org.opendaylight.snmp4sdn.internal;
 
 import org.opendaylight.snmp4sdn.internal.ExpectHandler;
 
-import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.sal.utils.StatusCode;
+import org.opendaylight.snmp4sdn.sal.utils.Status;
+import org.opendaylight.snmp4sdn.sal.utils.StatusCode;
 
 import org.opendaylight.snmp4sdn.ACLIndex;
 import org.opendaylight.snmp4sdn.protocol.util.HexString;

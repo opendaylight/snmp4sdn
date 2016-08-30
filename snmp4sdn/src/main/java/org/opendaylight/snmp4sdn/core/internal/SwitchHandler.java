@@ -39,8 +39,8 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.opendaylight.controller.sal.core.Config;
-import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.snmp4sdn.sal.core.Config;
+import org.opendaylight.snmp4sdn.sal.utils.Status;
 
 import org.opendaylight.snmp4sdn.core.IController;
 import org.opendaylight.snmp4sdn.core.ISwitch;

@@ -17,19 +17,19 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.opendaylight.controller.sal.core.Bandwidth;
-import org.opendaylight.controller.sal.core.AdvertisedBandwidth;
-import org.opendaylight.controller.sal.core.SupportedBandwidth;
-import org.opendaylight.controller.sal.core.PeerBandwidth;
-import org.opendaylight.controller.sal.core.Config;
-import org.opendaylight.controller.sal.core.Name;
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.controller.sal.core.Property;
-import org.opendaylight.controller.sal.core.State;
-import org.opendaylight.controller.sal.core.ConstructionException;
+import org.opendaylight.snmp4sdn.sal.core.Bandwidth;
+import org.opendaylight.snmp4sdn.sal.core.AdvertisedBandwidth;
+import org.opendaylight.snmp4sdn.sal.core.SupportedBandwidth;
+import org.opendaylight.snmp4sdn.sal.core.PeerBandwidth;
+import org.opendaylight.snmp4sdn.sal.core.Config;
+import org.opendaylight.snmp4sdn.sal.core.Name;
+import org.opendaylight.snmp4sdn.sal.core.Node;
+import org.opendaylight.snmp4sdn.sal.core.NodeConnector;
+import org.opendaylight.snmp4sdn.sal.core.Property;
+import org.opendaylight.snmp4sdn.sal.core.State;
+import org.opendaylight.snmp4sdn.sal.core.ConstructionException;
 
-import org.opendaylight.controller.sal.utils.NodeCreator;
+import org.opendaylight.snmp4sdn.sal.utils.NodeCreator;
 
 import org.opendaylight.snmp4sdn.core.ISwitch;
 import org.opendaylight.snmp4sdn.protocol.SNMPPhysicalPort;

@@ -16,7 +16,7 @@ import java.util.List;
 
 import org.openflow.protocol.OFMessage;
 
-import org.opendaylight.controller.sal.utils.Status;//s4s add
+import org.opendaylight.snmp4sdn.sal.utils.Status;//s4s add
 
 import org.opendaylight.snmp4sdn.protocol.SNMPMessage;//s4s add
 
