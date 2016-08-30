@@ -33,9 +33,9 @@
 
             <!--the following three bundles are required by sal bundle-->
             <bundle>mvn:org.osgi/org.osgi.compendium/5.0.0</bundle>
-            <bundle>mvn:org.apache.felix/org.apache.felix.dependencymanager/3.1.0</bundle><!--TODO: snmp4sdn uses sal 0.7 which uses felix.dm of ver 3.x while felex.dm Boron has been 4.x-->
+            <bundle>mvn:org.apache.felix/org.apache.felix.dependencymanager/4.3.0</bundle>
             <bundle>mvn:org.apache.commons/commons-lang3/3.4</bundle>
-            <bundle>mvn:org.opendaylight.controller/sal/0.7.0</bundle>
+            <bundle>mvn:org.opendaylight.snmp4sdn/sal/0.7.0</bundle>
 
             <bundle>mvn:org.opendaylight.snmp4sdn/md-model/${project.version}</bundle>
             <bundle>mvn:org.opendaylight.snmp4sdn/snmp4sdn/${project.version}</bundle>

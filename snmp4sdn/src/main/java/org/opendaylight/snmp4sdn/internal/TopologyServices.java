@@ -20,11 +20,11 @@ import org.opendaylight.snmp4sdn.ITopologyServiceShimListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.opendaylight.controller.sal.core.Edge;
-import org.opendaylight.controller.sal.core.UpdateType;
-import org.opendaylight.controller.sal.topology.IPluginInTopologyService;
-import org.opendaylight.controller.sal.topology.IPluginOutTopologyService;
-import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
+import org.opendaylight.snmp4sdn.sal.core.Edge;
+import org.opendaylight.snmp4sdn.sal.core.UpdateType;
+import org.opendaylight.snmp4sdn.sal.topology.IPluginInTopologyService;
+import org.opendaylight.snmp4sdn.sal.topology.IPluginOutTopologyService;
+import org.opendaylight.snmp4sdn.sal.topology.TopoEdgeUpdate;
 
 import org.opendaylight.snmp4sdn.ITopologyService;
 import org.opendaylight.snmp4sdn.internal.util.TopologyServiceUtil;
@@ -150,7 +150,7 @@ public class TopologyServices implements ITopologyServiceShimListener,
 
     @Override
     public void setMdNotifService(NotificationProviderService s){
-        logger.trace("Setting IRefreshInternalProvider to: {}", s);
+        logger.trace("Setting NotificationProviderService to: {}", s);
         this.notifService = s;
     }
 

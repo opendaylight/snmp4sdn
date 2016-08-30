@@ -13,9 +13,9 @@ This code reused the code base of OpenFlow plugin contributed by Cisco Systems, 
 
 package org.opendaylight.snmp4sdn.internal;
 
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.NodeTable;
-import org.opendaylight.controller.sal.utils.NodeTableCreator;
+import org.opendaylight.snmp4sdn.sal.core.Node;
+import org.opendaylight.snmp4sdn.sal.core.NodeTable;
+import org.opendaylight.snmp4sdn.sal.utils.NodeTableCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

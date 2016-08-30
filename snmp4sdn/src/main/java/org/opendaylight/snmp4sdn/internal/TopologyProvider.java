@@ -129,7 +129,7 @@ public class TopologyProvider implements BindingAwareProvider, AutoCloseable {
 
     public void setTopologyService(ITopologyService topo) {
         if(topo == null)
-            logger.debug("ERROR: setTopologyServiceShim(): given null ITopologyService");
+            logger.debug("ERROR: setTopologyService(): given null ITopologyService");
         topoService = topo;
     }
 
