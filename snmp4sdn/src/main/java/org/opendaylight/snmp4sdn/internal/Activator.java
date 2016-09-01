@@ -276,10 +276,12 @@ public class Activator extends DependencyActivatorBase/*extends ComponentActivat
 
         //ConfigService
         manager.add(createComponent()
-                .setImplementation(config)
-                .add(createServiceDependency().setService(BindingAwareBroker.class).setRequired(true)
-                        .setCallbacks("setBroker", "unsetBroker")));
-        logger.debug("snmp4sdn: Activator: configured BindingAwareBroker, for ConfigService");
+                        .setImplementation(config)
+                        .add(createServiceDependency().setService(BindingAwareBroker.class).setRequired(true)
+                                .setCallbacks("setBroker", "unsetBroker"))
+                        .add(createServiceDependency().setService(IController.class).setRequired(true)
+                                .setCallbacks("setController", "unsetController")));
+        logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and IController, for ConfigService");
 
         //FdbService
         manager.add(createComponent()
