@@ -20,10 +20,10 @@ import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 
-import org.opendaylight.snmp4sdn.sal.core.Node;
-import org.opendaylight.snmp4sdn.sal.core.NodeConnector;
-import org.opendaylight.snmp4sdn.sal.utils.Status;
-import org.opendaylight.snmp4sdn.sal.utils.StatusCode;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 
 import org.opendaylight.snmp4sdn.VsFunctionName;
 import org.opendaylight.snmp4sdn.VlanAttributeTag;

@@ -21,8 +21,8 @@ This code reused the code base of OpenFlow plugin contributed by Cisco Systems, 
  */
 package org.opendaylight.snmp4sdn;
 
-import org.opendaylight.snmp4sdn.sal.packet.RawPacket;
-import org.opendaylight.snmp4sdn.sal.packet.PacketResult;
+import org.opendaylight.controller.sal.packet.RawPacket;
+import org.opendaylight.controller.sal.packet.PacketResult;
 
 /**
  * Interface to dispatch locally in the protocol plugin the

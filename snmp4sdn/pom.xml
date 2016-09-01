@@ -54,18 +54,18 @@
         <configuration>
           <instructions>
             <Import-Package>
-              org.opendaylight.snmp4sdn.sal.packet,
-              org.opendaylight.snmp4sdn.sal.action,
-              org.opendaylight.snmp4sdn.sal.discovery,
-              org.opendaylight.snmp4sdn.sal.topology,
-              org.opendaylight.snmp4sdn.sal.core,
-              org.opendaylight.snmp4sdn.sal.flowprogrammer,
-              org.opendaylight.snmp4sdn.sal.reader,
-              org.opendaylight.snmp4sdn.sal.inventory,
-              org.opendaylight.snmp4sdn.sal.match,
-              org.opendaylight.snmp4sdn.sal.utils,
+              org.opendaylight.controller.sal.packet,
+              org.opendaylight.controller.sal.action,
+              org.opendaylight.controller.sal.discovery,
+              org.opendaylight.controller.sal.topology,
+              org.opendaylight.controller.sal.core,
+              org.opendaylight.controller.sal.flowprogrammer,
+              org.opendaylight.controller.sal.reader,
+              org.opendaylight.controller.sal.inventory,
+              org.opendaylight.controller.sal.match,
+              org.opendaylight.controller.sal.utils,
               <!--org.opendaylight.controller.topologymanager,--><!--remove this because nsf.managers feature can't be installed successfully--><!--need this due to snmp4sdn's waitOtherNecessaryBundle()-->
-              <!--org.opendaylight.snmp4sdn.sal.vlan,//ad-sal-->
+              <!--org.opendaylight.controller.sal.vlan,//ad-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.types.rev150126,<!--md-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev150515,<!--md-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev150515.get.vlan.table.output,<!--md-sal-->
@@ -129,9 +129,9 @@
       <artifactId>org.osgi.core</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.snmp4sdn</groupId>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
-      <version>0.7.0</version>
+      <version>0.7.0</version><!--0.7.0-withVLAN--><!--//prg. custom ad-sal-->
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller.thirdparty</groupId>
@@ -212,6 +212,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.dependencymanager</artifactId>
+      <version>3.1.0</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

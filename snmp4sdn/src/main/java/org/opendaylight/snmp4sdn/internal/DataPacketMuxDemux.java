@@ -37,19 +37,19 @@ import org.openflow.protocol.action.OFActionOutput;*/
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.opendaylight.snmp4sdn.sal.core.ConstructionException;
-import org.opendaylight.snmp4sdn.sal.core.ContainerFlow;
-import org.opendaylight.snmp4sdn.sal.core.IContainerAware;
-import org.opendaylight.snmp4sdn.sal.core.IContainerListener;
-import org.opendaylight.snmp4sdn.sal.core.Node;
-import org.opendaylight.snmp4sdn.sal.core.NodeConnector;
-import org.opendaylight.snmp4sdn.sal.core.Property;
-import org.opendaylight.snmp4sdn.sal.core.UpdateType;
-import org.opendaylight.snmp4sdn.sal.packet.IPluginOutDataPacketService;
-import org.opendaylight.snmp4sdn.sal.packet.PacketResult;
-import org.opendaylight.snmp4sdn.sal.packet.RawPacket;
-import org.opendaylight.snmp4sdn.sal.utils.GlobalConstants;
-import org.opendaylight.snmp4sdn.sal.utils.HexEncode;
+import org.opendaylight.controller.sal.core.ConstructionException;
+import org.opendaylight.controller.sal.core.ContainerFlow;
+import org.opendaylight.controller.sal.core.IContainerAware;
+import org.opendaylight.controller.sal.core.IContainerListener;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.Property;
+import org.opendaylight.controller.sal.core.UpdateType;
+import org.opendaylight.controller.sal.packet.IPluginOutDataPacketService;
+import org.opendaylight.controller.sal.packet.PacketResult;
+import org.opendaylight.controller.sal.packet.RawPacket;
+import org.opendaylight.controller.sal.utils.GlobalConstants;
+import org.opendaylight.controller.sal.utils.HexEncode;
 
 import org.opendaylight.snmp4sdn.protocol.SNMPMessage;
 import org.opendaylight.snmp4sdn.protocol.SNMPPacketIn;

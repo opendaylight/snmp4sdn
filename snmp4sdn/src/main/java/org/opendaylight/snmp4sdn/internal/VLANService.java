@@ -13,12 +13,12 @@ import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 
-import org.opendaylight.snmp4sdn.sal.core.ConstructionException;
-import org.opendaylight.snmp4sdn.sal.core.Node;
-import org.opendaylight.snmp4sdn.sal.core.Node.NodeIDType;
-import org.opendaylight.snmp4sdn.sal.core.NodeConnector;
-import org.opendaylight.snmp4sdn.sal.utils.Status;
-import org.opendaylight.snmp4sdn.sal.utils.StatusCode;
+import org.opendaylight.controller.sal.core.ConstructionException;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.Node.NodeIDType;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 
 import org.opendaylight.snmp4sdn.VLANTable;
 import org.opendaylight.snmp4sdn.VLANTable.VLANTableEntry;
@@ -29,9 +29,9 @@ import org.opendaylight.snmp4sdn.VLANTable;
 import org.opendaylight.snmp4sdn.VLANTable.VLANTableEntry;*/
 
 //custom ad-sal
-/*import org.opendaylight.snmp4sdn.sal.vlan.IPluginInVLANService;
-import org.opendaylight.snmp4sdn.sal.vlan.VLANTable;
-import org.opendaylight.snmp4sdn.sal.vlan.VLANTable.VLANTableEntry;*/
+/*import org.opendaylight.controller.sal.vlan.IPluginInVLANService;
+import org.opendaylight.controller.sal.vlan.VLANTable;
+import org.opendaylight.controller.sal.vlan.VLANTable.VLANTableEntry;*/
 
 //md-sal
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.types.rev150126.Result;

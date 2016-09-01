@@ -36,10 +36,10 @@ import org.opendaylight.snmp4sdn.core.IController;
 import org.opendaylight.snmp4sdn.core.IMessageListener;
 import org.opendaylight.snmp4sdn.core.ISwitch;
 import org.opendaylight.snmp4sdn.core.ISwitchStateListener;
-import org.opendaylight.snmp4sdn.sal.core.Node;
-import org.opendaylight.snmp4sdn.sal.core.NodeConnector;
-import org.opendaylight.snmp4sdn.sal.core.Config;
-import org.opendaylight.snmp4sdn.sal.core.State;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.Config;
+import org.opendaylight.controller.sal.core.State;
 //import org.opendaylight.snmp4sdn.internal.ConfigService;
 import org.opendaylight.snmp4sdn.internal.SNMPHandler;
 import org.opendaylight.snmp4sdn.internal.SNMPListener;
@@ -47,7 +47,7 @@ import org.opendaylight.snmp4sdn.internal.VLANService;
 import org.opendaylight.snmp4sdn.ICore;//karaf
 
 //import org.opendaylight.snmp4sdn.VLANTable;//no-sal
-//import org.opendaylight.snmp4sdn.sal.vlan.VLANTable;//ad-sal
+//import org.opendaylight.controller.sal.vlan.VLANTable;//ad-sal
 
 import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
 import org.opendaylight.snmp4sdn.protocol.SNMPMessage;
@@ -285,13 +285,13 @@ public class Controller implements IController, ICore, CommandProvider {
             //Fortunately, it's fine to skip checking SAL bundle.
         Bundle salTopoBundle = null;
         while(salTopoBundle == null){
-            logger.debug("waitOtherNecessaryBundle(): snmp4sdn plugin required bundle \"org.opendaylight.snmp4sdn.sal.implementation.internal.Topology\" is null");
+            logger.debug("waitOtherNecessaryBundle(): snmp4sdn plugin required bundle \"org.opendaylight.controller.sal.implementation.internal.Topology\" is null");
             try{
-                Class salClass = Class.forName("org.opendaylight.snmp4sdn.sal.implementation.internal.Topology");
-                //Class<org.opendaylight.snmp4sdn.sal.implementation.internal.Topology> salClass = (org.opendaylight.snmp4sdn.sal.implementation.internal.Topology)Class.forName("org.opendaylight.snmp4sdn.sal.implementation.internal.Topology");
+                Class salClass = Class.forName("org.opendaylight.controller.sal.implementation.internal.Topology");
+                //Class<org.opendaylight.controller.sal.implementation.internal.Topology> salClass = (org.opendaylight.controller.sal.implementation.internal.Topology)Class.forName("org.opendaylight.controller.sal.implementation.internal.Topology");
                 salTopoBundle = FrameworkUtil.getBundle(salClass);
             }catch(Exception e1){
-                logger.debug("waitOtherNecessaryBundle(): try to get Class of \"org.opendaylight.snmp4sdn.sal.implementation.internal.Topology\" error: {}", e1);
+                logger.debug("waitOtherNecessaryBundle(): try to get Class of \"org.opendaylight.controller.sal.implementation.internal.Topology\" error: {}", e1);
             }
             try{
                 Thread.sleep(1000);
@@ -306,7 +306,7 @@ public class Controller implements IController, ICore, CommandProvider {
                 logger.debug("waitOtherNecessaryBundle(): waiting for salTopoBundle to ready, Thread.sleep() error: {}", e1);
             }
         }
-        logger.debug("waitOtherNecessaryBundle(): snmp4sdn plugin required bundle \"org.opendaylight.snmp4sdn.sal.implementation.internal.Topology\" is ready");
+        logger.debug("waitOtherNecessaryBundle(): snmp4sdn plugin required bundle \"org.opendaylight.controller.sal.implementation.internal.Topology\" is ready");
         */
 
         /*//remove the checking for topoMgr because nsf.managers feature can't be installed successfully

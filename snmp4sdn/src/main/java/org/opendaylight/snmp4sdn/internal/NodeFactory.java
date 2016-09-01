@@ -8,9 +8,9 @@
 
 package org.opendaylight.snmp4sdn.internal;
 
-import org.opendaylight.snmp4sdn.sal.core.ConstructionException;
-import org.opendaylight.snmp4sdn.sal.utils.INodeFactory;
-import org.opendaylight.snmp4sdn.sal.core.Node;
+import org.opendaylight.controller.sal.core.ConstructionException;
+import org.opendaylight.controller.sal.utils.INodeFactory;
+import org.opendaylight.controller.sal.core.Node;
 
 public class NodeFactory implements INodeFactory
     {

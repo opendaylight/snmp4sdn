@@ -20,16 +20,16 @@ import org.opendaylight.snmp4sdn.IPluginReadServiceFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.opendaylight.snmp4sdn.sal.core.Node;
-import org.opendaylight.snmp4sdn.sal.core.Node.NodeIDType;
-import org.opendaylight.snmp4sdn.sal.core.NodeConnector;
-import org.opendaylight.snmp4sdn.sal.core.NodeTable;
-import org.opendaylight.snmp4sdn.sal.flowprogrammer.Flow;
-import org.opendaylight.snmp4sdn.sal.reader.FlowOnNode;
-import org.opendaylight.snmp4sdn.sal.reader.IPluginInReadService;
-import org.opendaylight.snmp4sdn.sal.reader.NodeConnectorStatistics;
-import org.opendaylight.snmp4sdn.sal.reader.NodeDescription;
-import org.opendaylight.snmp4sdn.sal.reader.NodeTableStatistics;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.Node.NodeIDType;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.NodeTable;
+import org.opendaylight.controller.sal.flowprogrammer.Flow;
+import org.opendaylight.controller.sal.reader.FlowOnNode;
+import org.opendaylight.controller.sal.reader.IPluginInReadService;
+import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
+import org.opendaylight.controller.sal.reader.NodeDescription;
+import org.opendaylight.controller.sal.reader.NodeTableStatistics;
 
 /**
  * Container Instance of IPluginInReadService implementation class

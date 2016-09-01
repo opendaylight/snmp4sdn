@@ -10,20 +10,20 @@ package org.opendaylight.snmp4sdn.internal;
 
 import org.snmpj.*;
 
-import org.opendaylight.snmp4sdn.sal.action.Action;
-import org.opendaylight.snmp4sdn.sal.action.ActionType;
-import org.opendaylight.snmp4sdn.sal.action.Output;
-import org.opendaylight.snmp4sdn.sal.flowprogrammer.Flow;
-import org.opendaylight.snmp4sdn.sal.match.Match;
-import org.opendaylight.snmp4sdn.sal.match.MatchField;
-import org.opendaylight.snmp4sdn.sal.match.MatchType;
-import org.opendaylight.snmp4sdn.sal.core.ConstructionException;
-import org.opendaylight.snmp4sdn.sal.core.Node;
-import org.opendaylight.snmp4sdn.sal.core.NodeConnector;
-import org.opendaylight.snmp4sdn.sal.reader.FlowOnNode;
-import org.opendaylight.snmp4sdn.sal.utils.NodeConnectorCreator;
-import org.opendaylight.snmp4sdn.sal.utils.Status;
-import org.opendaylight.snmp4sdn.sal.utils.StatusCode;
+import org.opendaylight.controller.sal.action.Action;
+import org.opendaylight.controller.sal.action.ActionType;
+import org.opendaylight.controller.sal.action.Output;
+import org.opendaylight.controller.sal.flowprogrammer.Flow;
+import org.opendaylight.controller.sal.match.Match;
+import org.opendaylight.controller.sal.match.MatchField;
+import org.opendaylight.controller.sal.match.MatchType;
+import org.opendaylight.controller.sal.core.ConstructionException;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.reader.FlowOnNode;
+import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
+import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 
 import org.opendaylight.snmp4sdn.protocol.util.HexString;
 import org.opendaylight.snmp4sdn.protocol.SNMPFlowMod;
@@ -35,7 +35,7 @@ import org.opendaylight.snmp4sdn.STPPortState;
 import org.opendaylight.snmp4sdn.FDBEntry;
 
 import org.opendaylight.snmp4sdn.VLANTable;
-//import org.opendaylight.snmp4sdn.sal.vlan.VLANTable;//ad-sal
+//import org.opendaylight.controller.sal.vlan.VLANTable;//ad-sal
 
 //for vendor-specific
 import org.opendaylight.snmp4sdn.VsFunctionName;

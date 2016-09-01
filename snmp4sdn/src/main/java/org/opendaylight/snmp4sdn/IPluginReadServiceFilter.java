@@ -14,14 +14,14 @@ package org.opendaylight.snmp4sdn;
 
 import java.util.List;
 
-import org.opendaylight.snmp4sdn.sal.core.Node;
-import org.opendaylight.snmp4sdn.sal.core.NodeConnector;
-import org.opendaylight.snmp4sdn.sal.core.NodeTable;
-import org.opendaylight.snmp4sdn.sal.flowprogrammer.Flow;
-import org.opendaylight.snmp4sdn.sal.reader.FlowOnNode;
-import org.opendaylight.snmp4sdn.sal.reader.NodeConnectorStatistics;
-import org.opendaylight.snmp4sdn.sal.reader.NodeDescription;
-import org.opendaylight.snmp4sdn.sal.reader.NodeTableStatistics;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.NodeTable;
+import org.opendaylight.controller.sal.flowprogrammer.Flow;
+import org.opendaylight.controller.sal.reader.FlowOnNode;
+import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
+import org.opendaylight.controller.sal.reader.NodeDescription;
+import org.opendaylight.controller.sal.reader.NodeTableStatistics;
 
 /**
  * Interface to serve the hardware information requests coming from SAL

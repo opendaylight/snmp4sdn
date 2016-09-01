@@ -15,8 +15,8 @@ package org.opendaylight.snmp4sdn.internal;
 import org.opendaylight.snmp4sdn.IDataPacketMux;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.opendaylight.snmp4sdn.sal.packet.IPluginInDataPacketService;
-import org.opendaylight.snmp4sdn.sal.packet.RawPacket;
+import org.opendaylight.controller.sal.packet.IPluginInDataPacketService;
+import org.opendaylight.controller.sal.packet.RawPacket;
 
 public class DataPacketServices implements IPluginInDataPacketService {
     protected static final Logger logger = LoggerFactory

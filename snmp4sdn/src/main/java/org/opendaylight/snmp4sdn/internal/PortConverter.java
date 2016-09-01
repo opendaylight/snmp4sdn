@@ -12,12 +12,12 @@ This code reused the code base of OpenFlow plugin contributed by Cisco Systems, 
 
 package org.opendaylight.snmp4sdn.internal;
 
-import org.opendaylight.snmp4sdn.sal.core.ConstructionException;
-import org.opendaylight.snmp4sdn.sal.core.Node;
-import org.opendaylight.snmp4sdn.sal.core.NodeConnector;
-import org.opendaylight.snmp4sdn.sal.core.NodeConnector.NodeConnectorIDType;
-import org.opendaylight.snmp4sdn.sal.utils.NetUtils;
-import org.opendaylight.snmp4sdn.sal.utils.NodeConnectorCreator;
+import org.opendaylight.controller.sal.core.ConstructionException;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.NodeConnector.NodeConnectorIDType;
+import org.opendaylight.controller.sal.utils.NetUtils;
+import org.opendaylight.controller.sal.utils.NodeConnectorCreator;
 import org.openflow.protocol.OFPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

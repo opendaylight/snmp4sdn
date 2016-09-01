@@ -8,10 +8,10 @@
 
 package org.opendaylight.snmp4sdn;
 
-import org.opendaylight.snmp4sdn.sal.core.Node;
-import org.opendaylight.snmp4sdn.sal.core.NodeConnector;
-import org.opendaylight.snmp4sdn.sal.utils.Status;
-import org.opendaylight.snmp4sdn.sal.utils.StatusCode;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 
 /**
  * Interface that defines the methods to be implemented by vendors for configration

@@ -8,10 +8,10 @@
 
 package org.opendaylight.snmp4sdn;
 
-import org.opendaylight.snmp4sdn.sal.core.Node;
-import org.opendaylight.snmp4sdn.sal.core.NodeConnector;
-import org.opendaylight.snmp4sdn.sal.utils.Status;
-//import org.opendaylight.snmp4sdn.sal.vlan.VLANTable;//ad-sal
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.utils.Status;
+//import org.opendaylight.controller.sal.vlan.VLANTable;//ad-sal
 import org.opendaylight.snmp4sdn.VLANTable;//no-sal
 
 import java.util.List;

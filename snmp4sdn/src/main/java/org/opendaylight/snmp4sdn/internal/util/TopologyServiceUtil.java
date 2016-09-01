@@ -8,9 +8,9 @@
 
 package org.opendaylight.snmp4sdn.internal.util;
 
-import org.opendaylight.snmp4sdn.sal.core.Edge;
-import org.opendaylight.snmp4sdn.sal.core.Node;
-import org.opendaylight.snmp4sdn.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.Edge;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

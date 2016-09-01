@@ -14,9 +14,9 @@ package org.opendaylight.snmp4sdn.internal;
 
 import org.apache.felix.dm.Component;
 import org.opendaylight.snmp4sdn.IFlowProgrammerNotifier;
-import org.opendaylight.snmp4sdn.sal.core.Node;
-import org.opendaylight.snmp4sdn.sal.flowprogrammer.Flow;
-import org.opendaylight.snmp4sdn.sal.flowprogrammer.IPluginOutFlowProgrammerService;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.flowprogrammer.Flow;
+import org.opendaylight.controller.sal.flowprogrammer.IPluginOutFlowProgrammerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

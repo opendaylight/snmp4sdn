@@ -28,8 +28,8 @@ import org.openflow.protocol.factory.BasicFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.opendaylight.snmp4sdn.sal.utils.Status;//s4s add
-import org.opendaylight.snmp4sdn.sal.utils.StatusCode;//s4s add
+import org.opendaylight.controller.sal.utils.Status;//s4s add
+import org.opendaylight.controller.sal.utils.StatusCode;//s4s add
 
 import org.opendaylight.snmp4sdn.protocol.SNMPFlowMod;//s4s add
 import org.opendaylight.snmp4sdn.protocol.SNMPMessage;//s4s add

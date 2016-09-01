@@ -41,19 +41,19 @@ import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.opendaylight.snmp4sdn.sal.core.Bandwidth;
-import org.opendaylight.snmp4sdn.sal.core.Config;
-import org.opendaylight.snmp4sdn.sal.core.ContainerFlow;
-import org.opendaylight.snmp4sdn.sal.core.Edge;
-import org.opendaylight.snmp4sdn.sal.core.IContainerAware;
-import org.opendaylight.snmp4sdn.sal.core.IContainerListener;
-import org.opendaylight.snmp4sdn.sal.core.Node;
-import org.opendaylight.snmp4sdn.sal.core.NodeConnector;
-import org.opendaylight.snmp4sdn.sal.core.Property;
-import org.opendaylight.snmp4sdn.sal.core.State;
-import org.opendaylight.snmp4sdn.sal.core.UpdateType;
-import org.opendaylight.snmp4sdn.sal.topology.TopoEdgeUpdate;
-import org.opendaylight.snmp4sdn.sal.utils.GlobalConstants;
+import org.opendaylight.controller.sal.core.Bandwidth;
+import org.opendaylight.controller.sal.core.Config;
+import org.opendaylight.controller.sal.core.ContainerFlow;
+import org.opendaylight.controller.sal.core.Edge;
+import org.opendaylight.controller.sal.core.IContainerAware;
+import org.opendaylight.controller.sal.core.IContainerListener;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.Property;
+import org.opendaylight.controller.sal.core.State;
+import org.opendaylight.controller.sal.core.UpdateType;
+import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
+import org.opendaylight.controller.sal.utils.GlobalConstants;
 
 /**
  * The class describes a shim layer that relays the topology events from

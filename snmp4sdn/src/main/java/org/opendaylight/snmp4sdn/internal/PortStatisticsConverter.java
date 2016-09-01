@@ -15,10 +15,10 @@ package org.opendaylight.snmp4sdn.internal;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendaylight.snmp4sdn.sal.core.ConstructionException;
-import org.opendaylight.snmp4sdn.sal.core.Node;
-import org.opendaylight.snmp4sdn.sal.reader.NodeConnectorStatistics;
-import org.opendaylight.snmp4sdn.sal.utils.NodeCreator;
+import org.opendaylight.controller.sal.core.ConstructionException;
+import org.opendaylight.controller.sal.core.Node;
+import org.opendaylight.controller.sal.reader.NodeConnectorStatistics;
+import org.opendaylight.controller.sal.utils.NodeCreator;
 import org.openflow.protocol.statistics.OFPortStatisticsReply;
 import org.openflow.protocol.statistics.OFStatistics;
 import org.slf4j.Logger;

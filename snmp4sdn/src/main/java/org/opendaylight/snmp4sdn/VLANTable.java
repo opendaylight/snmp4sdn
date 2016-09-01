@@ -8,7 +8,7 @@
 
 package org.opendaylight.snmp4sdn;
 
-import org.opendaylight.snmp4sdn.sal.core.NodeConnector;
+import org.opendaylight.controller.sal.core.NodeConnector;
 
 import java.util.ArrayList;
 import java.util.Collection;

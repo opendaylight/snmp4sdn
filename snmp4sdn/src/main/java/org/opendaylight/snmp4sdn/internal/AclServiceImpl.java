@@ -12,8 +12,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opendaylight.snmp4sdn.sal.utils.Status;
-import org.opendaylight.snmp4sdn.sal.utils.StatusCode;
+import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.controller.sal.utils.StatusCode;
 import org.opendaylight.snmp4sdn.core.internal.Controller;
 import org.opendaylight.snmp4sdn.core.IController;
 import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
