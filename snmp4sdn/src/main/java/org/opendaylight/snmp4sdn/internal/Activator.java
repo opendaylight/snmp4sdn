@@ -397,8 +397,6 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
             logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and IController, for SwitchDb");
         }
         if (imp == topo) {
-            c.add(createServiceDependency().setService(BindingAwareBroker.class)
-                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             c.add(createServiceDependency()
                     .setService(ITopologyService.class)
                     .setCallbacks("setTopologyService", "unsetTopologyService").setRequired(true));
@@ -411,6 +409,20 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
             c.add(createServiceDependency()
                     .setService(DiscoveryServiceAPI.class/*, "(name=XXX)"*/)/*Memo: name=XXX was given, then setService() fails!*/
                     .setCallbacks("setDiscoveryService", "unsetDiscoveryService").setRequired(true));
+            c.add(createServiceDependency().setService(BindingAwareBroker.class)
+                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
+                        //NOTICE: the md-sal binding item (BindingAwareBroker) needs to be the last one,
+                        //          among the add() items above.
+                        //          This is because that in the TopologyProvider.setBroker(),
+                        //          BindingAwareBroker.registerProvider() is called, 
+                        //          which BindingAwareBroker automatically triggers
+                        //          TopologyProvider.onSessionInitiated(),
+                        //          however in onSessionInitiated() the ITopologyService is used,
+                        //          ITopologyService is one of the add() items above
+                        //
+                        //      For the similar reason, the md-sal services registrations above,
+                        //      needs to be the last ones in Activator.init()
+                        //
             logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and DiscoveryServiceAPI, for TopologyService");
         }
 

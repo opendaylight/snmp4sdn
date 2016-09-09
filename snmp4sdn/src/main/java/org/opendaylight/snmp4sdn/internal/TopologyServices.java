@@ -27,7 +27,6 @@ import org.opendaylight.controller.sal.topology.IPluginOutTopologyService;
 import org.opendaylight.controller.sal.topology.TopoEdgeUpdate;
 
 import org.opendaylight.snmp4sdn.ITopologyService;
-import org.opendaylight.snmp4sdn.internal.util.TopologyServiceUtil;
 
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -150,7 +149,7 @@ public class TopologyServices implements ITopologyServiceShimListener,
 
     @Override
     public void setMdNotifService(NotificationProviderService s){
-        logger.trace("Setting IRefreshInternalProvider to: {}", s);
+        logger.trace("Setting NotificationProviderService to: {}", s);
         this.notifService = s;
     }
 
@@ -176,7 +175,7 @@ public class TopologyServices implements ITopologyServiceShimListener,
             this.salTopoService.edgeUpdate(topoedgeupdateList);
         }
         else
-            logger.debug("ERROR: edgeUpdate(): IPluginOutTopologyService is null!");
+            ;//logger.debug("ERROR: edgeUpdate(): IPluginOutTopologyService is null!");
 
         //to md-sal
         logger.trace("report to md-sal...");
@@ -213,11 +212,27 @@ public class TopologyServices implements ITopologyServiceShimListener,
     private LinkDiscovered makeAddLink(Edge edge){
 
         String headNodeIdStr = null, tailNodeIdStr = null, headNcIdStr = null, tailNcIdStr = null;
-        boolean bool = TopologyServiceUtil.getNodeAndNcIdString(edge, headNodeIdStr, tailNodeIdStr, headNcIdStr, tailNcIdStr);
-        if(bool == false){
-            logger.debug("ERROR: makeAddLink(): given Edge {}, call TopologyServiceUtil.getNodeAndNcIdString() fail", edge);
+
+        if(edge.getHeadNodeConnector() == null){
+            logger.debug("ERROR: makeAddLink(): given edge {}, head nodeconnector is null!", edge);
             return null;
         }
+        if(edge.getTailNodeConnector() == null){
+            logger.debug("ERROR: makeAddLink(): given edge {}, tail nodeconnector is null!");
+            return null;
+        }
+        if(edge.getHeadNodeConnector().getNode() == null){
+            logger.debug("ERROR: makeAddLink(): given edge {}, edge's head node is null!");
+            return null;
+        }
+        if(edge.getTailNodeConnector().getNode() == null){
+            logger.debug("ERROR: gmakeAddLink(): given edge {}, edge's tail node is null!");
+            return null;
+        }
+        headNodeIdStr = edge.getHeadNodeConnector().getNode().getNodeIDString();
+        tailNodeIdStr = edge.getTailNodeConnector().getNode().getNodeIDString();
+        headNcIdStr = edge.getHeadNodeConnector().getNodeConnectorIDString();
+        tailNcIdStr = edge.getTailNodeConnector().getNodeConnectorIDString();
 
         NodeId localNodeId = new NodeId(headNodeIdStr);
         NodeConnectorId localNodeConnectorId = new NodeConnectorId(headNcIdStr);
@@ -242,11 +257,27 @@ public class TopologyServices implements ITopologyServiceShimListener,
     private LinkRemoved makeRemoveLink(Edge edge){
 
         String headNodeIdStr = null, tailNodeIdStr = null, headNcIdStr = null, tailNcIdStr = null;
-        boolean bool = TopologyServiceUtil.getNodeAndNcIdString(edge, headNodeIdStr, tailNodeIdStr, headNcIdStr, tailNcIdStr);
-        if(bool == false){
-            logger.debug("ERROR: makeAddLink(): given Edge {}, call TopologyServiceUtil.getNodeAndNcIdString() fail", edge);
+
+        if(edge.getHeadNodeConnector() == null){
+            logger.debug("ERROR: makeAddLink(): given edge {}, head nodeconnector is null!", edge);
             return null;
         }
+        if(edge.getTailNodeConnector() == null){
+            logger.debug("ERROR: makeAddLink(): given edge {}, tail nodeconnector is null!");
+            return null;
+        }
+        if(edge.getHeadNodeConnector().getNode() == null){
+            logger.debug("ERROR: makeAddLink(): given edge {}, edge's head node is null!");
+            return null;
+        }
+        if(edge.getTailNodeConnector().getNode() == null){
+            logger.debug("ERROR: gmakeAddLink(): given edge {}, edge's tail node is null!");
+            return null;
+        }
+        headNodeIdStr = edge.getHeadNodeConnector().getNode().getNodeIDString();
+        tailNodeIdStr = edge.getTailNodeConnector().getNode().getNodeIDString();
+        headNcIdStr = edge.getHeadNodeConnector().getNodeConnectorIDString();
+        tailNcIdStr = edge.getTailNodeConnector().getNodeConnectorIDString();
 
         NodeId localNodeId = new NodeId(headNodeIdStr);
         NodeConnectorId localNodeConnectorId = new NodeConnectorId(headNcIdStr);
