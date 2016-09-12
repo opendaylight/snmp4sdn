@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a6b29fe_73eb2513",
+        "filename": "sal/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2016-09-12T12:05:01Z",
+      "side": 1,
+      "message": "Ordinary merge jobs are not allowed to upload non-snapshot versioned artifacts.\nI recommend to specify 0.11.0-SNAPSHOT, as 0.9.* was used in Lithium.\n\nhttps://nexus.opendaylight.org/content/repositories/opendaylight.release/org/opendaylight/controller/sal/",
+      "range": {
+        "startLine": 30,
+        "startChar": 11,
+        "endLine": 30,
+        "endChar": 16
+      },
+      "revId": "44b03414403b3c3f9b0b007849937fe484def342",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a6b29fe_93f6c1f7",
+        "filename": "snmp4sdn/pom.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2016-09-12T12:05:01Z",
+      "side": 1,
+      "message": "Snapshot version here as well.",
+      "range": {
+        "startLine": 134,
+        "startChar": 15,
+        "endLine": 134,
+        "endChar": 20
+      },
+      "revId": "44b03414403b3c3f9b0b007849937fe484def342",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
