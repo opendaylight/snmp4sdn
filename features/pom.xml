@@ -119,13 +119,6 @@
           <classifier>features</classifier>
           <type>xml</type>
         </dependency>
-        <!--<dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>features-base</artifactId>
-          <version>${commons.opendaylight.version}</version>
-          <classifier>features</classifier>
-          <type>xml</type>
-        </dependency>-->
 
         <!-- test to validate features.xml -->
         <dependency>
