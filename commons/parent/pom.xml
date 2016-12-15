@@ -9,13 +9,13 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent</artifactId>
-    <version>1.7.2-SNAPSHOT</version>
+    <version>1.7.2-Boron-SR2</version>
     <relativePath></relativePath>
   </parent>
 
   <groupId>org.opendaylight.snmp4sdn</groupId>
   <artifactId>commons.parent</artifactId>
-  <version>0.4.2-SNAPSHOT</version>
+  <version>0.4.2-Boron-SR2</version>
   <packaging>pom</packaging>
 
   <name>Parent POM</name>
