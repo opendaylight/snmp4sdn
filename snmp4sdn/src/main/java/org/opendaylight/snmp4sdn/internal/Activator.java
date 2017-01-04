@@ -357,43 +357,43 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
 
         //md-sal (the following items: config, fdb, acl, vlan, switchdb, topo)
         if (imp == config) {
-            c.add(createServiceDependency().setService(BindingAwareBroker.class)
-                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
                     .setCallbacks("setController", "unsetController").setRequired(true));
+            c.add(createServiceDependency().setService(BindingAwareBroker.class)
+                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and IController, for ConfigService");
         }
         if (imp == fdb) {
-            c.add(createServiceDependency().setService(BindingAwareBroker.class)
-                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
                     .setCallbacks("setController", "unsetController").setRequired(true));
+            c.add(createServiceDependency().setService(BindingAwareBroker.class)
+                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and IController, for FdbService");
         }
         if (imp == acl) {
-            c.add(createServiceDependency().setService(BindingAwareBroker.class)
-                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
                     .setCallbacks("setController", "unsetController").setRequired(true));
+            c.add(createServiceDependency().setService(BindingAwareBroker.class)
+                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and IController, for AclService");
         }
         if (imp == vlan) {
-            c.add(createServiceDependency().setService(BindingAwareBroker.class)
-                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
                     .setCallbacks("setController", "unsetController").setRequired(true));
+            c.add(createServiceDependency().setService(BindingAwareBroker.class)
+                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and IController, for VlanService");
         }
         if (imp == switchdb) {
-            c.add(createServiceDependency().setService(BindingAwareBroker.class)
-                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
                     .setCallbacks("setController", "unsetController").setRequired(true));
+            c.add(createServiceDependency().setService(BindingAwareBroker.class)
+                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and IController, for SwitchDb");
         }
         if (imp == topo) {
