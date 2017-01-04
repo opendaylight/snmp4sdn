@@ -29,7 +29,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.node.list.output.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.node.connector.list.output.*;
 
-import org.opendaylight.snmp4sdn.ITopologyService;
+import org.opendaylight.snmp4sdn.ITopologyServiceShim;
 import org.opendaylight.snmp4sdn.IInventoryProvider;
 import org.opendaylight.snmp4sdn.DiscoveryServiceAPI;
 
@@ -65,7 +65,7 @@ import org.slf4j.LoggerFactory;
 public class TopologyImpl implements TopologyService, CommandProvider{
     private static final Logger logger = LoggerFactory.getLogger(TopologyImpl.class);
 
-    private ITopologyService topo = null;
+    private ITopologyServiceShim topo = null;
     private IInventoryProvider inv = null;
     private DiscoveryServiceAPI discov = null;
 
@@ -85,18 +85,18 @@ public class TopologyImpl implements TopologyService, CommandProvider{
                 null);
     }
 
-    public void setTopologyServiceShim(ITopologyService topo) {
+    public void setTopologyServiceShim(ITopologyServiceShim topo) {
         if(topo == null)
-            logger.debug("ERROR: setTopologyServiceShim(): given null ITopologyService");
+            logger.debug("ERROR: setTopologyServiceShim(): given null ITopologyServiceShim");
         this.topo = topo;
     }
 
-    public void unsetTopologyServiceShim(ITopologyService topo) {
+    public void unsetTopologyServiceShim(ITopologyServiceShim topo) {
         if (this.topo == topo) {
             this.topo = null;
         }
         else
-            logger.debug("ERROR: unsetTopologyServiceShim(): given ITopologyService is not the local one");
+            logger.debug("ERROR: unsetTopologyServiceShim(): given ITopologyServiceShim is not the local one");
     }
 
     public void setInventoryService(IInventoryProvider inv) {
@@ -169,14 +169,14 @@ public class TopologyImpl implements TopologyService, CommandProvider{
     @Override
     public Future<RpcResult<GetEdgeListOutput>> getEdgeList(){
         if(topo == null){
-            logger.debug("ERROR: getEdgeList(): ITopologyService is null, can't proceed");
+            logger.debug("ERROR: getEdgeList(): ITopologyServiceShim is null, can't proceed");
             return createGetEdgeListFailRpcResult();
         }
 
         List<Edge> edgeList = topo.getEdgeList();
 
         if(edgeList == null){
-            logger.debug("ERROR: getEdgeList(): call ITopologyService.getEdgeList() returns null");
+            logger.debug("ERROR: getEdgeList(): call ITopologyServiceShim.getEdgeList() returns null");
             return createGetEdgeListFailRpcResult();
         }
 
@@ -184,63 +184,63 @@ public class TopologyImpl implements TopologyService, CommandProvider{
         for(Edge edge : edgeList){
             //check parameters
             if(edge == null){
-                logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyService.getEdgeList() is null");
+                logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyServiceShim.getEdgeList() is null");
                 return createGetEdgeListFailRpcResult();
             }
             if(edge.getHeadNodeConnector() == null){
-                logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyService.getEdgeList() has null headNodeConnector");
+                logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyServiceShim.getEdgeList() has null headNodeConnector");
                 return createGetEdgeListFailRpcResult();
             }
             if(edge.getTailNodeConnector() == null){
-                logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyService.getEdgeList() has null tailNodeConnector");
+                logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyServiceShim.getEdgeList() has null tailNodeConnector");
                 return createGetEdgeListFailRpcResult();
             }
             if(edge.getHeadNodeConnector().getNode() == null){
-                logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyService.getEdgeList() has null headNode");
+                logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyServiceShim.getEdgeList() has null headNode");
                 return createGetEdgeListFailRpcResult();
             }
             if(edge.getTailNodeConnector().getNode() == null){
-                logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyService.getEdgeList() has null tailNode");
+                logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyServiceShim.getEdgeList() has null tailNode");
                 return createGetEdgeListFailRpcResult();
             }
 
             //get the Type of head/tail Node/NodeConnector in the Edge, and check them
             String headNodeConnectorTypeStr = edge.getHeadNodeConnector().getType();
             if(headNodeConnectorTypeStr == null){
-                logger.debug("ERROR: getEdgeList(): an edge's head NodeConnector in the edgeList from ITopologyService.getEdgeList() has null Type");
+                logger.debug("ERROR: getEdgeList(): an edge's head NodeConnector in the edgeList from ITopologyServiceShim.getEdgeList() has null Type");
                 return createGetEdgeListFailRpcResult();
             }
             String tailNodeConnectorTypeStr = edge.getTailNodeConnector().getType();
             if(tailNodeConnectorTypeStr == null){
-                logger.debug("ERROR: getEdgeList(): an edge's tail NodeConnector in the edgeList from ITopologyService.getEdgeList() has null Type");
+                logger.debug("ERROR: getEdgeList(): an edge's tail NodeConnector in the edgeList from ITopologyServiceShim.getEdgeList() has null Type");
                 return createGetEdgeListFailRpcResult();
             }
             String headNodeTypeStr = edge.getHeadNodeConnector().getNode().getType();
             if(headNodeTypeStr == null){
-                logger.debug("ERROR: getEdgeList(): an edge's head Node in the edgeList from ITopologyService.getEdgeList() has null Type");
+                logger.debug("ERROR: getEdgeList(): an edge's head Node in the edgeList from ITopologyServiceShim.getEdgeList() has null Type");
                 return createGetEdgeListFailRpcResult();
             }
             String tailNodeTypeStr = edge.getTailNodeConnector().getNode().getType();
             if(tailNodeTypeStr == null){
-                logger.debug("ERROR: getEdgeList(): an edge's tail Node in the edgeList from ITopologyService.getEdgeList() has null Type");
+                logger.debug("ERROR: getEdgeList(): an edge's tail Node in the edgeList from ITopologyServiceShim.getEdgeList() has null Type");
                 return createGetEdgeListFailRpcResult();
             }
 
             //get the ID of head/tail Node/NodeConnector in the Edge, and check them
             if(edge.getHeadNodeConnector().getID() == null){
-                logger.debug("ERROR: getEdgeList(): an edge's head NodeConnector in the edgeList from ITopologyService.getEdgeList() has null ID");
+                logger.debug("ERROR: getEdgeList(): an edge's head NodeConnector in the edgeList from ITopologyServiceShim.getEdgeList() has null ID");
                 return createGetEdgeListFailRpcResult();
             }
             if(edge.getTailNodeConnector().getID() == null){
-                logger.debug("ERROR: getEdgeList(): an edge's tail NodeConnector in the edgeList from ITopologyService.getEdgeList() has null ID");
+                logger.debug("ERROR: getEdgeList(): an edge's tail NodeConnector in the edgeList from ITopologyServiceShim.getEdgeList() has null ID");
                 return createGetEdgeListFailRpcResult();
             }
             if(edge.getHeadNodeConnector().getNode().getID() == null){
-                logger.debug("ERROR: getEdgeList(): an edge's head Node in the edgeList from ITopologyService.getEdgeList() has null ID");
+                logger.debug("ERROR: getEdgeList(): an edge's head Node in the edgeList from ITopologyServiceShim.getEdgeList() has null ID");
                 return createGetEdgeListFailRpcResult();
             }
             if(edge.getTailNodeConnector().getNode().getID() == null){
-                logger.debug("ERROR: getEdgeList(): an edge's tail Node in the edgeList from ITopologyService.getEdgeList() has null ID");
+                logger.debug("ERROR: getEdgeList(): an edge's tail Node in the edgeList from ITopologyServiceShim.getEdgeList() has null ID");
                 return createGetEdgeListFailRpcResult();
             }
 
@@ -261,7 +261,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
                 entryBuilder.setHeadNodeConnectorId((String)(edge.getHeadNodeConnector().getID()));
             }
             else{
-                logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyService.getEdgeList() has head NodeConnector of unknown type: {}", headNodeConnectorTypeStr);
+                logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyServiceShim.getEdgeList() has head NodeConnector of unknown type: {}", headNodeConnectorTypeStr);
                 return createGetEdgeListFailRpcResult();
             }
 
@@ -279,7 +279,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
                 entryBuilder.setTailNodeConnectorId((String)(edge.getTailNodeConnector().getID()));
             }
             else{
-                logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyService.getEdgeList() has tail NodeConnector of unknown type: {}", tailNodeConnectorTypeStr);
+                logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyServiceShim.getEdgeList() has tail NodeConnector of unknown type: {}", tailNodeConnectorTypeStr);
                 return createGetEdgeListFailRpcResult();
             }
 
@@ -297,7 +297,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
                 entryBuilder.setHeadNodeId((String)(edge.getHeadNodeConnector().getNode().getID()));
             }
             else{
-                logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyService.getEdgeList() has head Node of unknown type: {}", headNodeTypeStr);
+                logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyServiceShim.getEdgeList() has head Node of unknown type: {}", headNodeTypeStr);
                 return createGetEdgeListFailRpcResult();
             }
 
@@ -315,7 +315,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
                 entryBuilder.setTailNodeId((String)(edge.getTailNodeConnector().getNode().getID()));
             }
             else{
-                logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyService.getEdgeList() has tail Node of unknown type: {}", tailNodeTypeStr);
+                logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyServiceShim.getEdgeList() has tail Node of unknown type: {}", tailNodeTypeStr);
                 return createGetEdgeListFailRpcResult();
             }
 
@@ -363,36 +363,36 @@ public class TopologyImpl implements TopologyService, CommandProvider{
         for(NodeConnector nodeConnector : nodeConnectorSet){
             //check parameters
             if(nodeConnector == null){
-                logger.debug("ERROR: getNodeConnectorList(): an NodeConnector from ITopologyService.getNodeConnectorProps() is null");
+                logger.debug("ERROR: getNodeConnectorList(): an NodeConnector from ITopologyServiceShim.getNodeConnectorProps() is null");
                 return createGetNodeConnectorListFailRpcResult();
             }
             Node node = nodeConnector.getNode();
             if(node == null){
-                logger.debug("ERROR: getNodeConnectorList(): an NodeConnector from ITopologyService.getNodeConnectorProps() has null Node");
+                logger.debug("ERROR: getNodeConnectorList(): an NodeConnector from ITopologyServiceShim.getNodeConnectorProps() has null Node");
                 return createGetNodeConnectorListFailRpcResult();
             }
             //check NodeConnector type
             String nodeConnectorTypeStr = nodeConnector.getType();
             if(nodeConnectorTypeStr == null){
-                logger.debug("ERROR: getNodeConnectorList(): an NodeConnector from ITopologyService.getNodeConnectorProps() has null Type");
+                logger.debug("ERROR: getNodeConnectorList(): an NodeConnector from ITopologyServiceShim.getNodeConnectorProps() has null Type");
                 return createGetNodeConnectorListFailRpcResult();
             }
             //check NodeConnector ID
             Object nodeConnectorID = nodeConnector.getID();
             if(nodeConnectorID == null){
-                logger.debug("ERROR: getNodeConnectorList(): an NodeConnector from ITopologyService.getNodeConnectorProps() has null ID");
+                logger.debug("ERROR: getNodeConnectorList(): an NodeConnector from ITopologyServiceShim.getNodeConnectorProps() has null ID");
                 return createGetNodeConnectorListFailRpcResult();
             }
             //check Node type
             String nodeTypeStr = node.getType();
             if(nodeTypeStr == null){
-                logger.debug("ERROR: getNodeConnectorList(): the Node of an NodeConnector from ITopologyService.getNodeConnectorProps() has null Type");
+                logger.debug("ERROR: getNodeConnectorList(): the Node of an NodeConnector from ITopologyServiceShim.getNodeConnectorProps() has null Type");
                 return createGetNodeConnectorListFailRpcResult();
             }
             //check Node ID
             Object nodeID = node.getID();
             if(nodeID == null){
-                logger.debug("ERROR: getNodeConnectorList(): the Node of an NodeConnector from ITopologyService.getNodeConnectorProps() has null ID");
+                logger.debug("ERROR: getNodeConnectorList(): the Node of an NodeConnector from ITopologyServiceShim.getNodeConnectorProps() has null ID");
                 return createGetNodeConnectorListFailRpcResult();
             }
 
@@ -413,7 +413,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
                 entryBuilder.setNodeConnectorId((String)nodeConnectorID);
             }
             else{
-                logger.debug("ERROR: getNodeConnectorList(): an NodeConnector from ITopologyService.getNodeConnectorProps() has unknown Type");
+                logger.debug("ERROR: getNodeConnectorList(): an NodeConnector from ITopologyServiceShim.getNodeConnectorProps() has unknown Type");
                 return createGetNodeConnectorListFailRpcResult();
             }
             //set Node's type and ID
@@ -430,7 +430,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
                 entryBuilder.setNodeId((String)nodeID);
             }
             else{
-                logger.debug("ERROR: getNodeConnectorList(): the Node of an NodeConnector from ITopologyService.getNodeConnectorProps() has unknown Type");
+                logger.debug("ERROR: getNodeConnectorList(): the Node of an NodeConnector from ITopologyServiceShim.getNodeConnectorProps() has unknown Type");
                 return createGetNodeConnectorListFailRpcResult();
             }
 
@@ -478,19 +478,19 @@ public class TopologyImpl implements TopologyService, CommandProvider{
         for(Node node : nodeSet){
             //check parameters
             if(node == null){
-                logger.debug("ERROR: getNodeList(): an Node from ITopologyService.getNodeProps() is null");
+                logger.debug("ERROR: getNodeList(): an Node from ITopologyServiceShim.getNodeProps() is null");
                 return createGetNodeListFailRpcResult();
             }
             //check Node type
             String nodeTypeStr = node.getType();
             if(nodeTypeStr == null){
-                logger.debug("ERROR: getNodeList(): an Node from ITopologyService.getNodeProps() has null Type");
+                logger.debug("ERROR: getNodeList(): an Node from ITopologyServiceShim.getNodeProps() has null Type");
                 return createGetNodeListFailRpcResult();
             }
             //check Node ID
             Object nodeID = node.getID();
             if(nodeID == null){
-                logger.debug("ERROR: getNodeList(): an Node from ITopologyService.getNodeProps() has null ID");
+                logger.debug("ERROR: getNodeList(): an Node from ITopologyServiceShim.getNodeProps() has null ID");
                 return createGetNodeListFailRpcResult();
             }
 
@@ -511,7 +511,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
                 entryBuilder.setNodeId((String)nodeID);
             }
             else{
-                logger.debug("ERROR: getNodeList(): a Node from ITopologyService.getNodeConnectorProps() has unknown Type");
+                logger.debug("ERROR: getNodeList(): a Node from ITopologyServiceShim.getNodeConnectorProps() has unknown Type");
                 return createGetNodeListFailRpcResult();
             }
 
