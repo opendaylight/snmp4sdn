@@ -50,6 +50,7 @@
         <surefire.version>2.16</surefire.version>
         <restconf.version>1.5.0-SNAPSHOT</restconf.version>
         <mdsal.model.version>0.10.0-SNAPSHOT</mdsal.model.version>
+        <openflowplugin.version>0.4.0-SNAPSHOT</openflowplugin.version>
     </properties>
     <dependencies>
         <dependency>
@@ -119,43 +120,6 @@
           <classifier>features</classifier>
           <type>xml</type>
         </dependency>
-
-        <!-- test to validate features.xml -->
-        <dependency>
-          <groupId>org.opendaylight.odlparent</groupId><!--modify "yangtools" to "odlparent", as gerrit 16240-->
-          <artifactId>features-test</artifactId>
-          <version>${feature.test.version}</version>
-          <scope>test</scope>
-          <!--<exclusions>//remove this part, as gerrit 16240
-            <exclusion>
-            // declare the exclusion here
-            <groupId>org.ops4j.pax.exam</groupId>
-            <artifactId>pax-exam-container-native</artifactId>
-            </exclusion>
-          </exclusions>-->
-        </dependency>
-
-        <!-- dependency for opendaylight-karaf-empty for use by testing -->
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>opendaylight-karaf-empty</artifactId>
-            <version>${karaf.empty.version}</version>
-            <type>zip</type>
-            <exclusions>
-                <!-- declare the exclusion here -->
-                <exclusion>
-                    <groupId>org.ops4j.pax.exam</groupId>
-                    <artifactId>pax-exam-container-native</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!-- Uncomment this if you get an error : java.lang.NoSuchMethodError: org.slf4j.helpers.MessageFormatter.format(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)Lorg/slf4j/helpers/FormattingTuple;
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.2</version>
-        </dependency>
-        -->
     </dependencies>
 
     <build>

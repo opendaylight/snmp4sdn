@@ -41,6 +41,7 @@ import org.opendaylight.controller.protocol_plugin.openflow.core.internal.Contro
     import org.opendaylight.snmp4sdn.IRefreshInternalProvider;
     import org.opendaylight.snmp4sdn.IStatisticsListener;
     import org.opendaylight.snmp4sdn.ITopologyService;
+    import org.opendaylight.snmp4sdn.ITopologyServiceShim;
     import org.opendaylight.snmp4sdn.ITopologyServiceShimListener;
     import org.opendaylight.snmp4sdn.DiscoveryServiceAPI;
     import org.opendaylight.snmp4sdn.core.IController;
@@ -356,50 +357,51 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
 
         //md-sal (the following items: config, fdb, acl, vlan, switchdb, topo)
         if (imp == config) {
-            c.add(createServiceDependency().setService(BindingAwareBroker.class)
-                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
                     .setCallbacks("setController", "unsetController").setRequired(true));
+            c.add(createServiceDependency().setService(BindingAwareBroker.class)
+                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and IController, for ConfigService");
         }
         if (imp == fdb) {
-            c.add(createServiceDependency().setService(BindingAwareBroker.class)
-                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
                     .setCallbacks("setController", "unsetController").setRequired(true));
+            c.add(createServiceDependency().setService(BindingAwareBroker.class)
+                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and IController, for FdbService");
         }
         if (imp == acl) {
-            c.add(createServiceDependency().setService(BindingAwareBroker.class)
-                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
                     .setCallbacks("setController", "unsetController").setRequired(true));
+            c.add(createServiceDependency().setService(BindingAwareBroker.class)
+                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and IController, for AclService");
         }
         if (imp == vlan) {
-            c.add(createServiceDependency().setService(BindingAwareBroker.class)
-                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
                     .setCallbacks("setController", "unsetController").setRequired(true));
+            c.add(createServiceDependency().setService(BindingAwareBroker.class)
+                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and IController, for VlanService");
         }
         if (imp == switchdb) {
-            c.add(createServiceDependency().setService(BindingAwareBroker.class)
-                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             c.add(createServiceDependency()
                     .setService(IController.class, "(name=Controller)")
                     .setCallbacks("setController", "unsetController").setRequired(true));
+            c.add(createServiceDependency().setService(BindingAwareBroker.class)
+                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and IController, for SwitchDb");
         }
         if (imp == topo) {
-            c.add(createServiceDependency().setService(BindingAwareBroker.class)
-                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
             c.add(createServiceDependency()
                     .setService(ITopologyService.class)
+                    .setCallbacks("setTopologyService", "unsetTopologyService").setRequired(true));
+            c.add(createServiceDependency()
+                    .setService(ITopologyServiceShim.class)
                     .setCallbacks("setTopologyServiceShim", "unsetTopologyServiceShim").setRequired(true));
             c.add(createServiceDependency()
                     .setService(IInventoryProvider.class)
@@ -407,6 +409,20 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
             c.add(createServiceDependency()
                     .setService(DiscoveryServiceAPI.class/*, "(name=XXX)"*/)/*Memo: name=XXX was given, then setService() fails!*/
                     .setCallbacks("setDiscoveryService", "unsetDiscoveryService").setRequired(true));
+            c.add(createServiceDependency().setService(BindingAwareBroker.class)
+                    .setCallbacks("setBroker", "unsetBroker").setRequired(true));
+                        //NOTICE: the md-sal binding item (BindingAwareBroker) needs to be the last one,
+                        //          among the add() items above.
+                        //          This is because that in the TopologyProvider.setBroker(),
+                        //          BindingAwareBroker.registerProvider() is called, 
+                        //          which BindingAwareBroker automatically triggers
+                        //          TopologyProvider.onSessionInitiated(),
+                        //          however in onSessionInitiated() the ITopologyService is used,
+                        //          ITopologyService is one of the add() items above
+                        //
+                        //      For the similar reason, the md-sal services registrations above,
+                        //      needs to be the last ones in Activator.init()
+                        //
             logger.debug("snmp4sdn: Activator: configured BindingAwareBroker and DiscoveryServiceAPI, for TopologyService");
         }
 
@@ -601,7 +617,7 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
         if (imp.equals(TopologyServiceShim.class)) {
             c.setInterface(new String[] { IDiscoveryListener.class.getName(), IContainerListener.class.getName(),
                     IRefreshInternalProvider.class.getName(), IInventoryShimExternalListener.class.getName(),
-                    IContainerAware.class.getName(), ITopologyService.class.getName() }, null);
+                    IContainerAware.class.getName(), ITopologyServiceShim.class.getName() }, null);
             c.add(createServiceDependency()
                     .setService(ITopologyServiceShimListener.class)
                     .setCallbacks("setTopologyServiceShimListener",
@@ -646,7 +662,7 @@ public class Activator extends ComponentActivatorAbstractBase/*, AbstractBinding
             // export the service to be used by SAL
             c.setInterface(
                     new String[] { IPluginInTopologyService.class.getName(),
-                            ITopologyServiceShimListener.class.getName() }, null);
+                            ITopologyServiceShimListener.class.getName(), ITopologyService.class.getName() }, null);
             // Hook the services coming in from SAL, as optional in
             // case SAL is not yet there, could happen
             /*c.add(createContainerServiceDependency(containerName)
