@@ -80,6 +80,8 @@
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.node.list.output,<!--md-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.node.connector.list.output,<!--md-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node,<!--md-sal-->
+              org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes,<!--md-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819,<!--md-sal-->
               <!--com.google.common.collect,//md-sal-->
               org.opendaylight.yangtools.yang.common,<!--md-sal copy from ping example-->
