@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Yi-Ling Hsieh <ylhsieh@itri.org.tw>
+Submitted-by: Yi-Ling Hsieh <ylhsieh@itri.org.tw>
+Submitted-at: Wed, 04 Jan 2017 06:07:50 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/45416
+Project: snmp4sdn
+Branch: refs/heads/stable/boron
