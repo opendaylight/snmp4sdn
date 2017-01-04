@@ -14,6 +14,7 @@
     <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.netconf/features-restconf/${restconf.version}/xml/features</repository>
+    <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin/${openflowplugin.version}/xml/features</repository>
     <!--NOT to add snmp4sdn repo, cause recursive loading--><!--<repository>mvn:org.opendaylight.snmp4sdn/features-snmp4sdn/${project.version}/xml/features</repository>-->
 
     <feature name='odl-snmp4sdn-all' version='${project.version}' description='OpenDaylight :: SNMP4SDN :: All'>
@@ -23,9 +24,9 @@
             <!--these marked are in Helium first release-->
             <feature version='${mdsal.model.version}'>odl-mdsal-models</feature>
             <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
-
             <feature version='${mdsal.version}'>odl-mdsal-apidocs</feature>
             <feature version='${restconf.version}'>odl-restconf</feature>
+            <feature version='${openflowplugin.version}'>odl-openflowplugin-nsf-model</feature>
 
             <bundle>wrap:mvn:org.dom4j/dom4j/2.0.0</bundle>
             <!--<bundle>mvn:org.opendaylight.controller/topologymanager/0.4.1</bundle>--><!--remove, because odl-nsf-managers can't be installed successfully, many dependency missing-->
