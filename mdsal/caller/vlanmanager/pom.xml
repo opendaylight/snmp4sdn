@@ -43,11 +43,6 @@
     <url>https://git.opendaylight.org/gerrit/gitweb?p=snmp4sdn.git;a=summary</url>
   </scm>
 
-  <properties>
-    <yangtools.version>0.6.1</yangtools.version>
-    <mdsal.version>1.0</mdsal.version>
-  </properties>
-
   <build>
     <plugins>
       <plugin>
@@ -86,11 +81,6 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-binding-api</artifactId>
       <version>${mdsal.version}</version>
-    </dependency>
-    <dependency>
-     <groupId>org.opendaylight.yangtools</groupId>
-     <artifactId>yang-common</artifactId>
-     <version>${yangtools.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
