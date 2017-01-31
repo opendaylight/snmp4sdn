@@ -114,7 +114,6 @@
               org.opendaylight.snmp4sdn.internal.Activator
             </Bundle-Activator>
           </instructions>
-          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>

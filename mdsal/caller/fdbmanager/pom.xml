@@ -84,7 +84,6 @@
             <!--<Export-Package>org.opendaylight.controller.ping.service.api</Export-Package>-->
             <Bundle-Activator>org.opendaylight.fdbmanager.impl.FdbManagerImpl</Bundle-Activator><!--fdbmanager add-->
           </instructions>
-          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>

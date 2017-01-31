@@ -6,7 +6,6 @@
 .project
 .settings
 
-MANIFEST.MF
 target
 
 **/target

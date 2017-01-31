@@ -83,7 +83,6 @@
             <!--<Export-Package>org.opendaylight.controller.ping.service.api</Export-Package>-->
             <Bundle-Activator>org.opendaylight.aclmanager.impl.AclManagerImpl</Bundle-Activator><!--aclmanager add-->
           </instructions>
-          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>

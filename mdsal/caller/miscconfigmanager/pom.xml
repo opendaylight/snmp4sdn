@@ -84,7 +84,6 @@
             <!--<Export-Package>org.opendaylight.controller.ping.service.api</Export-Package>-->
             <Bundle-Activator>org.opendaylight.miscconfigmanager.impl.MiscConfigManagerImpl</Bundle-Activator><!--configmanager add-->
           </instructions>
-          <manifestLocation>${project.basedir}/META-INF</manifestLocation>
         </configuration>
       </plugin>
     </plugins>
