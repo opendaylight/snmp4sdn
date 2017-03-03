@@ -12,8 +12,10 @@
   <artifactId>snmp4sdn</artifactId>
   <version>0.5.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
+  <!-- <name> formatting is used by autorelease to parse and notify projects on
+       build failure. Please do not modify this unless you have a good reason. -->
+  <name>ODL :: snmp4sdn :: ${project.artifactId}</name>
 
-  <name>snmp4sdn plugin</name>
   <description>The snmp4sdn plugin</description>
   <url>https://wiki.opendaylight.org/view/SNMP4SDN:Main</url>
 
