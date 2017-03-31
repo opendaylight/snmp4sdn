@@ -209,8 +209,14 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
+      <!--In features4-snmp4sdn build, SingleFeatureTest fails and warn that using another org.eclipse.osgi,
+          the following are versions of org.eclipse.osgi I tried, but the warning still appear-->
       <groupId>org.eclipse.tycho</groupId>
       <artifactId>org.eclipse.osgi</artifactId>
+      <!--<groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>-->
+      <!--<groupId>org.osgi</groupId>
+      <artifactId>org.eclipse.osgi</artifactId>-->
     </dependency>
   </dependencies>
 </project>
