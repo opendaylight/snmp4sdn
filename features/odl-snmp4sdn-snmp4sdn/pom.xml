@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+#
+# Copyright (c) 2017 NEC Corporation
+# All rights reserved.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License v1.0 which accompanies this
+# distribution, and is available at http://www.eclipse.org/legal/epl-v10.html
+#
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.opendaylight.odlparent</groupId>
+    <artifactId>single-feature-parent</artifactId>
+    <version>1.8.0-SNAPSHOT</version>
+    <relativePath />
+  </parent>
+
+  <groupId>org.opendaylight.snmp4sdn</groupId>
+  <artifactId>odl-snmp4sdn-snmp4sdn</artifactId>
+  <version>0.5.0-SNAPSHOT</version>
+  <packaging>feature</packaging>
+
+  <name>OpenDaylight :: SNMP4SDN :: SNMP4SDN Plugin</name>
+
+  <properties>
+    <restconf.version>1.5.0-SNAPSHOT</restconf.version>
+    <mdsal.model.version>0.10.0-SNAPSHOT</mdsal.model.version>
+    <openflowplugin.version>0.4.0-SNAPSHOT</openflowplugin.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.opendaylight.mdsal.model</groupId>
+        <artifactId>mdsal-model-artifacts</artifactId>
+        <version>${mdsal.model.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>mdsal-artifacts</artifactId>
+        <version>1.5.0-SNAPSHOT</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>org.opendaylight.mdsal.model</groupId>
+      <artifactId>odl-mdsal-models</artifactId>
+      <version>${mdsal.model.version}</version>
+      <type>xml</type>
+      <classifier>features</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>odl-mdsal-broker</artifactId>
+      <version>1.5.0-SNAPSHOT</version>
+      <type>xml</type>
+      <classifier>features</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opendaylight.netconf</groupId>
+      <artifactId>odl-mdsal-apidocs</artifactId>
+      <version>${restconf.version}</version>
+      <type>xml</type>
+      <classifier>features</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opendaylight.netconf</groupId>
+      <artifactId>odl-restconf</artifactId>
+      <version>${restconf.version}</version>
+      <type>xml</type>
+      <classifier>features</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opendaylight.openflowplugin</groupId>
+      <artifactId>odl-openflowplugin-nsf-model</artifactId>
+      <version>${openflowplugin.version}</version>
+      <type>xml</type>
+      <classifier>features</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>org.dom4j</groupId>
+      <artifactId>dom4j</artifactId>
+      <version>2.0.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <version>5.0.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.dependencymanager</artifactId>
+      <version>3.1.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.4</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal</artifactId>
+      <version>0.7.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opendaylight.snmp4sdn</groupId>
+      <artifactId>md-model</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opendaylight.snmp4sdn</groupId>
+      <artifactId>snmp4sdn</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opendaylight.snmp4sdn</groupId>
+      <artifactId>plugin-shell</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+  </dependencies>
+
+  <url>${odl.site.url}/${project.groupId}/${stream}/${project.artifactId}/</url>
+
+  <distributionManagement>
+    <site>
+      <id>opendaylight-site</id>
+      <url>${nexus.site.url}/${project.artifactId}/</url>
+    </site>
+  </distributionManagement>
+
+</project>
