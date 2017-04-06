@@ -66,7 +66,9 @@ public interface IPluginReadServiceFilter {
     /**
      * Returns the hardware view of the specified network node connector
      * for the given container
-     * @param node
+     * @param container
+     * @param nodeConnector
+     * @param cached     
      * @return
      */
     public NodeConnectorStatistics readNodeConnector(String container,
@@ -84,7 +86,8 @@ public interface IPluginReadServiceFilter {
 
     /**
      * Returns the table statistics of the node as specified by the given container
-     * @param node
+     * @param container
+     * @param nodeTable
      * @param cached
      * @return
      */

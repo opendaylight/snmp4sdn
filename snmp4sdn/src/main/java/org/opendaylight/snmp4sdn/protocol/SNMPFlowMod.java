@@ -131,23 +131,6 @@ public class SNMPFlowMod extends /*OFMessage*/SNMPMessage /*implements OFActionF
         return this;
     }
 
-    /**
-     * Returns read-only copies of the actions contained in this Flow Mod
-     * @return a list of ordered OFAction objects
-     *//*
-    public List<OFAction> getActions() {
-        return this.actions;
-    }*///not used in cmeth
-
-    /**
-     * Sets the list of actions this Flow Mod contains
-     * @param actions a list of ordered OFAction objects
-     *//*
-    public OFFlowMod setActions(List<OFAction> actions) {
-        this.actions = actions;
-        return this;
-    }*///not used in cmeth
-
     public String toString() {
         return "SNMPFlowMod ["
                 + "command=" + command

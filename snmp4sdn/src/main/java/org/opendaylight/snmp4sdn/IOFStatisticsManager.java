@@ -83,9 +83,6 @@ public interface IOFStatisticsManager {
      *                                  For port statistics, it is the port id. If null the query
      *                                  will be performed for all the targets for the specified
      *                                  statistics type.
-     *
-     * @param timeout the timeout in milliseconds the system will wait for a response
-     *                  from the switch, before declaring failure
      * @return the list of openflow statistics
      */
     List<OFStatistics> queryStatistics(Long switchId,
@@ -95,7 +92,7 @@ public interface IOFStatisticsManager {
      * Returns the averaged transmit rate for the passed switch port
      *
      * @param switchId the openflow datapath id of the target switch
-     * @param portId the openflow switch port id
+     * @param port the openflow switch port id
      * @return the median transmit rate in bits per second
      */
     long getTransmitRate(Long switchId, Short port);

@@ -33,8 +33,9 @@ public interface IVLANService {//TODO: if with AD-SAL or MD-SAL, this interface 
     /**
      * Add a VLAN to a switch
      *
-     * @param XXX
-     *            XXX
+     * @param node
+     * @param vlanID
+     * @param vlanName
      */
     public Status addVLAN(Node node, Integer vlanID, String vlanName);
 
@@ -42,8 +43,9 @@ public interface IVLANService {//TODO: if with AD-SAL or MD-SAL, this interface 
     /**
      * Set ports to a specfic VLAN
      *
-     * @param XXX
-     *            XXX
+     * @param node
+     * @param vlanID
+     * @param nodeConns
      */
     public Status setVLANPorts (Node node, Integer vlanID, List<NodeConnector> nodeConns);
 
