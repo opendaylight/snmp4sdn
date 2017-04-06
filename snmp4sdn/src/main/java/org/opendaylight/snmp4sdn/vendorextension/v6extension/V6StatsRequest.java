@@ -39,9 +39,6 @@ public class V6StatsRequest extends OFVendorStatistics {
         this.match_len = 0;
     }
 
-    /**
-     * @param None. Being set with local variable (TBD).
-     */
     public void setVendorId() {
         this.vendor = NICIRA_VENDOR_ID;
     }
@@ -53,9 +50,6 @@ public class V6StatsRequest extends OFVendorStatistics {
         return vendor;
     }
 
-    /**
-     * @param None. Being set with local variable (TBD).
-     */
     public void setMsgtype() {
         this.msgsubtype = NXST_FLOW;
     }

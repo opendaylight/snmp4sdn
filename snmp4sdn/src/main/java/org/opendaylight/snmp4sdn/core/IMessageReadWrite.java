@@ -55,7 +55,6 @@ public interface IMessageReadWrite {
         /**
          * Proper clean up when the switch connection is closed
          *
-         * @return
          * @throws Exception
          */
         public void stop() throws Exception;

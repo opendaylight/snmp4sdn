@@ -101,7 +101,7 @@ public class V6FlowMod extends OFVendor implements Cloneable {
 
     /**
      * Sets the outPort field of V6FlowMod message
-     * @param outPort   outPort of the message
+     * @param port   outPort of the message
      */
     public V6FlowMod setOutPort(OFPort port) {
         this.outPort = port.getValue();

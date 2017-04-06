@@ -1179,7 +1179,6 @@ public class V6Match extends OFMatch implements Cloneable {
     /**
      * Get nw_src
      *
-     * @return
      */
 
     public void setNetworkSrc(InetAddress address) {
@@ -1189,7 +1188,6 @@ public class V6Match extends OFMatch implements Cloneable {
     /**
      * Set nw_dst
      *
-     * @return
      */
 
     public void setNetworkDest(InetAddress address) {

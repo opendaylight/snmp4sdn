@@ -740,7 +740,6 @@ public class TopologyServiceShim implements IDiscoveryListener,
      * longer have the latest topology. Hence, a request is sent here.
      *
      * @param containerName
-     * @return void
      */
     @Override
     public void requestRefresh(String containerName) {

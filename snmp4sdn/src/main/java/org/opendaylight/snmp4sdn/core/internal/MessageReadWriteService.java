@@ -71,7 +71,7 @@ public class MessageReadWriteService implements IMessageReadWrite {
      *
      * @param msg
      *            OF message to be sent
-     * @throws Exception
+     * @throws IOException
      */
     @Override
     //public void asyncSend(OFMessage msg) throws IOException {//s4s. OF's
@@ -120,7 +120,6 @@ public class MessageReadWriteService implements IMessageReadWrite {
     /**
      * Resumes sending the remaining messages in the outgoing buffer
      *
-     * @throws Exception
      */
     @Override
     public void resumeSend() throws IOException {
@@ -148,7 +147,6 @@ public class MessageReadWriteService implements IMessageReadWrite {
      * messages.
      *
      * @return list of OF messages
-     * @throws Exception
      */
     @Override
     public List</*OFMessage msg*/SNMPMessage> readMessages() throws IOException {
