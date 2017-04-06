@@ -37,7 +37,7 @@ public interface ITopologyServiceShimListener {
      * Called when an Edge utilization is above the safe threshold configured on
      * the controller
      *
-     * @param {@link org.opendaylight.controller.sal.core.Edge}
+     * @param edge
      */
     public void edgeOverUtilized(Edge edge);
 
@@ -45,7 +45,7 @@ public interface ITopologyServiceShimListener {
      * Called when the Edge utilization is back to normal, below the safety
      * threshold level configured on the controller
      *
-     * @param {@link org.opendaylight.controller.sal.core.Edge}
+     * @param edge
      */
     public void edgeUtilBackToNormal(Edge edge);
 }

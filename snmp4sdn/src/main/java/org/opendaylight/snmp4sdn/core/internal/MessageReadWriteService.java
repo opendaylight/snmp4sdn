@@ -71,7 +71,7 @@ public class MessageReadWriteService implements IMessageReadWrite {
      *
      * @param msg
      *            OF message to be sent
-     * @throws Exception
+     * @throws IOException
      */
     @Override
     //public void asyncSend(OFMessage msg) throws IOException {//s4s. OF's

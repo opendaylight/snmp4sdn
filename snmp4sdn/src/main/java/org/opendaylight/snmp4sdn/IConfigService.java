@@ -21,7 +21,7 @@ public interface IConfigService {
     /**
      * Disable the function of Spanning Tree Protocol on the switch
      *
-     * @param XXX
+     * @param node
      *            XXX
      */
     Status disableSTP(Node node);
@@ -30,7 +30,7 @@ public interface IConfigService {
     /**
      * Disable the function of BPDU flooding when STP is off
      *
-     * @param XXX
+     * @param node
      *            XXX
      */
     Status disableBpduFlooding(Node node);
@@ -39,8 +39,10 @@ public interface IConfigService {
     /**
      * Disable the function of BPDU flooding when STP is off
      *
-     * @param XXX
+     * @param node
      *            XXX
+     * @param nodeConnector^M
+     *            XXX^M
      */
     Status disableBpduFlooding(Node node, NodeConnector nodeConnector);
 
@@ -48,7 +50,7 @@ public interface IConfigService {
          * Disable the function of broadcast flooding on the switch
          *
          *
-         * @param XXX
+         * @param node
          *            XXX
          */
     Status disableBroadcastFlooding(Node node);
@@ -57,8 +59,10 @@ public interface IConfigService {
              * Disable the function of broadcast flooding on the switch
              *
              *
-             * @param XXX
+             * @param node
              *            XXX
+             * @param nodeConnector^M
+             *            XXX^M
              */
     Status disableBroadcastFlooding(Node node, NodeConnector nodeConnector);
         
@@ -67,7 +71,7 @@ public interface IConfigService {
      * Disable the function of multicast flooding on the switch
      *
      *
-     * @param XXX
+     * @param node
      *            XXX
      */
     Status disableMulticastFlooding(Node node);
@@ -77,8 +81,10 @@ public interface IConfigService {
      * Disable the function of multicast flooding on the switch
      *
      *
-     * @param XXX
+     * @param node
      *            XXX
+     * @param nodeConnector^M
+     *            XXX^M
      */
     Status disableMulticastFlooding(Node node, NodeConnector nodeConnector);
 
@@ -87,7 +93,7 @@ public interface IConfigService {
      * Disable the function of unknown flooding on the switch
      *
      *
-     * @param XXX
+     * @param node
      *            XXX
      */
     Status disableUnknownFlooding(Node node);
@@ -97,8 +103,10 @@ public interface IConfigService {
      * Disable the function of unknown flooding on the switch
      *
      *
-     * @param XXX
+     * @param node
      *            XXX
+    * @param nodeConnector^M
+     *            XXX^M
      */
     Status disableUnknownFlooding(Node node, NodeConnector nodeConnector);
 
@@ -106,7 +114,7 @@ public interface IConfigService {
     /**
      * Disable the function of source mac check on the switch
      *
-     * @param XXX
+     * @param node
      *            XXX
      */
     Status disableSourceMacCheck(Node node);
@@ -115,8 +123,10 @@ public interface IConfigService {
     /**
      * Disable the function of source mac check on the switch
      *
-     * @param XXX
+     * @param node
      *            XXX
+     * @param nodeConnector^M
+     *            XXX^M
      */
     Status disableSourceMacCheck(Node node, NodeConnector nodeConnector);
 
@@ -124,7 +134,7 @@ public interface IConfigService {
     /**
      * Disable the function of source learning on the switch
      *
-     * @param XXX
+     * @param node
      *            XXX
      */
     Status disableSourceLearning(Node node);
@@ -133,8 +143,10 @@ public interface IConfigService {
     /**
      * Disable the function of source learning on the switch
      *
-     * @param XXX
+     * @param node
      *            XXX
+     * @param nodeConnector^M
+     *            XXX^M
      */
     Status disableSourceLearning(Node node, NodeConnector nodeConnector);
 }

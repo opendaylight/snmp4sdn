@@ -149,7 +149,6 @@ public interface ISwitch {
     /**
      * To refesh pysical port, including Config and State.
      *
-     * @param port
      * @return True if the refresh complete
      */
     public boolean refreshPhysicalPorts();//Bug fix: port on/off update depends link-down/up trap, but sometime trap lost, so need using snmp to request switch for completely correct ports states.
@@ -216,7 +215,7 @@ public interface ISwitch {
      * @param req
      *            the OF Statistic Request to be sent
      * @return Object has one of the following instances/values::
-     *         List<OFStatistics>, a list of statistics records received from
+     *         List of OFStatistics, a list of statistics records received from
      *         the switch as response from the request; OFError if the switch
      *         failed handle the request or NULL if timeout has occurred while
      *         waiting for the response.
