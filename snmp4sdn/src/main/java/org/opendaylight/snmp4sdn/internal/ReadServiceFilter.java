@@ -227,7 +227,7 @@ public class ReadServiceFilter implements IPluginReadServiceFilter,
      * Filters a list of FlowOnNode elements based on the container
      *
      * @param container
-     * @param nodeId
+     * @param switchId
      * @param list
      * @return
      */
