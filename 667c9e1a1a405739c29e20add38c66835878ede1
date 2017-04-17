@@ -45,6 +45,30 @@
       "revId": "667c9e1a1a405739c29e20add38c66835878ede1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da01753e_8beffc86",
+        "filename": "snmp4sdn/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 763
+      },
+      "writtenOn": "2017-04-17T10:32:08Z",
+      "side": 1,
+      "message": "This artifact has been listed (at line 123). Besides, without the currently used artifact (lines 214-215), building will fail due to missing Class \"org.eclipse.osgi.framework.console.CommandInterpreter\".",
+      "parentUuid": "da01753e_2ba9b07b",
+      "range": {
+        "startLine": 217,
+        "startChar": 18,
+        "endLine": 217,
+        "endChar": 31
+      },
+      "revId": "667c9e1a1a405739c29e20add38c66835878ede1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
