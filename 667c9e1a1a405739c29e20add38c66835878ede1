@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da01753e_4bc99477",
+        "filename": "features/features4-snmp4sdn/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-04-17T09:01:10Z",
+      "side": 1,
+      "message": "You are NOT allowed to do this in a project included in Integration/Distribution.",
+      "range": {
+        "startLine": 54,
+        "startChar": 10,
+        "endLine": 54,
+        "endChar": 28
+      },
+      "revId": "667c9e1a1a405739c29e20add38c66835878ede1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
