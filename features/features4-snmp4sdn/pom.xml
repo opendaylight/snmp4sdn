@@ -50,8 +50,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <!--<skipTests>true</skipTests>--><!--I think using skipTests can cover the following, not yet try-->
-          <skip>false</skip>
           <dependenciesToScan>
             <dependency>org.opendaylight.odlparent:feature4-test</dependency>
           </dependenciesToScan>
