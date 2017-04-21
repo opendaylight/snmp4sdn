@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "da01753e_a29be370",
+        "filename": "features/features-snmp4sdn/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2017-04-21T10:35:02Z",
+      "side": 1,
+      "message": "Maven output [2] shows tests are skipped indeed:\n[INFO] --- maven-surefire-plugin:2.18.1:test (default-test) @ features-snmp4sdn ---\n[INFO] No tests to run.\n\n[2] https://logs.opendaylight.org/releng/jenkins092/snmp4sdn-merge-carbon/44/console.log.gz",
+      "parentUuid": "da01753e_02a3cfb2",
+      "range": {
+        "startLine": 203,
+        "startChar": 63,
+        "endLine": 203,
+        "endChar": 76
+      },
+      "revId": "667c9e1a1a405739c29e20add38c66835878ede1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da01753e_4bc99477",
         "filename": "features/features4-snmp4sdn/pom.xml",
         "patchSetId": 4
