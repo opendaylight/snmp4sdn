@@ -42,20 +42,7 @@
     </site>
   </distributionManagement>
 
-  <!--This feature build fails due to SingleFeatureTest error, so far can't solve-->
-  <!--workaround: just copy the maven-surefire-plugin settings from the parent pom, as below, then the SingleFeatureTest is omitted-->
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <dependenciesToScan>
-            <dependency>org.opendaylight.odlparent:feature4-test</dependency>
-          </dependenciesToScan>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+  <!-- <build> configuration has been defined in the parent pom, doesn't need here-->
+
 </project>
 
