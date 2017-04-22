@@ -28,8 +28,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.osgi.framework.console.CommandInterpreter;
-import org.eclipse.osgi.framework.console.CommandProvider;
+import org.opendaylight.snmp4sdn.internal.util.CommandInterpreter;
+import org.opendaylight.snmp4sdn.internal.util.CommandProvider;
 import org.opendaylight.snmp4sdn.IDiscoveryListener;
 import org.opendaylight.snmp4sdn.IInventoryShimExternalListener;
 import org.opendaylight.snmp4sdn.IOFStatisticsManager;
@@ -247,7 +247,7 @@ public class TopologyServiceShim implements IDiscoveryListener,
             }
         };
 
-        registerWithOSGIConsole();
+        //registerWithOSGIConsole();
     }
 
     /**
@@ -667,12 +667,12 @@ public class TopologyServiceShim implements IDiscoveryListener,
         // do nothing
     }
 
-    private void registerWithOSGIConsole() {
+    /*private void registerWithOSGIConsole() {
         BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass())
                 .getBundleContext();
         bundleContext.registerService(CommandProvider.class.getName(), this,
                 null);
-    }
+    }*/
 
     @Override
     public String getHelp() {
