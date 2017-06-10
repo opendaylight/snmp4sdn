@@ -61,9 +61,7 @@
     <properties><!--TODO: move the settings to commons.snmp4sdn pom-->
         <features.file>features.xml</features.file>
         <branding.version>1.5.0-SNAPSHOT</branding.version>
-        <karaf.resources.version>1.9.0-SNAPSHOT</karaf.resources.version>
-        <feature.test.version>1.9.0-SNAPSHOT</feature.test.version><!--referencing to other projects, usually is 1.8.0-SNAPSHOT after version bump for Lithium-->
-        <karaf.empty.version>1.9.0-SNAPSHOT</karaf.empty.version>
+        <karaf.empty.version>1.8.0-Carbon</karaf.empty.version>
         <surefire.version>2.16</surefire.version>
         <restconf.version>1.6.0-SNAPSHOT</restconf.version>
         <mdsal.model.version>0.11.0-SNAPSHOT</mdsal.model.version>
