@@ -4,11 +4,11 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>karaf-parent</artifactId>
-    <version>1.7.4-SNAPSHOT</version>
+    <version>1.7.5-SNAPSHOT</version>
   </parent>
   <groupId>org.opendaylight.snmp4sdn</groupId>
   <artifactId>distribution-karaf</artifactId>
-  <version>0.4.4-SNAPSHOT</version>
+  <version>0.4.5-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Karaf distribution</name>
@@ -53,7 +53,7 @@
     <dependency><!--s4s add-->
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>features-snmp4sdn</artifactId>
-      <version>0.4.4-SNAPSHOT</version>
+      <version>0.4.5-SNAPSHOT</version>
       <classifier>features</classifier>
       <type>xml</type>
       <scope>runtime</scope>
