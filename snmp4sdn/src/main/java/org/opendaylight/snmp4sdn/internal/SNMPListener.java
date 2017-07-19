@@ -54,8 +54,8 @@ import java.util.Map.Entry;
 import java.util.Vector;
 import java.io.*;
 
-import org.eclipse.osgi.framework.console.CommandInterpreter;
-import org.eclipse.osgi.framework.console.CommandProvider;
+import org.opendaylight.snmp4sdn.internal.util.CommandInterpreter;
+import org.opendaylight.snmp4sdn.internal.util.CommandProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import java.net.SocketException;
@@ -108,15 +108,15 @@ public class SNMPListener implements SNMPv2TrapListener, Runnable, CommandProvid
         }catch(Exception e){
             logger.warn("Problem starting SNMP Trap Interface: {}" , e);
         }
-        registerWithOSGIConsole();
+        //registerWithOSGIConsole();
     }
 
-    private void registerWithOSGIConsole() {
+    /*private void registerWithOSGIConsole() {
         BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass())
                 .getBundleContext();
         bundleContext.registerService(CommandProvider.class.getName(), this,
                 null);
-    }
+    }*/
 
     public void run(){
     }
