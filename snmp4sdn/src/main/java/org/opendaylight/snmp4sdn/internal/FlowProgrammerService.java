@@ -21,8 +21,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.net.InetAddress;//s4s add
 
-import org.eclipse.osgi.framework.console.CommandInterpreter;
-import org.eclipse.osgi.framework.console.CommandProvider;
+import org.opendaylight.snmp4sdn.internal.util.CommandInterpreter;
+import org.opendaylight.snmp4sdn.internal.util.CommandProvider;
 import org.opendaylight.controller.sal.action.Action;
 import org.opendaylight.controller.sal.action.ActionType;
 import org.opendaylight.controller.sal.action.Output;
@@ -137,7 +137,7 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
     void init() {
         //this.controller.addMessageListener(OFType.FLOW_REMOVED, this);//s4s
         //this.controller.addMessageListener(OFType.ERROR, this);//s4s
-        registerWithOSGIConsole();
+        //registerWithOSGIConsole();
     }
 
     /**
@@ -762,12 +762,12 @@ public class FlowProgrammerService implements IPluginInFlowProgrammerService,
             UpdateType type, Set<Property> props) {
     }
 
-    private void registerWithOSGIConsole() {
+    /*private void registerWithOSGIConsole() {
         BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass())
                 .getBundleContext();
         bundleContext.registerService(CommandProvider.class.getName(), this,
                 null);
-    }
+    }*/
 
 ///* //s4s mark 13
     @Override

@@ -33,8 +33,8 @@ import com.google.common.util.concurrent.Futures;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
-import org.eclipse.osgi.framework.console.CommandInterpreter;
-import org.eclipse.osgi.framework.console.CommandProvider;
+import org.opendaylight.snmp4sdn.internal.util.CommandInterpreter;
+import org.opendaylight.snmp4sdn.internal.util.CommandProvider;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -65,15 +65,15 @@ public class AclServiceImpl implements AclService, CommandProvider{
 
     public void init() {//this method would not be called, when Activator.java adopt "new AclProvider()->new AclServiceImpl()"
         logger.debug("AclServiceImpl: init() is called");
-        registerWithOSGIConsole();
+        //registerWithOSGIConsole();
     }
 
-    private void registerWithOSGIConsole() {
+    /*private void registerWithOSGIConsole() {
         BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass())
                 .getBundleContext();
         bundleContext.registerService(CommandProvider.class.getName(), this,
                 null);
-    }
+    }*/
 
     private boolean checkNodeIpValid(long nodeId){
         if(cmethUtil == null){

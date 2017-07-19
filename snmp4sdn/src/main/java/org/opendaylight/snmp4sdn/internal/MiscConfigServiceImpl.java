@@ -79,8 +79,8 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 //import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
-import org.eclipse.osgi.framework.console.CommandInterpreter;
-import org.eclipse.osgi.framework.console.CommandProvider;
+import org.opendaylight.snmp4sdn.internal.util.CommandInterpreter;
+import org.opendaylight.snmp4sdn.internal.util.CommandProvider;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -113,15 +113,15 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
 
     public void init() {//this method would not be called, when Activator.java adopt "new MiscConfigProvider()->new MiscConfigServiceImpl()"
         logger.debug("MiscConfigServiceImpl: init() is called");
-        registerWithOSGIConsole();
+        //registerWithOSGIConsole();
     }
 
-    private void registerWithOSGIConsole() {
+    /*private void registerWithOSGIConsole() {
         BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass())
                 .getBundleContext();
         bundleContext.registerService(CommandProvider.class.getName(), this,
                 null);
-    }
+    }*/
 
     public void TestCLI(){
         System.out.println("enter MiscConfigServiceImpl.TestCLI() 1");
