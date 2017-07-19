@@ -30,8 +30,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.eclipse.osgi.framework.console.CommandInterpreter;
-import org.eclipse.osgi.framework.console.CommandProvider;
+import org.opendaylight.snmp4sdn.internal.util.CommandInterpreter;
+import org.opendaylight.snmp4sdn.internal.util.CommandProvider;
 import org.opendaylight.snmp4sdn.core.IController;
 import org.opendaylight.snmp4sdn.core.IMessageListener;
 import org.opendaylight.snmp4sdn.core.ISwitch;
@@ -152,7 +152,7 @@ public class Controller implements IController, ICore, CommandProvider {
         this.messageListeners = new ConcurrentHashMap<SNMPType, IMessageListener>();
         this.switchStateListener = null;
         this.switchInstanceNumber = new AtomicInteger(0);
-        registerWithOSGIConsole();//s4s. in junit test, doesn't need. but need it when system test
+        //registerWithOSGIConsole();//s4s. in junit test, doesn't need. but need it when system test
         cmethUtil = new CmethUtil();
         cmethUtil.init();
 
@@ -598,12 +598,12 @@ public class Controller implements IController, ICore, CommandProvider {
         }
     }
 
-    private void registerWithOSGIConsole() {
+    /*private void registerWithOSGIConsole() {
         BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass())
                 .getBundleContext();
         bundleContext.registerService(CommandProvider.class.getName(), this,
                 null);
-    }
+    }*/
 
     public void topologyDiscoverSwitchesAndPorts(){
         logger.trace("Remove existing switches...");
