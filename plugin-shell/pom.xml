@@ -76,8 +76,8 @@
         <configuration>
           <instructions>
             <Import-Package>org.apache.felix.service.command,
-              org.apache.karaf.shell.commands,
-              org.apache.karaf.shell.console,
+              org.apache.karaf.shell.commands;version="[3.0.0,4.1)",
+              org.apache.karaf.shell.console;version="[3.0.0,4.1)",
               org.opendaylight.snmp4sdn,
               *</Import-Package>
           </instructions>
