@@ -30,8 +30,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.eclipse.osgi.framework.console.CommandInterpreter;
-import org.eclipse.osgi.framework.console.CommandProvider;
+import org.opendaylight.snmp4sdn.internal.util.CommandInterpreter;
+import org.opendaylight.snmp4sdn.internal.util.CommandProvider;
 import org.opendaylight.snmp4sdn.IInventoryShimExternalListener;
 import org.opendaylight.snmp4sdn.IOFStatisticsManager;
 import org.opendaylight.snmp4sdn.IStatisticsListener;
@@ -252,7 +252,7 @@ IInventoryShimExternalListener, CommandProvider {
         txRatesUpdater.start();
 
         // OSGI console
-        registerWithOSGIConsole();
+        //registerWithOSGIConsole();
     }
 
     /**
@@ -276,12 +276,12 @@ IInventoryShimExternalListener, CommandProvider {
         }
     }
 
-    private void registerWithOSGIConsole() {
+    /*private void registerWithOSGIConsole() {
         BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass())
                 .getBundleContext();
         bundleContext.registerService(CommandProvider.class.getName(), this,
                 null);
-    }
+    }*/
 
     private static class StatsRequest {
         protected Long switchId;
