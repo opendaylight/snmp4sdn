@@ -11,25 +11,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!--ODL suggests this
     <parent>
       <groupId>org.opendaylight.odlparent</groupId>
       <artifactId>features-parent</artifactId>
       <version>1.8.0-SNAPSHOT</version>
       <relativePath />
-    </parent>-->
-
-    <parent>
-        <groupId>org.opendaylight.snmp4sdn</groupId>
-        <artifactId>commons.snmp4sdn</artifactId>
-        <version>0.6.0-SNAPSHOT</version>
-        <relativePath>../../commons/snmp4sdn</relativePath>
     </parent>
 
     <artifactId>features-snmp4sdn</artifactId>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <version>0.6.0-SNAPSHOT</version>
-    <!--<packaging>jar</packaging>--><!--TODO: whether given this tag or not, doesn't seem harm. Other project seems not to put this tag, so we ignore it too-->
 
     <!--<name>snmp4sdn features</name>-->
     <description>features of snmp4sdn</description>
@@ -65,6 +56,9 @@
         <feature.test.version>1.9.0-SNAPSHOT</feature.test.version><!--referencing to other projects, usually is 1.8.0-SNAPSHOT after version bump for Lithium-->
         <karaf.empty.version>1.9.0-SNAPSHOT</karaf.empty.version>
         <surefire.version>2.16</surefire.version>
+        <!--the following yangtools.version and mdsal.version are copied from ../../commons/snmp4sdn/pom.xml-->
+        <yangtools.version>1.1.0-SNAPSHOT</yangtools.version>
+        <mdsal.version>1.5.0-SNAPSHOT</mdsal.version>
         <restconf.version>1.6.0-SNAPSHOT</restconf.version>
         <mdsal.model.version>0.11.0-SNAPSHOT</mdsal.model.version>
         <openflowplugin.version>0.5.0-SNAPSHOT</openflowplugin.version>
@@ -139,71 +133,4 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-            </resources>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <version>2.7</version>
-                    <executions>
-                         <execution>
-                             <id>filter</id>
-                             <phase>generate-resources</phase>
-                             <goals>
-                                 <goal>resources</goal>
-                             </goals>
-                        </execution>
-                    </executions>
-               </plugin>
-               <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.9.1</version>
-                    <executions>
-                        <execution>
-                        <id>attach-artifacts</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>attach-artifact</goal>
-                        </goals>
-                        <configuration>
-                            <artifacts>
-                                <artifact>
-                                   <file>${project.build.directory}/classes/${features.file}</file>
-                                   <type>xml</type>
-                                   <classifier>features</classifier>
-                                </artifact>
-                            </artifacts>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <!--
-            TODO: with the plugin below, build code fail as the error shown in the link below (but the code could be built successfully earlier)
-            https://jenkins.opendaylight.org/releng/job/snmp4sdn-verify-boron/jdk=openjdk7,nodes=dynamic_verify/15/consoleFull
-            We don't know why but other projects seems no such code (even, no <build> section in pom), so we skip the code here.
-            -->
-            <!--<plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${surefire.version}</version>
-                <configuration>
-                    <systemPropertyVariables>
-                        <karaf.distro.groupId>org.opendaylight.controller</karaf.distro.groupId>
-                        <karaf.distro.artifactId>opendaylight-karaf-empty</karaf.distro.artifactId>
-                        <karaf.distro.version>${karaf.empty.version}</karaf.distro.version>
-                    </systemPropertyVariables>
-                    <dependenciesToScan>
-                        <dependency>org.opendaylight.odlparent:features-test</dependency>< ! - -modify "yangtools" to "odlparent", as gerrit 16240 - - >
-                    </dependenciesToScan>
-                </configuration>
-            </plugin>-->
-        </plugins>
-    </build>
 </project>
