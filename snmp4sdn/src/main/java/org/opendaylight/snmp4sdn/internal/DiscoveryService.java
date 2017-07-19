@@ -33,8 +33,8 @@ import java.util.Vector;
 import org.apache.commons.lang3.tuple.ImmutablePair;//s4s simulation add
 import org.apache.commons.lang3.tuple.Pair;//s4s simulation add
 
-import org.eclipse.osgi.framework.console.CommandInterpreter;
-import org.eclipse.osgi.framework.console.CommandProvider;
+import org.opendaylight.snmp4sdn.internal.util.CommandInterpreter;
+import org.opendaylight.snmp4sdn.internal.util.CommandProvider;
 import org.opendaylight.snmp4sdn.IDataPacketListen;
 import org.opendaylight.snmp4sdn.IDataPacketMux;
 import org.opendaylight.snmp4sdn.IDiscoveryListener;
@@ -1210,10 +1210,10 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
         readyListHi.add(nodeConnector);
     }*/
 
-    private void registerWithOSGIConsole() {
+    /*private void registerWithOSGIConsole() {
         BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
         bundleContext.registerService(CommandProvider.class.getName(), this, null);
-    }
+    }*/
 
     //snmp4sdn: OF's need
     /*
@@ -1777,7 +1777,7 @@ public class DiscoveryService implements IInventoryShimExternalListener, IDataPa
 
         //initDiscoveryPacket();//snmp4sdn: OF's need
 
-        registerWithOSGIConsole();
+        //registerWithOSGIConsole();
     }
 
     /**
