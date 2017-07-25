@@ -14,7 +14,7 @@
     <parent>
       <groupId>org.opendaylight.odlparent</groupId>
       <artifactId>features-parent</artifactId>
-      <version>1.9.0</version>
+      <version>2.0.2</version>
       <relativePath />
     </parent>
 
@@ -52,7 +52,7 @@
     <properties><!--TODO: move the settings to commons.snmp4sdn pom-->
         <features.file>features.xml</features.file>
         <branding.version>1.5.0-SNAPSHOT</branding.version>
-        <karaf.empty.version>1.9.0</karaf.empty.version>
+        <karaf.empty.version>2.0.2</karaf.empty.version>
         <surefire.version>2.16</surefire.version>
         <!--the following yangtools.version and mdsal.version are copied from ../../commons/snmp4sdn/pom.xml-->
         <yangtools.version>1.1.0-SNAPSHOT</yangtools.version>
