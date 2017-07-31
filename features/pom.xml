@@ -28,8 +28,7 @@
     <url>https://wiki.opendaylight.org/view/SNMP4SDN:Main</url>
 
     <modules>
-       <!--<module>features-snmp4sdn</module>-->
-       <module>features4-snmp4sdn</module>
+       <module>features-snmp4sdn</module>
        <module>odl-snmp4sdn-snmp4sdn</module>
     </modules>
 
