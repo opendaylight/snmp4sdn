@@ -4,13 +4,13 @@
     <parent>
       <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>binding-parent</artifactId>
-      <version>0.11.0-SNAPSHOT</version>
+      <version>0.11.1-SNAPSHOT</version>
       <relativePath/>
     </parent>
 
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>md-model</artifactId>
-    <version>0.6.0-SNAPSHOT</version>
+    <version>0.6.1-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <name>MD-SAL models</name>
