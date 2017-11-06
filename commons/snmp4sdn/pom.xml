@@ -62,17 +62,6 @@
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.apache.felix.dependencymanager</artifactId>
-        <version>3.1.0</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.apache.felix.dependencymanager.shell</artifactId>
-        <version>3.0.1</version>
-      </dependency>
-
       <!--copy from expect4j's pom-->
       <dependency>
         <groupId>org.apache.servicemix.bundles</groupId>
