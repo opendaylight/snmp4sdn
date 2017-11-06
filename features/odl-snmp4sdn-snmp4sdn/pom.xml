@@ -112,6 +112,10 @@
       <artifactId>org.apache.felix.dependencymanager</artifactId>
       <version>3.1.0</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.metatype</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.apache.commons</groupId>
