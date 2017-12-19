@@ -19,14 +19,14 @@
   <name>vlan manager</name>
   <description>vlan manager, as a consumer of snmp4sdn, for demo snmp4sdn vlan service</description>
   <url>https://wiki.opendaylight.org/view/SNMP4SDN:Main</url>
-  
+
   <licenses>
     <license>
       <name>Eclipse Public License v1.0</name>
       <url>http://www.eclipse.org/legal/epl-v10.html</url>
     </license>
   </licenses>
-  
+
   <developers>
     <developer>
       <name>Yi-Ling Hsieh</name>
@@ -93,6 +93,7 @@
     <dependency>
       <groupId>org.eclipse.tycho</groupId>
       <artifactId>org.eclipse.osgi</artifactId>
+      <version>3.9.1.v20130814-1242</version>
     </dependency>
   </dependencies>
 </project>
