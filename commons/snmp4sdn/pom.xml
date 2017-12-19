@@ -57,7 +57,6 @@
     <sal.version>0.14.0-SNAPSHOT</sal.version>
     <mdsal.version>1.7.0-SNAPSHOT</mdsal.version>
     <nsf.version>0.10.0-SNAPSHOT</nsf.version>
-    <yangtools.version>1.2.0</yangtools.version>
   </properties>
 
   <dependencyManagement>
