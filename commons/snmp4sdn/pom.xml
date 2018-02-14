@@ -7,12 +7,12 @@
   </prerequisites>
   <groupId>org.opendaylight.snmp4sdn</groupId>
   <artifactId>commons.snmp4sdn</artifactId>
-  <version>0.6.2-SNAPSHOT</version>
+  <version>0.6.2</version>
   <packaging>pom</packaging>
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.parent</artifactId>
-    <version>0.6.2-SNAPSHOT</version>
+    <version>0.6.2</version>
     <relativePath>../parent</relativePath>
   </parent>
 
@@ -54,10 +54,10 @@
     <releaseplugin.version>2.3.2</releaseplugin.version>
 
     <ietf-inet-types.version>2010.09.24.3</ietf-inet-types.version>
-    <sal.version>0.13.2-SNAPSHOT</sal.version>
-    <mdsal.version>1.6.2-SNAPSHOT</mdsal.version>
-    <nsf.version>0.9.2-SNAPSHOT</nsf.version>
-    <yangtools.version>1.2.2-SNAPSHOT</yangtools.version>
+    <sal.version>0.13.2</sal.version>
+    <mdsal.version>1.6.2</mdsal.version>
+    <nsf.version>0.9.2</nsf.version>
+    <yangtools.version>1.2.2</yangtools.version>
   </properties>
 
   <dependencyManagement>
@@ -350,7 +350,7 @@
             <dependency>
               <groupId>org.opendaylight.snmp4sdn</groupId>
               <artifactId>commons.checkstyle</artifactId>
-              <version>0.6.2-SNAPSHOT</version>//TODO: version need to up to date
+              <version>0.6.2</version>//TODO: version need to up to date
             </dependency>
           </dependencies>
         <executions>
