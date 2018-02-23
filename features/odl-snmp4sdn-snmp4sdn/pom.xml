@@ -22,15 +22,15 @@
 
   <groupId>org.opendaylight.snmp4sdn</groupId>
   <artifactId>odl-snmp4sdn-snmp4sdn</artifactId>
-  <version>0.6.2-SNAPSHOT</version>
+  <version>0.6.3-SNAPSHOT</version>
   <packaging>feature</packaging>
 
   <name>OpenDaylight :: SNMP4SDN :: SNMP4SDN Plugin</name>
 
   <properties>
-    <restconf.version>1.6.2-SNAPSHOT</restconf.version>
-    <mdsal.model.version>0.11.2-SNAPSHOT</mdsal.model.version>
-    <openflowplugin.version>0.5.2-SNAPSHOT</openflowplugin.version>
+    <restconf.version>1.6.3-SNAPSHOT</restconf.version>
+    <mdsal.model.version>0.11.3-SNAPSHOT</mdsal.model.version>
+    <openflowplugin.version>0.5.3-SNAPSHOT</openflowplugin.version>
   </properties>
 
   <dependencyManagement>
@@ -46,7 +46,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>mdsal-artifacts</artifactId>
-        <version>1.6.2-SNAPSHOT</version>
+        <version>1.6.3-SNAPSHOT</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -66,7 +66,7 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>odl-mdsal-broker</artifactId>
-      <version>1.6.2-SNAPSHOT</version>
+      <version>1.6.3-SNAPSHOT</version>
       <type>xml</type>
       <classifier>features</classifier>
     </dependency>
