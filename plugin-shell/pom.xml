@@ -13,7 +13,7 @@
   <version>0.8.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
-  <name>snmp4sn plugin shell</name>
+  <name>snmp4sdn plugin shell</name>
   <description>Provide shell command for snmp4sdn plugin in Karaf</description>
   <url>https://wiki.opendaylight.org/view/SNMP4SDN:Main</url>
 
