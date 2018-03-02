@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Christine Hsieh <ylhsieh@itri.org.tw>
+Submitted-by: Thanh Ha <thanh.ha@linuxfoundation.org>
+Submitted-at: Fri, 02 Mar 2018 13:45:23 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/68984
+Project: snmp4sdn
+Branch: refs/heads/stable/oxygen
