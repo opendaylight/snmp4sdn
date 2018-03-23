@@ -8,56 +8,44 @@
 
 package org.opendaylight.snmp4sdn.internal;
 
-import org.opendaylight.snmp4sdn.internal.util.CommandInterpreter;
-import org.opendaylight.snmp4sdn.internal.util.CommandProvider;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-
-import org.opendaylight.controller.sal.core.ConstructionException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Future;
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.core.Property;
-import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.sal.utils.StatusCode;
-
+import org.opendaylight.snmp4sdn.DiscoveryServiceAPI;
+import org.opendaylight.snmp4sdn.IInventoryProvider;
+import org.opendaylight.snmp4sdn.ITopologyServiceShim;
+import org.opendaylight.snmp4sdn.internal.util.CommandProvider;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.DeviceType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.GetEdgeListOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.GetEdgeListOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.GetNodeConnectorListOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.GetNodeConnectorListOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.GetNodeListOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.GetNodeListOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.RediscoverOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.RediscoverOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.SetDiscoveryIntervalInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.SetDiscoveryIntervalOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.SetDiscoveryIntervalOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.TopologyService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.edge.list.output.EdgeListEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.edge.list.output.EdgeListEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.node.connector.list.output.NodeConnectorListEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.node.connector.list.output.NodeConnectorListEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.node.list.output.NodeListEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.node.list.output.NodeListEntryBuilder;
 //md-sal
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.types.rev150126.Result;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.*;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.edge.list.output.*;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.node.list.output.*;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.node.connector.list.output.*;
-
-import org.opendaylight.snmp4sdn.ITopologyServiceShim;
-import org.opendaylight.snmp4sdn.IInventoryProvider;
-import org.opendaylight.snmp4sdn.DiscoveryServiceAPI;
-
-//For md-sal RPC call
-import org.opendaylight.controller.sal.common.util.Rpcs;
-import java.util.Collections;
-import java.util.concurrent.Future;
-import com.google.common.util.concurrent.Futures;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 //import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
-
-//TODO: com.google.common import error in karaf
-/*import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.SettableFuture;*/
-
-import org.opendaylight.snmp4sdn.core.internal.Controller;
-import org.opendaylight.snmp4sdn.core.IController;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.Vector;
-import java.util.Set;
-import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,83 +74,68 @@ public class TopologyImpl implements TopologyService, CommandProvider{
     }*/
 
     public void setTopologyServiceShim(ITopologyServiceShim topo) {
-        if(topo == null)
+        if(topo == null) {
             logger.debug("ERROR: setTopologyServiceShim(): given null ITopologyServiceShim");
+        }
         this.topo = topo;
     }
 
     public void unsetTopologyServiceShim(ITopologyServiceShim topo) {
         if (this.topo == topo) {
             this.topo = null;
-        }
-        else
+        } else {
             logger.debug("ERROR: unsetTopologyServiceShim(): given ITopologyServiceShim is not the local one");
+        }
     }
 
     public void setInventoryService(IInventoryProvider inv) {
-        if(inv == null)
+        if(inv == null) {
             logger.debug("ERROR: setInventoryService(): given null IInventoryProvider");
+        }
         this.inv = inv;
     }
 
     public void unsetInventoryService(IInventoryProvider inv) {
         if (this.inv == inv) {
             this.inv = null;
-        }
-        else
+        } else {
             logger.debug("ERROR: unsetInventoryService(): given IInventoryProvider is not the local one");
+        }
     }
 
     public void setDiscoveryService(DiscoveryServiceAPI discov) {
-        if(discov == null)
+        if(discov == null) {
             logger.debug("ERROR: setDiscoveryService(): given null DiscoveryServiceAPI");
+        }
         this.discov = discov;
     }
 
     public void unsetDiscoveryService(DiscoveryServiceAPI discov) {
         if (this.discov == discov) {
             this.discov = null;
-        }
-        else
+        } else {
             logger.debug("ERROR: unsetDiscoveryService(): given DiscoveryServiceAPI is not the local one");
+        }
     }
 
     private Future<RpcResult<GetEdgeListOutput>> createGetEdgeListFailRpcResult(){
-        GetEdgeListOutputBuilder ob = new GetEdgeListOutputBuilder().setEdgeListEntry(null);
-        RpcResult<GetEdgeListOutput> rpcResult =
-                    Rpcs.<GetEdgeListOutput> getRpcResult(false, ob.build(),//TODO:the first parameter should be true/false? //TODO: many other xxxServiceImpl.java also need check this
-                            Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);
+        return RpcResultBuilder.<GetEdgeListOutput>failed().buildFuture();
     }
 
     public Future<RpcResult<GetNodeListOutput>> createGetNodeListFailRpcResult(){
-        RpcResult<GetNodeListOutput> rpcResult =
-                Rpcs.<GetNodeListOutput> getRpcResult(false, null,
-                Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);
+        return RpcResultBuilder.<GetNodeListOutput>failed().buildFuture();
     }
 
     public Future<RpcResult<GetNodeConnectorListOutput>> createGetNodeConnectorListFailRpcResult(){
-        RpcResult<GetNodeConnectorListOutput> rpcResult =
-                Rpcs.<GetNodeConnectorListOutput> getRpcResult(false, null,
-                Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);
+        return RpcResultBuilder.<GetNodeConnectorListOutput>failed().buildFuture();
     }
 
     private Future<RpcResult<RediscoverOutput>> createRediscoverRpcFailResult(){
-        RediscoverOutputBuilder ob = new RediscoverOutputBuilder().setRediscoverResult(Result.FAIL);
-        RpcResult<RediscoverOutput> rpcResult =
-                    Rpcs.<RediscoverOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);
+        return RpcResultBuilder.<RediscoverOutput>failed().buildFuture();
     }
 
     private Future<RpcResult<SetDiscoveryIntervalOutput>> createSetDiscoveryIntervalRpcFailResult(){
-        SetDiscoveryIntervalOutputBuilder ob = new SetDiscoveryIntervalOutputBuilder().setSetDiscoveryIntervalResult(Result.FAIL);
-        RpcResult<SetDiscoveryIntervalOutput> rpcResult =
-                    Rpcs.<SetDiscoveryIntervalOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);
+        return RpcResultBuilder.<SetDiscoveryIntervalOutput>failed().buildFuture();
     }
 
     //md-sal
@@ -180,7 +153,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
             return createGetEdgeListFailRpcResult();
         }
 
-        List<EdgeListEntry> retList = new ArrayList<EdgeListEntry>();
+        List<EdgeListEntry> retList = new ArrayList<>();
         for(Edge edge : edgeList){
             //check parameters
             if(edge == null){
@@ -250,15 +223,15 @@ public class TopologyImpl implements TopologyService, CommandProvider{
             //set head NodeConnecotr's type and ID
             if(headNodeConnectorTypeStr.equals("SNMP")){
                 entryBuilder.setHeadNodeConnectorType(DeviceType.SNMP);
-                entryBuilder.setHeadNodeConnectorId(((Short)(edge.getHeadNodeConnector().getID())).toString());
+                entryBuilder.setHeadNodeConnectorId(((Short)edge.getHeadNodeConnector().getID()).toString());
             }
             else if(headNodeConnectorTypeStr.equals("OF")){
                 entryBuilder.setHeadNodeConnectorType(DeviceType.OF);
-                entryBuilder.setHeadNodeConnectorId(((Short)(edge.getHeadNodeConnector().getID())).toString());
+                entryBuilder.setHeadNodeConnectorId(((Short)edge.getHeadNodeConnector().getID()).toString());
             }
             else if(headNodeConnectorTypeStr.equals("PR")){
                 entryBuilder.setHeadNodeConnectorType(DeviceType.PR);
-                entryBuilder.setHeadNodeConnectorId((String)(edge.getHeadNodeConnector().getID()));
+                entryBuilder.setHeadNodeConnectorId((String)edge.getHeadNodeConnector().getID());
             }
             else{
                 logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyServiceShim.getEdgeList() has head NodeConnector of unknown type: {}", headNodeConnectorTypeStr);
@@ -268,15 +241,15 @@ public class TopologyImpl implements TopologyService, CommandProvider{
             //set tail NodeConnecotr's type and ID
             if(tailNodeConnectorTypeStr.equals("SNMP")){
                 entryBuilder.setTailNodeConnectorType(DeviceType.SNMP);
-                entryBuilder.setTailNodeConnectorId(((Short)(edge.getTailNodeConnector().getID())).toString());
+                entryBuilder.setTailNodeConnectorId(((Short)edge.getTailNodeConnector().getID()).toString());
             }
             else if(tailNodeConnectorTypeStr.equals("OF")){
                 entryBuilder.setTailNodeConnectorType(DeviceType.OF);
-                entryBuilder.setTailNodeConnectorId(((Short)(edge.getTailNodeConnector().getID())).toString());
+                entryBuilder.setTailNodeConnectorId(((Short)edge.getTailNodeConnector().getID()).toString());
             }
             else if(tailNodeConnectorTypeStr.equals("PR")){
                 entryBuilder.setTailNodeConnectorType(DeviceType.PR);
-                entryBuilder.setTailNodeConnectorId((String)(edge.getTailNodeConnector().getID()));
+                entryBuilder.setTailNodeConnectorId((String)edge.getTailNodeConnector().getID());
             }
             else{
                 logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyServiceShim.getEdgeList() has tail NodeConnector of unknown type: {}", tailNodeConnectorTypeStr);
@@ -286,15 +259,15 @@ public class TopologyImpl implements TopologyService, CommandProvider{
             //set head Node's type and ID
             if(headNodeTypeStr.equals("SNMP")){
                 entryBuilder.setHeadNodeType(DeviceType.SNMP);
-                entryBuilder.setHeadNodeId(((Long)(edge.getHeadNodeConnector().getNode().getID())).toString());
+                entryBuilder.setHeadNodeId(((Long)edge.getHeadNodeConnector().getNode().getID()).toString());
             }
             else if(headNodeTypeStr.equals("OF")){
                 entryBuilder.setHeadNodeType(DeviceType.OF);
-                entryBuilder.setHeadNodeId(((Long)(edge.getHeadNodeConnector().getNode().getID())).toString());
+                entryBuilder.setHeadNodeId(((Long)edge.getHeadNodeConnector().getNode().getID()).toString());
             }
             else if(headNodeTypeStr.equals("PR")){
                 entryBuilder.setHeadNodeType(DeviceType.PR);
-                entryBuilder.setHeadNodeId((String)(edge.getHeadNodeConnector().getNode().getID()));
+                entryBuilder.setHeadNodeId((String)edge.getHeadNodeConnector().getNode().getID());
             }
             else{
                 logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyServiceShim.getEdgeList() has head Node of unknown type: {}", headNodeTypeStr);
@@ -304,15 +277,15 @@ public class TopologyImpl implements TopologyService, CommandProvider{
             //set tail Node's type and ID
             if(tailNodeTypeStr.equals("SNMP")){
                 entryBuilder.setTailNodeType(DeviceType.SNMP);
-                entryBuilder.setTailNodeId(((Long)(edge.getTailNodeConnector().getNode().getID())).toString());
+                entryBuilder.setTailNodeId(((Long)edge.getTailNodeConnector().getNode().getID()).toString());
             }
             else if(tailNodeTypeStr.equals("OF")){
                 entryBuilder.setTailNodeType(DeviceType.OF);
-                entryBuilder.setTailNodeId(((Long)(edge.getTailNodeConnector().getNode().getID())).toString());
+                entryBuilder.setTailNodeId(((Long)edge.getTailNodeConnector().getNode().getID()).toString());
             }
             else if(tailNodeTypeStr.equals("PR")){
                 entryBuilder.setTailNodeType(DeviceType.PR);
-                entryBuilder.setTailNodeId((String)(edge.getTailNodeConnector().getNode().getID()));
+                entryBuilder.setTailNodeId((String)edge.getTailNodeConnector().getNode().getID());
             }
             else{
                 logger.debug("ERROR: getEdgeList(): an edge in the edgeList from ITopologyServiceShim.getEdgeList() has tail Node of unknown type: {}", tailNodeTypeStr);
@@ -333,10 +306,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
         System.out.println();
 
         GetEdgeListOutputBuilder ob = new GetEdgeListOutputBuilder().setEdgeListEntry(retList);
-        RpcResult<GetEdgeListOutput> rpcResult =
-                Rpcs.<GetEdgeListOutput> getRpcResult(true, ob.build(),
-                Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);
+        return RpcResultBuilder.<GetEdgeListOutput>success(ob.build()).buildFuture();
     }
 
     //md-sal
@@ -359,7 +329,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
             return createGetNodeConnectorListFailRpcResult();
         }
 
-        List<NodeConnectorListEntry> retList = new ArrayList<NodeConnectorListEntry>();
+        List<NodeConnectorListEntry> retList = new ArrayList<>();
         for(NodeConnector nodeConnector : nodeConnectorSet){
             //check parameters
             if(nodeConnector == null){
@@ -448,10 +418,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
         System.out.println();
 
         GetNodeConnectorListOutputBuilder ob = new GetNodeConnectorListOutputBuilder().setNodeConnectorListEntry(retList);
-        RpcResult<GetNodeConnectorListOutput> rpcResult =
-                Rpcs.<GetNodeConnectorListOutput> getRpcResult(true, ob.build(),
-                Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);
+        return RpcResultBuilder.<GetNodeConnectorListOutput>success(ob.build()).buildFuture();
     }
 
     //md-sal
@@ -474,7 +441,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
             return createGetNodeListFailRpcResult();
         }
 
-        List<NodeListEntry> retList = new ArrayList<NodeListEntry>();
+        List<NodeListEntry> retList = new ArrayList<>();
         for(Node node : nodeSet){
             //check parameters
             if(node == null){
@@ -529,10 +496,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
         System.out.println();
 
         GetNodeListOutputBuilder ob = new GetNodeListOutputBuilder().setNodeListEntry(retList);
-        RpcResult<GetNodeListOutput> rpcResult =
-                Rpcs.<GetNodeListOutput> getRpcResult(true, ob.build(),
-                Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);
+        return RpcResultBuilder.<GetNodeListOutput>success(ob.build()).buildFuture();
     }
 
     @Override//md-sal
@@ -543,10 +507,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
         boolean isSuccess = discov.doTopologyDiscovery();
         if(isSuccess){
             RediscoverOutputBuilder ob = new RediscoverOutputBuilder().setRediscoverResult(Result.SUCCESS);
-            RpcResult<RediscoverOutput> rpcResult =
-                    Rpcs.<RediscoverOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<RediscoverOutput>success(ob.build()).buildFuture();
         }
         else{
             logger.debug("ERROR: rediscover(): call DiscoveryService.doTopologyDiscovery() fail");
@@ -580,10 +541,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
         logger.info("SNMP4SDN: Periodic Topology Discovery interval time has been set as {} second", interval);
 
         SetDiscoveryIntervalOutputBuilder ob = new SetDiscoveryIntervalOutputBuilder().setSetDiscoveryIntervalResult(Result.SUCCESS);
-        RpcResult<SetDiscoveryIntervalOutput> rpcResult =
-                Rpcs.<SetDiscoveryIntervalOutput> getRpcResult(true, ob.build(),
-                Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);
+        return RpcResultBuilder.<SetDiscoveryIntervalOutput>success(ob.build()).buildFuture();
     }
 
     private void printEdgeList(List<Edge> edgeList){
@@ -591,8 +549,9 @@ public class TopologyImpl implements TopologyService, CommandProvider{
             System.out.println("ERROR: printEdgeList(): given null data");
             return;
         }
-        for(Edge edge : edgeList)
+        for(Edge edge : edgeList) {
             System.out.println(edge);
+        }
     }
 
     private void printNodeConnectorSet(Set<NodeConnector> nodeConnectorSet){
@@ -600,8 +559,9 @@ public class TopologyImpl implements TopologyService, CommandProvider{
             System.out.println("ERROR: printNodeConnectorSet(): given null data");
             return;
         }
-        for(NodeConnector nc : nodeConnectorSet)
+        for(NodeConnector nc : nodeConnectorSet) {
             System.out.println(nc);
+        }
     }
 
     private void printNodeSet(Set<Node> nodeSet){
@@ -609,8 +569,9 @@ public class TopologyImpl implements TopologyService, CommandProvider{
             System.out.println("ERROR: printNodeSet(): given null data");
             return;
         }
-        for(Node node : nodeSet)
+        for(Node node : nodeSet) {
             System.out.println(node);
+        }
     }
 
     //TODO: OSGi test command

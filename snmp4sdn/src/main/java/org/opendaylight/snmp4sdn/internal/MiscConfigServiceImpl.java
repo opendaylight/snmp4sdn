@@ -10,81 +10,62 @@ package org.opendaylight.snmp4sdn.internal;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.concurrent.ExecutionException;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.Node.NodeIDType;
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.controller.sal.utils.StatusCode;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
-//import org.opendaylight.snmp4sdn.IConfigService;
-import org.opendaylight.snmp4sdn.core.internal.Controller;
-import org.opendaylight.snmp4sdn.core.IController;
-import org.opendaylight.snmp4sdn.internal.CLIHandler;
-import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
-import org.opendaylight.snmp4sdn.protocol.util.HexString;
-
 import org.opendaylight.snmp4sdn.ARPTableEntry;
 //import org.opendaylight.snmp4sdn.SNMP4SDNErrorCode;
 import org.opendaylight.snmp4sdn.STPPortState;
-
-//md-sal
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.MiscConfigService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.Result;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.StpPortState;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.EnableStpInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.EnableStpOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.EnableStpOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.SetStpPortStateInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.SetStpPortStateOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.SetStpPortStateOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetStpPortStateInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetStpPortStateOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetStpPortStateOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.DisableStpInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.DisableStpOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.DisableStpOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetArpEntryInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetArpEntryOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetArpEntryOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.SetArpEntryInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.SetArpEntryOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.SetArpEntryOutputBuilder;
+import org.opendaylight.snmp4sdn.core.IController;
+//import org.opendaylight.snmp4sdn.IConfigService;
+import org.opendaylight.snmp4sdn.core.internal.Controller;
+import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
+import org.opendaylight.snmp4sdn.internal.util.CommandInterpreter;
+import org.opendaylight.snmp4sdn.internal.util.CommandProvider;
+import org.opendaylight.snmp4sdn.protocol.util.HexString;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.DeleteArpEntryInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.DeleteArpEntryOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.DeleteArpEntryOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.DisableStpInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.DisableStpOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.DisableStpOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.EnableStpInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.EnableStpOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.EnableStpOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetArpEntryInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetArpEntryOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetArpEntryOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetArpTableInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetArpTableOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetArpTableOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetStpPortRootInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetStpPortRootOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetStpPortRootOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetStpPortRootInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetStpPortRootInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetStpPortRootOutput;
-
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetStpPortRootOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetStpPortStateInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetStpPortStateOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.GetStpPortStateOutputBuilder;
+//md-sal
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.MiscConfigService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.Result;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.SetArpEntryInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.SetArpEntryOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.SetArpEntryOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.SetStpPortStateInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.SetStpPortStateOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.SetStpPortStateOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.StpPortState;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.get.arp.table.output.ArpTableEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.miscconfig.rev151207.get.arp.table.output.ArpTableEntryBuilder;
-
-//For md-sal RPC call
-import org.opendaylight.controller.sal.common.util.Rpcs;
-import java.util.Collections;
-import java.util.concurrent.Future;
-import com.google.common.util.concurrent.Futures;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 //import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
-
-import org.opendaylight.snmp4sdn.internal.util.CommandInterpreter;
-import org.opendaylight.snmp4sdn.internal.util.CommandProvider;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -201,7 +182,7 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
 
    //@Override
    public Status disableBpduFlooding(Node node){
-        Long nodeId = (Long)(node.getID());
+        Long nodeId = (Long)node.getID();
         //CmethUtil cmethUtil = controller.getCmethUtil();
         if(cmethUtil == null){
             logger.debug("ERROR: MiscConfigServiceImpl: disableBpduFlooding(): cmethUtil is null");
@@ -210,18 +191,21 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         String sw_ipAddr = cmethUtil.getIpAddr(nodeId);
         String username = cmethUtil.getCliUsername(nodeId);
         String password = cmethUtil.getCliPassword(nodeId);
-        if(sw_ipAddr == null)
+        if(sw_ipAddr == null) {
             return new Status(StatusCode.INTERNALERROR, "IP address of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(username == null)
+        }
+        if(username == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI username of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(password == null)
+        }
+        if(password == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI password of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
+        }
         return new CLIHandler(sw_ipAddr, username, password).disableBpduFlooding();
     }
 
    //@Override
    public Status disableBpduFlooding(Node node, NodeConnector nodeConnector){
-        Long nodeId = (Long)(node.getID());
+        Long nodeId = (Long)node.getID();
         //CmethUtil cmethUtil = controller.getCmethUtil();
         if(cmethUtil == null){
             logger.debug("ERROR: MiscConfigServiceImpl: disableBpduFlooding(): cmethUtil is null");
@@ -230,18 +214,21 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         String sw_ipAddr = cmethUtil.getIpAddr(nodeId);
         String username = cmethUtil.getCliUsername(nodeId);
         String password = cmethUtil.getCliPassword(nodeId);
-        if(sw_ipAddr == null)
+        if(sw_ipAddr == null) {
             return new Status(StatusCode.INTERNALERROR, "IP address of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(username == null)
+        }
+        if(username == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI username of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(password == null)
+        }
+        if(password == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI password of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
+        }
         return new CLIHandler(sw_ipAddr, username, password).disableBpduFlooding((Short)nodeConnector.getID());
     }
 
     //@Override
     public Status disableBroadcastFlooding(Node node){
-        Long nodeId = (Long)(node.getID());
+        Long nodeId = (Long)node.getID();
         //CmethUtil cmethUtil = controller.getCmethUtil();
         if(cmethUtil == null){
             logger.debug("ERROR: MiscConfigServiceImpl: disableBroadcastFlooding(): cmethUtil is null");
@@ -250,18 +237,21 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         String sw_ipAddr = cmethUtil.getIpAddr(nodeId);
         String username = cmethUtil.getCliUsername(nodeId);
         String password = cmethUtil.getCliPassword(nodeId);
-        if(sw_ipAddr == null)
+        if(sw_ipAddr == null) {
             return new Status(StatusCode.INTERNALERROR, "IP address of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(username == null)
+        }
+        if(username == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI username of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(password == null)
+        }
+        if(password == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI password of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
+        }
         return new CLIHandler(sw_ipAddr, username, password).disableBroadcastFlooding();
     }
 
     //@Override
     public Status disableBroadcastFlooding(Node node, NodeConnector nodeConnector){
-        Long nodeId = (Long)(node.getID());
+        Long nodeId = (Long)node.getID();
         //CmethUtil cmethUtil = controller.getCmethUtil();
         if(cmethUtil == null){
             logger.debug("ERROR: MiscConfigServiceImpl: disableBroadcastFlooding(): cmethUtil is null");
@@ -270,18 +260,21 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         String sw_ipAddr = cmethUtil.getIpAddr(nodeId);
         String username = cmethUtil.getCliUsername(nodeId);
         String password = cmethUtil.getCliPassword(nodeId);
-        if(sw_ipAddr == null)
+        if(sw_ipAddr == null) {
             return new Status(StatusCode.INTERNALERROR, "IP address of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(username == null)
+        }
+        if(username == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI username of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(password == null)
+        }
+        if(password == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI password of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
+        }
         return new CLIHandler(sw_ipAddr, username, password).disableBroadcastFlooding((Short)nodeConnector.getID());
     }
 
     //@Override
     public Status disableMulticastFlooding(Node node){
-        Long nodeId = (Long)(node.getID());
+        Long nodeId = (Long)node.getID();
         //CmethUtil cmethUtil = controller.getCmethUtil();
         if(cmethUtil == null){
             logger.debug("ERROR: MiscConfigServiceImpl: disableMulticastFlooding(): cmethUtil is null");
@@ -290,18 +283,21 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         String sw_ipAddr = cmethUtil.getIpAddr(nodeId);
         String username = cmethUtil.getCliUsername(nodeId);
         String password = cmethUtil.getCliPassword(nodeId);
-        if(sw_ipAddr == null)
+        if(sw_ipAddr == null) {
             return new Status(StatusCode.INTERNALERROR, "IP address of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(username == null)
+        }
+        if(username == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI username of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(password == null)
+        }
+        if(password == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI password of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
+        }
         return new CLIHandler(sw_ipAddr, username, password).disableMulticastFlooding();
     }
 
    //@Override
    public Status disableMulticastFlooding(Node node, NodeConnector nodeConnector){
-        Long nodeId = (Long)(node.getID());
+        Long nodeId = (Long)node.getID();
         //CmethUtil cmethUtil = controller.getCmethUtil();
         if(cmethUtil == null){
             logger.debug("ERROR: MiscConfigServiceImpl: disableMulticastFlooding(): cmethUtil is null");
@@ -310,18 +306,21 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         String sw_ipAddr = cmethUtil.getIpAddr(nodeId);
         String username = cmethUtil.getCliUsername(nodeId);
         String password = cmethUtil.getCliPassword(nodeId);
-        if(sw_ipAddr == null)
+        if(sw_ipAddr == null) {
             return new Status(StatusCode.INTERNALERROR, "IP address of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(username == null)
+        }
+        if(username == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI username of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(password == null)
+        }
+        if(password == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI password of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
+        }
         return new CLIHandler(sw_ipAddr, username, password).disableMulticastFlooding((Short)nodeConnector.getID());
     }
 
    //@Override
    public Status disableUnknownFlooding(Node node){
-        Long nodeId = (Long)(node.getID());
+        Long nodeId = (Long)node.getID();
         //CmethUtil cmethUtil = controller.getCmethUtil();
         if(cmethUtil == null){
             logger.debug("ERROR: MiscConfigServiceImpl: disableUnknownFlooding(): cmethUtil is null");
@@ -330,18 +329,21 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         String sw_ipAddr = cmethUtil.getIpAddr(nodeId);
         String username = cmethUtil.getCliUsername(nodeId);
         String password = cmethUtil.getCliPassword(nodeId);
-        if(sw_ipAddr == null)
+        if(sw_ipAddr == null) {
             return new Status(StatusCode.INTERNALERROR, "IP address of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(username == null)
+        }
+        if(username == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI username of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(password == null)
+        }
+        if(password == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI password of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
+        }
         return new CLIHandler(sw_ipAddr, username, password).disableUnknownFlooding();
     }
 
    //@Override
    public Status disableUnknownFlooding(Node node, NodeConnector nodeConnector){
-        Long nodeId = (Long)(node.getID());
+        Long nodeId = (Long)node.getID();
         //CmethUtil cmethUtil = controller.getCmethUtil();
         if(cmethUtil == null){
             logger.debug("ERROR: MiscConfigServiceImpl: disableUnknownFlooding(): cmethUtil is null");
@@ -350,18 +352,21 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         String sw_ipAddr = cmethUtil.getIpAddr(nodeId);
         String username = cmethUtil.getCliUsername(nodeId);
         String password = cmethUtil.getCliPassword(nodeId);
-        if(sw_ipAddr == null)
+        if(sw_ipAddr == null) {
             return new Status(StatusCode.INTERNALERROR, "IP address of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(username == null)
+        }
+        if(username == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI username of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(password == null)
+        }
+        if(password == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI password of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
+        }
         return new CLIHandler(sw_ipAddr, username, password).disableUnknownFlooding((Short)nodeConnector.getID());
     }
 
    //@Override
    public Status disableSourceMacCheck(Node node){
-        Long nodeId = (Long)(node.getID());
+        Long nodeId = (Long)node.getID();
         //CmethUtil cmethUtil = controller.getCmethUtil();
         if(cmethUtil == null){
             logger.debug("ERROR: MiscConfigServiceImpl: disableSourceMacCheck(): cmethUtil is null");
@@ -370,18 +375,21 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         String sw_ipAddr = cmethUtil.getIpAddr(nodeId);
         String username = cmethUtil.getCliUsername(nodeId);
         String password = cmethUtil.getCliPassword(nodeId);
-        if(sw_ipAddr == null)
+        if(sw_ipAddr == null) {
             return new Status(StatusCode.INTERNALERROR, "IP address of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(username == null)
+        }
+        if(username == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI username of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(password == null)
+        }
+        if(password == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI password of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
+        }
         return new CLIHandler(sw_ipAddr, username, password).disableSourceMacCheck();
     }
 
    //@Override
    public Status disableSourceMacCheck(Node node, NodeConnector nodeConnector){
-        Long nodeId = (Long)(node.getID());
+        Long nodeId = (Long)node.getID();
         //CmethUtil cmethUtil = controller.getCmethUtil();
         if(cmethUtil == null){
             logger.debug("ERROR: MiscConfigServiceImpl: disableSourceMacCheck(): cmethUtil is null");
@@ -390,18 +398,21 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         String sw_ipAddr = cmethUtil.getIpAddr(nodeId);
         String username = cmethUtil.getCliUsername(nodeId);
         String password = cmethUtil.getCliPassword(nodeId);
-        if(sw_ipAddr == null)
+        if(sw_ipAddr == null) {
             return new Status(StatusCode.INTERNALERROR, "IP address of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(username == null)
+        }
+        if(username == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI username of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(password == null)
+        }
+        if(password == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI password of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
+        }
         return new CLIHandler(sw_ipAddr, username, password).disableSourceMacCheck((Short)nodeConnector.getID());
     }
 
    //@Override
    public Status disableSourceLearning(Node node){
-        Long nodeId = (Long)(node.getID());
+        Long nodeId = (Long)node.getID();
         //CmethUtil cmethUtil = controller.getCmethUtil();
         if(cmethUtil == null){
             logger.debug("ERROR: MiscConfigServiceImpl: disableSourceLearning(): cmethUtil is null");
@@ -410,18 +421,21 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         String sw_ipAddr = cmethUtil.getIpAddr(nodeId);
         String username = cmethUtil.getCliUsername(nodeId);
         String password = cmethUtil.getCliPassword(nodeId);
-        if(sw_ipAddr == null)
+        if(sw_ipAddr == null) {
             return new Status(StatusCode.INTERNALERROR, "IP address of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(username == null)
+        }
+        if(username == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI username of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(password == null)
+        }
+        if(password == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI password of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
+        }
         return new CLIHandler(sw_ipAddr, username, password).disableSourceLearning();
     }
 
    //@Override
    public Status disableSourceLearning(Node node, NodeConnector nodeConnector){
-        Long nodeId = (Long)(node.getID());
+        Long nodeId = (Long)node.getID();
         //CmethUtil cmethUtil = controller.getCmethUtil();
         if(cmethUtil == null){
             logger.debug("ERROR: MiscConfigServiceImpl: disableSourceLearning(): cmethUtil is null");
@@ -430,12 +444,15 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         String sw_ipAddr = cmethUtil.getIpAddr(nodeId);
         String username = cmethUtil.getCliUsername(nodeId);
         String password = cmethUtil.getCliPassword(nodeId);
-        if(sw_ipAddr == null)
+        if(sw_ipAddr == null) {
             return new Status(StatusCode.INTERNALERROR, "IP address of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(username == null)
+        }
+        if(username == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI username of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
-        if(password == null)
+        }
+        if(password == null) {
             return new Status(StatusCode.INTERNALERROR, "CLI password of switch (mac address " + HexString.toHexString((Long)node.getID()) + ") is not found in DB");
+        }
         return new CLIHandler(sw_ipAddr, username, password).disableSourceLearning((Short)nodeConnector.getID());
     }
 
@@ -458,7 +475,9 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
             return new Status(StatusCode.BADREQUEST, "MiscConfigServiceImpl: setSTPPortState(): invalid port " + portNum);
         }
 
-        if(isDummy) return /*SNMP4SDNErrorCode.SUCCESS*/new Status(StatusCode.SUCCESS);
+        if(isDummy) {
+            return /*SNMP4SDNErrorCode.SUCCESS*/new Status(StatusCode.SUCCESS);
+        }
 
         status = new SNMPHandler(cmethUtil).setSTPPortState(nodeID, portNum, isEnable);
         //if(status != SNMP4SDNErrorCode.SUCCESS){
@@ -486,7 +505,9 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
             return null;
         }
 
-        if(isDummy) return STPPortState.FORWARDING;
+        if(isDummy) {
+            return STPPortState.FORWARDING;
+        }
 
         STPPortState state = new SNMPHandler(cmethUtil).getSTPPortState(nodeID, portNum);
         if(state == null){
@@ -569,7 +590,9 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
             return new Status(StatusCode.BADREQUEST, "MiscConfigServiceImpl: deleteARPEntry(): address translation for node " + nodeID + " for arp_entry_ip " + ipAddress + " error: " + e2);
         }
 
-        if(isDummy) return /*SNMP4SDNErrorCode.SUCCESS*/new Status(StatusCode.SUCCESS);
+        if(isDummy) {
+            return /*SNMP4SDNErrorCode.SUCCESS*/new Status(StatusCode.SUCCESS);
+        }
 
         //SNMP4SDNErrorCode ret = new SNMPHandler(cmethUtil).deleteARPTableEntry(nodeID, ipAddress);
         Status ret = new SNMPHandler(cmethUtil).deleteARPTableEntry(nodeID, ipAddress);
@@ -602,7 +625,7 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
             logger.debug("ERROR: setARPEntry(): call checkNodeIpValid() for node {} for entry ipAddress {} fail", nodeID, ipAddress);
             return new Status(StatusCode.BADREQUEST, "MiscConfigServiceImpl: setARPEntry: call checkNodeIpValid() for node " + nodeID + " for entry ipAddress " + ipAddress + " fail");
         }
-        
+
         try{//check ipAddress valid?
             InetAddress addr = InetAddress.getByName(ipAddress);
         }
@@ -617,7 +640,9 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
             return new Status(StatusCode.BADREQUEST, "MiscConfigServiceImpl: setARPEntry: address translation for node " + nodeID + " for arp_entry_ip " + ipAddress + " error: " + e2);
         }
 
-        if(isDummy) return /*SNMP4SDNErrorCode.SUCCESS*/new Status(StatusCode.SUCCESS);
+        if(isDummy) {
+            return /*SNMP4SDNErrorCode.SUCCESS*/new Status(StatusCode.SUCCESS);
+        }
 
         //SNMP4SDNErrorCode ret = new SNMPHandler(cmethUtil).setARPEntry(nodeID, ipAddress, macID);
         Status ret = new SNMPHandler(cmethUtil).setARPEntry(nodeID, ipAddress, macID);
@@ -644,7 +669,7 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         }
 
         if(isDummy){
-            List<ARPTableEntry> list = new ArrayList<ARPTableEntry>();
+            List<ARPTableEntry> list = new ArrayList<>();
             ARPTableEntry ret =new ARPTableEntry();
             ret.ipAddress = "1.1.1.1";
             ret.macAddress = HexString.toLong("12:34:56:78:AB:CD");
@@ -679,7 +704,7 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
             return new Status(StatusCode.BADREQUEST, "MiscConfigServiceImpl: checkNodeIpValid(): null node");
         }
 
-        long nodeID = ((Long)(node.getID())).longValue();
+        long nodeID = ((Long)node.getID()).longValue();
         if(cmethUtil == null){
             logger.debug("ERROR: MiscConfigServiceImpl: checkNodeIpValid(): cmethUtil is null");
             return new Status(StatusCode.INTERNALERROR, "MiscConfigServiceImpl: checkNodeIpValid() with nodeId " + nodeID + ": cmethUtil is null");
@@ -703,31 +728,19 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         //check null input parameters
         if(input == null){
             logger.debug("ERROR: disableStp(): given null input");
-            DisableStpOutputBuilder ob = new DisableStpOutputBuilder().setDisableStpResult(Result.FAIL);
-            RpcResult<DisableStpOutput> rpcResult =
-                    Rpcs.<DisableStpOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<DisableStpOutput>failed().buildFuture();
         }
         Long nodeId = input.getNodeId();
         if(nodeId == null){
             logger.debug("ERROR: disableStp(): given nodeId is null");
-            DisableStpOutputBuilder ob = new DisableStpOutputBuilder().setDisableStpResult(Result.FAIL);
-            RpcResult<DisableStpOutput> rpcResult =
-                    Rpcs.<DisableStpOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<DisableStpOutput>failed().buildFuture();
         }
 
         //create the node and check null
         Node node = createSNMPNode(nodeId.longValue());
         if(node == null){
             logger.debug("ERROR: disableStp(): call createSNMPNode() with nodeId {} fail", nodeId);
-            DisableStpOutputBuilder ob = new DisableStpOutputBuilder().setDisableStpResult(Result.FAIL);
-            RpcResult<DisableStpOutput> rpcResult =
-                    Rpcs.<DisableStpOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<DisableStpOutput>failed().buildFuture();
         }
 
         //execute disableSTP
@@ -735,18 +748,11 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         //TODO: for each case of returned status error code, give DisableStpOutputBuilder Result.XXX accordingly
         if(status.isSuccess()){
             DisableStpOutputBuilder ob = new DisableStpOutputBuilder().setDisableStpResult(Result.SUCCESS);
-            RpcResult<DisableStpOutput> rpcResult =
-                    Rpcs.<DisableStpOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<DisableStpOutput>success(ob.build()).buildFuture();
         }
         else{
             logger.debug("ERROR: disableStp(): call disableSTP() with nodeId {} fail", nodeId);
-            DisableStpOutputBuilder ob = new DisableStpOutputBuilder().setDisableStpResult(Result.FAIL);
-            RpcResult<DisableStpOutput> rpcResult =
-                    Rpcs.<DisableStpOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<DisableStpOutput>failed().buildFuture();
         }
     }
 
@@ -757,31 +763,19 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         //check null input parameters
         if(input == null){
             logger.debug("ERROR: enableStp(): given null input");
-            EnableStpOutputBuilder ob = new EnableStpOutputBuilder().setEnableStpResult(Result.FAIL);
-            RpcResult<EnableStpOutput> rpcResult =
-                    Rpcs.<EnableStpOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<EnableStpOutput>failed().buildFuture();
         }
         Long nodeId = input.getNodeId();
         if(nodeId == null){
             logger.debug("ERROR: enbleStp(): given nodeId is null");
-            EnableStpOutputBuilder ob = new EnableStpOutputBuilder().setEnableStpResult(Result.FAIL);
-            RpcResult<EnableStpOutput> rpcResult =
-                    Rpcs.<EnableStpOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<EnableStpOutput>failed().buildFuture();
         }
 
         //create the node and check null
         Node node = createSNMPNode(nodeId.longValue());
         if(node == null){
             logger.debug("ERROR: enableStp(): call createSNMPNode() with nodeId {} fail", nodeId);
-            EnableStpOutputBuilder ob = new EnableStpOutputBuilder().setEnableStpResult(Result.FAIL);
-            RpcResult<EnableStpOutput> rpcResult =
-                    Rpcs.<EnableStpOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<EnableStpOutput>failed().buildFuture();
         }
 
         //execute enableSTP
@@ -789,18 +783,11 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         //TODO: for each case of returned status error code, give EnableStpOutputBuilder Result.XXX accordingly
         if(status.isSuccess()){
             EnableStpOutputBuilder ob = new EnableStpOutputBuilder().setEnableStpResult(Result.SUCCESS);
-            RpcResult<EnableStpOutput> rpcResult =
-                    Rpcs.<EnableStpOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<EnableStpOutput>success(ob.build()).buildFuture();
         }
         else{
             logger.debug("ERROR: enableStp(): call enableSTP() with nodeId {} fail", nodeId);
-            EnableStpOutputBuilder ob = new EnableStpOutputBuilder().setEnableStpResult(Result.FAIL);
-            RpcResult<EnableStpOutput> rpcResult =
-                    Rpcs.<EnableStpOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<EnableStpOutput>failed().buildFuture();
         }
     }
 
@@ -865,10 +852,7 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         }
         }
 
-        RpcResult<GetStpPortStateOutput> rpcResult =
-                    Rpcs.<GetStpPortStateOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);
+        return RpcResultBuilder.<GetStpPortStateOutput>success(ob.build()).buildFuture();
     }
 
     //md-sal
@@ -878,33 +862,21 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         //check null input parameters
         if(input == null){
             logger.debug("ERROR: setStpPortState(): given null input");
-            SetStpPortStateOutputBuilder ob = new SetStpPortStateOutputBuilder().setSetStpPortStateResult(Result.FAIL);
-            RpcResult<SetStpPortStateOutput> rpcResult =
-                    Rpcs.<SetStpPortStateOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<SetStpPortStateOutput>failed().buildFuture();
         }
         Long nodeId = input.getNodeId();
         Short port = input.getPort();
         Boolean isEnable = input.isEnable();
         if(nodeId == null || port == null || isEnable == null){
             logger.debug("ERROR: setStpPortState(): given nodeId or port or isEnable is null");
-            SetStpPortStateOutputBuilder ob = new SetStpPortStateOutputBuilder().setSetStpPortStateResult(Result.FAIL);
-            RpcResult<SetStpPortStateOutput> rpcResult =
-                    Rpcs.<SetStpPortStateOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<SetStpPortStateOutput>failed().buildFuture();
         }
 
         //create the node and check null
         Node node = createSNMPNode(nodeId.longValue());
         if(node == null){
             logger.debug("ERROR: setStpPortState(): call createSNMPNode() with nodeId {} fail", nodeId);
-            SetStpPortStateOutputBuilder ob = new SetStpPortStateOutputBuilder().setSetStpPortStateResult(Result.FAIL);
-            RpcResult<SetStpPortStateOutput> rpcResult =
-                    Rpcs.<SetStpPortStateOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<SetStpPortStateOutput>failed().buildFuture();
         }
 
         //execute setSTPPortState
@@ -912,18 +884,11 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         //TODO: for each case of returned status error code, give EnableStpOutputBuilder Result.XXX accordingly
         if(status.isSuccess()){
             SetStpPortStateOutputBuilder ob = new SetStpPortStateOutputBuilder().setSetStpPortStateResult(Result.SUCCESS);
-            RpcResult<SetStpPortStateOutput> rpcResult =
-                    Rpcs.<SetStpPortStateOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<SetStpPortStateOutput>success(ob.build()).buildFuture();
         }
         else{
             logger.debug("ERROR: setStpPortState(): call setSTPPortState() with nodeId {} fail", nodeId);
-            SetStpPortStateOutputBuilder ob = new SetStpPortStateOutputBuilder().setSetStpPortStateResult(Result.FAIL);
-            RpcResult<SetStpPortStateOutput> rpcResult =
-                    Rpcs.<SetStpPortStateOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<SetStpPortStateOutput>failed().buildFuture();
         }
     }
 
@@ -958,10 +923,7 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         }
 
         GetStpPortRootOutputBuilder ob = new GetStpPortRootOutputBuilder().setRootNodeId(rootNodeId);
-        RpcResult<GetStpPortRootOutput> rpcResult =
-                    Rpcs.<GetStpPortRootOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);
+        return RpcResultBuilder.<GetStpPortRootOutput>success(ob.build()).buildFuture();
     }
 
     //md-sal
@@ -993,13 +955,10 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
             logger.debug("ERROR: getArpEntry(): call getARPEntry() fail, nodeId {} ipAddress {}", nodeId, ipAddress);
             return null;
         }
-        
+
         GetArpEntryOutputBuilder ob = new GetArpEntryOutputBuilder().setIpAddress(entry.ipAddress).setMacAddress(entry.macAddress);
 
-        RpcResult<GetArpEntryOutput> rpcResult =
-                    Rpcs.<GetArpEntryOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);
+        return RpcResultBuilder.<GetArpEntryOutput>success(ob.build()).buildFuture();
     }
 
     //md-sal
@@ -1008,33 +967,21 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         //check null input parameters
         if(input == null){
             logger.debug("ERROR: setArpEntry(): given null input");
-            SetArpEntryOutputBuilder ob = new SetArpEntryOutputBuilder().setSetArpEntryResult(Result.FAIL);
-            RpcResult<SetArpEntryOutput> rpcResult =
-                    Rpcs.<SetArpEntryOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<SetArpEntryOutput>failed().buildFuture();
         }
         Long nodeId = input.getNodeId();
         String ipAddress = input.getIpAddress();
         Long macAddress = input.getMacAddress();
         if(nodeId == null || ipAddress == null || macAddress == null){
             logger.debug("ERROR: setArpEntry(): given nodeId or ipAddress or macAddress is null");
-            SetArpEntryOutputBuilder ob = new SetArpEntryOutputBuilder().setSetArpEntryResult(Result.FAIL);
-            RpcResult<SetArpEntryOutput> rpcResult =
-                    Rpcs.<SetArpEntryOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<SetArpEntryOutput>failed().buildFuture();
         }
 
         //create the node and check null
         Node node = createSNMPNode(nodeId.longValue());
         if(node == null){
             logger.debug("ERROR: setArpEntry(): call createSNMPNode() with nodeId {} fail", nodeId);
-            SetArpEntryOutputBuilder ob = new SetArpEntryOutputBuilder().setSetArpEntryResult(Result.FAIL);
-            RpcResult<SetArpEntryOutput> rpcResult =
-                    Rpcs.<SetArpEntryOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<SetArpEntryOutput>failed().buildFuture();
         }
 
         //execute setARPEntry
@@ -1045,18 +992,11 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         //TODO: for each case of returned status error code, give EnableStpOutputBuilder Result.XXX accordingly
         if(status.isSuccess()){
             SetArpEntryOutputBuilder ob = new SetArpEntryOutputBuilder().setSetArpEntryResult(Result.SUCCESS);
-            RpcResult<SetArpEntryOutput> rpcResult =
-                    Rpcs.<SetArpEntryOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<SetArpEntryOutput>success(ob.build()).buildFuture();
         }
         else{
             logger.debug("ERROR: setArpEntry(): call setARPEntry() with nodeId {} fail", nodeId);
-            SetArpEntryOutputBuilder ob = new SetArpEntryOutputBuilder().setSetArpEntryResult(Result.FAIL);
-            RpcResult<SetArpEntryOutput> rpcResult =
-                    Rpcs.<SetArpEntryOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<SetArpEntryOutput>failed().buildFuture();
         }
     }
 
@@ -1067,32 +1007,20 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         //check null input parameters
         if(input == null){
             logger.debug("ERROR: deleteArpEntry(): given null input");
-            DeleteArpEntryOutputBuilder ob = new DeleteArpEntryOutputBuilder().setDeleteArpEntryResult(Result.FAIL);
-            RpcResult<DeleteArpEntryOutput> rpcResult =
-                    Rpcs.<DeleteArpEntryOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<DeleteArpEntryOutput>failed().buildFuture();
         }
         Long nodeId = input.getNodeId();
         String ipAddress = input.getIpAddress();
         if(nodeId == null || ipAddress == null){
             logger.debug("ERROR: deleteArpEntry(): given nodeId or ipAddress is null");
-            DeleteArpEntryOutputBuilder ob = new DeleteArpEntryOutputBuilder().setDeleteArpEntryResult(Result.FAIL);
-            RpcResult<DeleteArpEntryOutput> rpcResult =
-                    Rpcs.<DeleteArpEntryOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<DeleteArpEntryOutput>failed().buildFuture();
         }
 
         //create the node and check null
         Node node = createSNMPNode(nodeId.longValue());
         if(node == null){
             logger.debug("ERROR: deleteArpEntry(): call createSNMPNode() with nodeId {} fail", nodeId);
-            DeleteArpEntryOutputBuilder ob = new DeleteArpEntryOutputBuilder().setDeleteArpEntryResult(Result.FAIL);
-            RpcResult<DeleteArpEntryOutput> rpcResult =
-                    Rpcs.<DeleteArpEntryOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<DeleteArpEntryOutput>failed().buildFuture();
         }
 
         //execute deleteARPEntry
@@ -1100,18 +1028,11 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         //TODO: for each case of returned status error code, give EnableStpOutputBuilder Result.XXX accordingly
         if(status.isSuccess()){
             DeleteArpEntryOutputBuilder ob = new DeleteArpEntryOutputBuilder().setDeleteArpEntryResult(Result.SUCCESS);
-            RpcResult<DeleteArpEntryOutput> rpcResult =
-                    Rpcs.<DeleteArpEntryOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<DeleteArpEntryOutput>success(ob.build()).buildFuture();
         }
         else{
             logger.debug("ERROR: deleteArpEntry(): call deleteARPEntry() with nodeId {} fail", nodeId);
-            DeleteArpEntryOutputBuilder ob = new DeleteArpEntryOutputBuilder().setDeleteArpEntryResult(Result.FAIL);
-            RpcResult<DeleteArpEntryOutput> rpcResult =
-                    Rpcs.<DeleteArpEntryOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<DeleteArpEntryOutput>failed().buildFuture();
         }
     }
 
@@ -1122,16 +1043,14 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         * Fix Bug 5438: Result of calling rpc get-arp-table defined in misc-config.yang is false.
         * */
         GetArpTableOutputBuilder ob = new GetArpTableOutputBuilder();
-        List<ArpTableEntry> arpTable = new ArrayList<ArpTableEntry>();
+        List<ArpTableEntry> arpTable = new ArrayList<>();
 
         //check null input parameters
         if (input == null) {
             logger.debug("ERROR: getArpTable(): given null input");
 
             ob.setArpTableEntry(arpTable);
-            RpcResult<GetArpTableOutput> rpcResult = Rpcs.<GetArpTableOutput> getRpcResult(true,
-                    ob.build(), Collections.<RpcError>emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<GetArpTableOutput>success(ob.build()).buildFuture();
         }
 
         Long nodeId = input.getNodeId();
@@ -1139,9 +1058,7 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
             logger.debug("ERROR: getArpTable(): given nodeId is null");
 
             ob.setArpTableEntry(arpTable);
-            RpcResult<GetArpTableOutput> rpcResult = Rpcs.<GetArpTableOutput> getRpcResult(true,
-                    ob.build(), Collections.<RpcError>emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<GetArpTableOutput>success(ob.build()).buildFuture();
         }
 
         //create the node and check null
@@ -1150,9 +1067,7 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
             logger.debug("ERROR: getArpTable(): call createSNMPNode() with nodeId {} fail", nodeId);
 
             ob.setArpTableEntry(arpTable);
-            RpcResult<GetArpTableOutput> rpcResult = Rpcs.<GetArpTableOutput> getRpcResult(true,
-                    ob.build(), Collections.<RpcError>emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<GetArpTableOutput>success(ob.build()).buildFuture();
         }
 
         //execute getARPTable   (Notice the ARP v.s. Arp !)
@@ -1161,13 +1076,11 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
             logger.debug("ERROR: getArpTable(): call getARPTable() fail, nodeId {}", nodeId);
 
             ob.setArpTableEntry(arpTable);
-            RpcResult<GetArpTableOutput> rpcResult = Rpcs.<GetArpTableOutput> getRpcResult(true,
-                    ob.build(), Collections.<RpcError>emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<GetArpTableOutput>success(ob.build()).buildFuture();
         }
 
         //prepare the arp table to return
-        List<ArpTableEntry> retTable = new ArrayList<ArpTableEntry>();
+        List<ArpTableEntry> retTable = new ArrayList<>();
         for (ARPTableEntry entry : table) {
             ArpTableEntryBuilder entryBuilder = new ArpTableEntryBuilder()
                     .setIpAddress(entry.ipAddress)
@@ -1177,9 +1090,7 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         }
 
         ob.setArpTableEntry(retTable);
-        RpcResult<GetArpTableOutput> rpcResult = Rpcs.<GetArpTableOutput> getRpcResult(true,
-                ob.build(), Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);
+        return RpcResultBuilder.<GetArpTableOutput>success(ob.build()).buildFuture();
     }
 
     //CLI: s4sSTP
@@ -1243,10 +1154,11 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         //parse arg2: String sw_mac to int value nodeId
         long nodeId = -1;
         try{
-            if(arg2.indexOf(":") < 0)
+            if(arg2.indexOf(":") < 0) {
                 nodeId = Long.parseLong(arg2);
-            else
+            } else {
                 nodeId = HexString.toLong(arg2);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg2 + " to long value error: " + e1);
             return;
@@ -1292,15 +1204,16 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         //parse arg2: String sw_mac to int value nodeId
         long nodeId = -1;
         try{
-            if(arg2.indexOf(":") < 0)
+            if(arg2.indexOf(":") < 0) {
                 nodeId = Long.parseLong(arg2);
-            else
+            } else {
                 nodeId = HexString.toLong(arg2);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg2 + " to long value error: " + e1);
             return;
         }
-        
+
         //parse arg3: String port to int value vlanId
         short portNum = -1;
         Short.parseShort(arg3);
@@ -1313,15 +1226,15 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
 
         //parse arg4: enable port to run STP or not
         boolean isEnable;
-        if(arg4.compareToIgnoreCase("Y") == 0)
+        if(arg4.compareToIgnoreCase("Y") == 0) {
             isEnable = true;
-        else if(arg4.compareToIgnoreCase("N") == 0)
+        } else if(arg4.compareToIgnoreCase("N") == 0) {
             isEnable = false;
-        else{
+        } else{
             ci.println();
             ci.println("Please use: s4sSTP setPortState <switch> <port> <enable(Y/N)>");
             return;
-        }  
+        }
 
         Node node = createSNMPNode(nodeId);
         Status status = setSTPPortState(node, portNum, isEnable);
@@ -1355,10 +1268,11 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         //parse arg2: String sw_mac to int value nodeId
         long nodeId = -1;
         try{
-            if(arg2.indexOf(":") < 0)
+            if(arg2.indexOf(":") < 0) {
                 nodeId = Long.parseLong(arg2);
-            else
+            } else {
                 nodeId = HexString.toLong(arg2);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg2 + " to long value error: " + e1);
             return;
@@ -1440,10 +1354,11 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         //parse arg2: String sw_mac to int value nodeId
         long nodeId = -1;
         try{
-            if(arg2.indexOf(":") < 0)
+            if(arg2.indexOf(":") < 0) {
                 nodeId = Long.parseLong(arg2);
-            else
+            } else {
                 nodeId = HexString.toLong(arg2);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg2 + " to long value error: " + e1);
             return;
@@ -1479,17 +1394,18 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         //parse arg2: String sw_mac to int value nodeId
         long nodeId = -1;
         try{
-            if(arg2.indexOf(":") < 0)
+            if(arg2.indexOf(":") < 0) {
                 nodeId = Long.parseLong(arg2);
-            else
+            } else {
                 nodeId = HexString.toLong(arg2);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg2 + " to long value error: " + e1);
             return;
         }
 
         //SNMP4SDNErrorCode ret = enableSTP(nodeId);
-        Node node = createSNMPNode(nodeId); 
+        Node node = createSNMPNode(nodeId);
         Status ret = enableSTP(node);
         if(ret.isSuccess()){
         //if(ret == SNMP4SDNErrorCode.SUCCESS){
@@ -1560,10 +1476,11 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         //parse arg2: String switch to long value nodeId
         long nodeId = -1;
         try{
-            if(arg2.indexOf(":") < 0)
+            if(arg2.indexOf(":") < 0) {
                 nodeId = Long.parseLong(arg2);
-            else
+            } else {
                 nodeId = HexString.toLong(arg2);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg2 + " to long value error: " + e1);
             return;
@@ -1600,10 +1517,11 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         //parse arg2: String switch to long value nodeId
         long nodeId = -1;
         try{
-            if(arg2.indexOf(":") < 0)
+            if(arg2.indexOf(":") < 0) {
                 nodeId = Long.parseLong(arg2);
-            else
+            } else {
                 nodeId = HexString.toLong(arg2);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg2 + " to long value error: " + e1);
             return;
@@ -1644,10 +1562,11 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         //parse arg2: String switch to long value nodeId
         long nodeId = -1;
         try{
-            if(arg2.indexOf(":") < 0)
+            if(arg2.indexOf(":") < 0) {
                 nodeId = Long.parseLong(arg2);
-            else
+            } else {
                 nodeId = HexString.toLong(arg2);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg2 + " to long value error: " + e1);
             return;
@@ -1659,10 +1578,11 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         //parse arg4: String switch to long value nodeId
         long macId = -1;
         try{
-            if(arg4.indexOf(":") < 0)
+            if(arg4.indexOf(":") < 0) {
                 macId = Long.parseLong(arg4);
-            else
+            } else {
                 macId = HexString.toLong(arg4);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg4 + " to long value error: " + e1);
             return;
@@ -1702,10 +1622,11 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         //parse arg2: String switch to long value nodeId
         long nodeId = -1;
         try{
-            if(arg2.indexOf(":") < 0)
+            if(arg2.indexOf(":") < 0) {
                 nodeId = Long.parseLong(arg2);
-            else
+            } else {
                 nodeId = HexString.toLong(arg2);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg2 + " to long value error: " + e1);
             return;

@@ -8,37 +8,45 @@
 
 package org.opendaylight.snmp4sdn.internal;
 
-import java.util.concurrent.ExecutionException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.sal.utils.StatusCode;
-import org.opendaylight.snmp4sdn.core.internal.Controller;
-import org.opendaylight.snmp4sdn.core.IController;
-import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
-import org.opendaylight.snmp4sdn.protocol.util.HexString;
-
-import org.opendaylight.snmp4sdn.ACLIndex;
-
-//md-sal
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.types.rev150126.Result;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.*;//TODO: should list every used one, or just use '*' to include all
-
-//For md-sal RPC call
-import org.opendaylight.controller.sal.common.util.Rpcs;
-import java.util.Collections;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import com.google.common.util.concurrent.Futures;
-import org.opendaylight.yangtools.yang.common.RpcError;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-
+import org.opendaylight.controller.sal.utils.Status;
+import org.opendaylight.snmp4sdn.core.IController;
+import org.opendaylight.snmp4sdn.core.internal.Controller;
+import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
 import org.opendaylight.snmp4sdn.internal.util.CommandInterpreter;
 import org.opendaylight.snmp4sdn.internal.util.CommandProvider;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-
+import org.opendaylight.snmp4sdn.protocol.util.HexString;
+//TODO: should list every used one, or just use '*' to include all
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.AclAction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.AclLayer;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.AclService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.ClearAclTableInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.ClearAclTableInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.ClearAclTableOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.ClearAclTableOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.CreateAclProfileInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.CreateAclProfileInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.CreateAclProfileOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.CreateAclProfileOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.DelAclProfileInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.DelAclProfileInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.DelAclProfileOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.DelAclProfileOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.DelAclRuleInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.DelAclRuleInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.DelAclRuleOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.DelAclRuleOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.SetAclRuleInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.SetAclRuleInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.SetAclRuleOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.acl.rev150119.SetAclRuleOutputBuilder;
+//md-sal
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.types.rev150126.Result;
+import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,48 +92,28 @@ public class AclServiceImpl implements AclService, CommandProvider{
         if(sw_ipAddr == null){
             logger.debug("ERROR: checkNodeIpValid(): IP address of switch (nodeId: " + nodeId + ") not in DB");
             return false;
-        }
-        else
+        } else {
             return true;
+        }
     }
 
     /*
     *The following many createXxxxFilRpcResult() are for easy of return fail
     */
     private Future<RpcResult<SetAclRuleOutput>> createSetAclRuleFailRpcResult(){
-        SetAclRuleOutputBuilder ob = new SetAclRuleOutputBuilder().setSetAclRuleResult(Result.FAIL);
-        RpcResult<SetAclRuleOutput> rpcResult =
-                    Rpcs.<SetAclRuleOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);
+        return RpcResultBuilder.<SetAclRuleOutput>failed().buildFuture();
     }
     private Future<RpcResult<CreateAclProfileOutput>> createCreateAclProfileFailRpcResult(){
-        CreateAclProfileOutputBuilder ob = new CreateAclProfileOutputBuilder().setCreateAclProfileResult(Result.FAIL);
-        RpcResult<CreateAclProfileOutput> rpcResult =
-                    Rpcs.<CreateAclProfileOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);
+        return RpcResultBuilder.<CreateAclProfileOutput>failed().buildFuture();
     }
     private Future<RpcResult<DelAclProfileOutput>> createDelAclProfileFailRpcResult(){
-        DelAclProfileOutputBuilder ob = new DelAclProfileOutputBuilder().setDelAclProfileResult(Result.FAIL);
-        RpcResult<DelAclProfileOutput> rpcResult =
-                    Rpcs.<DelAclProfileOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);
+        return RpcResultBuilder.<DelAclProfileOutput>failed().buildFuture();
     }
     private Future<RpcResult<DelAclRuleOutput>> createDelAclRuleFailRpcResult(){
-        DelAclRuleOutputBuilder ob = new DelAclRuleOutputBuilder().setDelAclRuleResult(Result.FAIL);
-        RpcResult<DelAclRuleOutput> rpcResult =
-                    Rpcs.<DelAclRuleOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);
+        return RpcResultBuilder.<DelAclRuleOutput>failed().buildFuture();
     }
     private Future<RpcResult<ClearAclTableOutput>> createClearAclTableFailRpcResult(){
-        ClearAclTableOutputBuilder ob = new ClearAclTableOutputBuilder().setClearAclTableResult(Result.FAIL);
-        RpcResult<ClearAclTableOutput> rpcResult =
-                    Rpcs.<ClearAclTableOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);
+        return RpcResultBuilder.<ClearAclTableOutput>failed().buildFuture();
     }
 
     //md-sal
@@ -189,7 +177,7 @@ public class AclServiceImpl implements AclService, CommandProvider{
                 return createSetAclRuleFailRpcResult();
             }
         }
-        
+
         //checking parameters valid?
         if(nodeId < 0){
             logger.debug("ERROR: setAclRule(): given invalid nodeId {}", nodeId);
@@ -236,17 +224,14 @@ public class AclServiceImpl implements AclService, CommandProvider{
         //TODO: for each case of returned status error code, give Result.XXX accordingly
         if(status.isSuccess()){
             SetAclRuleOutputBuilder ob = new SetAclRuleOutputBuilder().setSetAclRuleResult(Result.SUCCESS);
-            RpcResult<SetAclRuleOutput> rpcResult =
-                    Rpcs.<SetAclRuleOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<SetAclRuleOutput>success(ob.build()).buildFuture();
         }
         else{
             logger.debug("ERROR: setAclRule(): call CLIHandler.setAclRule() with nodeId {} fail", nodeId);//TODO: print other parameters
             return createSetAclRuleFailRpcResult();
         }
     }
-    
+
     //md-sal
     @Override
     public Future<RpcResult<CreateAclProfileOutput>> createAclProfile(CreateAclProfileInput input){
@@ -294,7 +279,7 @@ public class AclServiceImpl implements AclService, CommandProvider{
                 return createCreateAclProfileFailRpcResult();
             }
         }
-        
+
         //checking parameters valid?
         if(nodeId < 0){
             logger.debug("ERROR: createAclProfile(): given invalid nodeId {}", nodeId);
@@ -329,17 +314,14 @@ public class AclServiceImpl implements AclService, CommandProvider{
         //TODO: for each case of returned status error code, give Result.XXX accordingly
         if(status.isSuccess()){
             CreateAclProfileOutputBuilder ob = new CreateAclProfileOutputBuilder().setCreateAclProfileResult(Result.SUCCESS);
-            RpcResult<CreateAclProfileOutput> rpcResult =
-                    Rpcs.<CreateAclProfileOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<CreateAclProfileOutput>success(ob.build()).buildFuture();
         }
         else{
             logger.debug("ERROR: createAclProfile(): call CLIHandler.createAclProfile() with nodeId {} fail", nodeId);
             return createCreateAclProfileFailRpcResult();
         }
     }
-    
+
     //md-sal
     @Override
     public Future<RpcResult<DelAclProfileOutput>> delAclProfile(DelAclProfileInput input){
@@ -362,7 +344,7 @@ public class AclServiceImpl implements AclService, CommandProvider{
             logger.debug("ERROR: delAclProfile(): given profileId and profileName are null");
             return createDelAclProfileFailRpcResult();
         }
-        
+
         //checking parameters valid?
         if(nodeId < 0){
             logger.debug("ERROR: delAclProfile(): given invalid nodeId {}", nodeId);
@@ -393,17 +375,14 @@ public class AclServiceImpl implements AclService, CommandProvider{
         //TODO: for each case of returned status error code, give Result.XXX accordingly
         if(status.isSuccess()){
             DelAclProfileOutputBuilder ob = new DelAclProfileOutputBuilder().setDelAclProfileResult(Result.SUCCESS);
-            RpcResult<DelAclProfileOutput> rpcResult =
-                    Rpcs.<DelAclProfileOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<DelAclProfileOutput>success(ob.build()).buildFuture();
         }
         else{
             logger.debug("ERROR: delAclProfile(): call CLIHandler.delAclProfile() with nodeId {} fail", nodeId);//TODO: print other parameters
             return createDelAclProfileFailRpcResult();
         }
     }
-    
+
     //md-sal
     @Override
     public Future<RpcResult<DelAclRuleOutput>> delAclRule(DelAclRuleInput input){
@@ -432,7 +411,7 @@ public class AclServiceImpl implements AclService, CommandProvider{
             logger.debug("ERROR: delAclRule(): given ruleId and ruleName are null");
             return createDelAclRuleFailRpcResult();
         }
-        
+
         //checking parameters valid?
         if(nodeId < 0){
             logger.debug("ERROR: delAclRule(): given invalid nodeId {}", nodeId);
@@ -467,10 +446,7 @@ public class AclServiceImpl implements AclService, CommandProvider{
         //TODO: for each case of returned status error code, give Result.XXX accordingly
         if(status.isSuccess()){
             DelAclRuleOutputBuilder ob = new DelAclRuleOutputBuilder().setDelAclRuleResult(Result.SUCCESS);
-            RpcResult<DelAclRuleOutput> rpcResult =
-                    Rpcs.<DelAclRuleOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<DelAclRuleOutput>success(ob.build()).buildFuture();
         }
         else{
             logger.debug("ERROR: delAclRule(): call CLIHandler.delAclRule() with nodeId {} fail", nodeId);//TODO: print other parameters
@@ -488,7 +464,7 @@ public class AclServiceImpl implements AclService, CommandProvider{
         }
         //ClearAclTableInput
         Long nodeId = input.getNodeId();
-        
+
         //checking parameters valid?
         if(nodeId < 0){
             logger.debug("ERROR: clearAclTable(): given invalid nodeId {}", nodeId);
@@ -513,23 +489,20 @@ public class AclServiceImpl implements AclService, CommandProvider{
         //TODO: for each case of returned status error code, give Result.XXX accordingly
         if(status.isSuccess()){
             ClearAclTableOutputBuilder ob = new ClearAclTableOutputBuilder().setClearAclTableResult(Result.SUCCESS);
-            RpcResult<ClearAclTableOutput> rpcResult =
-                    Rpcs.<ClearAclTableOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<ClearAclTableOutput>success(ob.build()).buildFuture();
         }
         else{
             logger.debug("ERROR: clearAclTable(): call CLIHandler.clearAclTable() with nodeId {} fail", nodeId);//TODO: print other parameters
             return createClearAclTableFailRpcResult();
         }
     }
-    
+
     //Deprecated
     //md-sal
     //@Override
     /*public Future<RpcResult<GetAclIndexListOutput>> getAclIndexList(GetAclIndexListInput input){
         //TODO: so far only return profileId and ruleId, profileName and ruleName are null in the return object
-        
+
         //check null parameters
         if(input == null){
             logger.debug("ERROR: getAclIndexList(): given null input");
@@ -541,7 +514,7 @@ public class AclServiceImpl implements AclService, CommandProvider{
             logger.debug("ERROR: getAclIndexList(): given nodeId is null");
             return null;
         }
-        
+
         //checking parameters valid?
         if(nodeId < 0){
             logger.debug("ERROR: getAclIndexList(): given invalid nodeId {}", nodeId);
@@ -570,14 +543,15 @@ public class AclServiceImpl implements AclService, CommandProvider{
         RpcResult<GetAclIndexListOutput> rpcResult =
                     Rpcs.<GetAclIndexListOutput> getRpcResult(true, ob.build(),
                             Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);        
+        return Futures.immediateFuture(rpcResult);
     }*/
 
     private boolean isValidVlan(Integer vlanId){
-        if(vlanId < 1 || vlanId > 4095)//TODO: valid vlan range?
+        if(vlanId < 1 || vlanId > 4095) {
             return false;
-        else
+        } else {
             return true;
+        }
     }
 
     /*
@@ -647,7 +621,7 @@ public class AclServiceImpl implements AclService, CommandProvider{
         }
     }
 
-    //CLI: s4sACL setRule <switch> 
+    //CLI: s4sACL setRule <switch>
     //                                  {[profileId <profile_id>] | [profileName <profile_name>]}
     //                                  {[ruleId <rule_id>] | [ruleName <rule_name>]}
     //                                   ports <portList(seperate_by_comma)>
@@ -685,10 +659,11 @@ public class AclServiceImpl implements AclService, CommandProvider{
         //parse arg2: String switch to long value nodeId
         long nodeId = -1;
         try{
-            if(arg2.indexOf(":") < 0)
+            if(arg2.indexOf(":") < 0) {
                 nodeId = Long.parseLong(arg2);
-            else
+            } else {
                 nodeId = HexString.toLong(arg2);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg2 + " to long value error: " + e1);
             return;
@@ -742,8 +717,9 @@ public class AclServiceImpl implements AclService, CommandProvider{
             return;
         }
         String portListChk = "";//convert the ports int array to String, later can print for check correctness
-        for(Short port : ports)
+        for(Short port : ports) {
             portListChk += port + ",";
+        }
 
         //arg8
         if(arg8.compareToIgnoreCase("layer") != 0){
@@ -753,11 +729,11 @@ public class AclServiceImpl implements AclService, CommandProvider{
 
         //parse arg8v: <layer> to AclLayer value
         AclLayer layer = null;
-        if(arg8v.compareToIgnoreCase("ethernet") == 0)
+        if(arg8v.compareToIgnoreCase("ethernet") == 0) {
             layer = AclLayer.ETHERNET;
-        else if(arg8v.compareToIgnoreCase("ip") == 0)
+        } else if(arg8v.compareToIgnoreCase("ip") == 0) {
             layer = AclLayer.IP;
-        else{
+        } else{
             ci.println();
             ci.println("ERROR: Layer of '" + arg8v + "' is not supported");
             printCiSetAclRuleUsage(ci);
@@ -771,8 +747,9 @@ public class AclServiceImpl implements AclService, CommandProvider{
         AclAction action = null;
         while(true){
             String arg = ci.nextArgument();
-            if(arg == null)
+            if(arg == null) {
                 break;
+            }
 
             if(arg.compareToIgnoreCase("vlanId") == 0){
                 String vlanIdValue = ci.nextArgument();
@@ -791,10 +768,12 @@ public class AclServiceImpl implements AclService, CommandProvider{
             }
             else if(arg.compareToIgnoreCase("action") == 0){
                 String actionValue = ci.nextArgument();
-                if(actionValue.compareToIgnoreCase("permit") == 0)
+                if(actionValue.compareToIgnoreCase("permit") == 0) {
                     action = AclAction.PERMIT;
-                if(actionValue.compareToIgnoreCase("deny") == 0)
+                }
+                if(actionValue.compareToIgnoreCase("deny") == 0) {
                     action = AclAction.DENY;
+                }
             }
             //Leave this checking to setAclRule(), here should allow invalid case so as to test setAclRule()'s reliability
             /*else{
@@ -938,10 +917,11 @@ public class AclServiceImpl implements AclService, CommandProvider{
         //parse arg2: String switch to long value nodeId
         long nodeId = -1;
         try{
-            if(arg2.indexOf(":") < 0)
+            if(arg2.indexOf(":") < 0) {
                 nodeId = Long.parseLong(arg2);
-            else
+            } else {
                 nodeId = HexString.toLong(arg2);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg2 + " to long value error: " + e1);
             return;
@@ -1068,10 +1048,11 @@ public class AclServiceImpl implements AclService, CommandProvider{
         //parse arg2: String switch to long value nodeId
         long nodeId = -1;
         try{
-            if(arg2.indexOf(":") < 0)
+            if(arg2.indexOf(":") < 0) {
                 nodeId = Long.parseLong(arg2);
-            else
+            } else {
                 nodeId = HexString.toLong(arg2);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg2 + " to long value error: " + e1);
             return;
@@ -1146,7 +1127,9 @@ public class AclServiceImpl implements AclService, CommandProvider{
             while(true){
                 String maskStr = ci.nextArgument();
                 String valueStr = ci.nextArgument();
-                if(maskStr == null) break;
+                if(maskStr == null) {
+                    break;
+                }
                 if(maskStr != null && valueStr == null){
                     printCiAddAclProfileUsage(ci);
                     return;
@@ -1191,10 +1174,12 @@ public class AclServiceImpl implements AclService, CommandProvider{
                                                         .setNodeId(nodeId)
                                                         .setProfileId(profileId).setProfileName(profileName)
                                                         .setAclLayer(layer);
-        if(layer == AclLayer.ETHERNET)
+        if(layer == AclLayer.ETHERNET) {
             ib = ib.setVlanMask(vlanMask);
-        if(layer == AclLayer.IP)
+        }
+        if(layer == AclLayer.IP) {
             ib = ib.setVlanMask(vlanMask).setSrcIpMask(srcIpMask).setDstIpMask(dstIpMask);
+        }
 
         //execute addAclProfile(), and check return null parameters?
         RpcResult<CreateAclProfileOutput> rpcResult;
@@ -1288,11 +1273,14 @@ public class AclServiceImpl implements AclService, CommandProvider{
     }
 
     private boolean isStartWith0x(String str){
-        if(str.length() < 2) return false;
-        if(str.substring(0, 2).compareToIgnoreCase("0x") == 0)
-            return true;
-        else
+        if(str.length() < 2) {
             return false;
+        }
+        if(str.substring(0, 2).compareToIgnoreCase("0x") == 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     //CLI: s4sACL delProfile <switch> {[profileId <profile_id>] | [profileName <profile_name>]}
@@ -1313,10 +1301,11 @@ public class AclServiceImpl implements AclService, CommandProvider{
         //parse arg2: String switch to long value nodeId
         long nodeId = -1;
         try{
-            if(arg2.indexOf(":") < 0)
+            if(arg2.indexOf(":") < 0) {
                 nodeId = Long.parseLong(arg2);
-            else
+            } else {
                 nodeId = HexString.toLong(arg2);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg2 + " to long value error: " + e1);
             return;
@@ -1421,10 +1410,11 @@ public class AclServiceImpl implements AclService, CommandProvider{
         //parse arg2: String switch to long value nodeId
         long nodeId = -1;
         try{
-            if(arg2.indexOf(":") < 0)
+            if(arg2.indexOf(":") < 0) {
                 nodeId = Long.parseLong(arg2);
-            else
+            } else {
                 nodeId = HexString.toLong(arg2);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg2 + " to long value error: " + e1);
             return;
@@ -1590,10 +1580,10 @@ public class AclServiceImpl implements AclService, CommandProvider{
 
     public List<Short> convertPortListString2ShortList(String portList){
         String[] portsStr = portList.split(",");
-        List<Short> ports = new ArrayList<Short>();
-        for(int i = 0; i < portsStr.length; i++){
+        List<Short> ports = new ArrayList<>();
+        for (String element : portsStr) {
             try{
-                ports.add(Short.parseShort(portsStr[i]));
+                ports.add(Short.parseShort(element));
                 /*if(ports.get(i) < 0){
                     logger.debug("ERROR: convertPortListString2ShortArray() error: input string \"" + portList +"\" has invalid port number " + portsStr[i]);
                     return null;

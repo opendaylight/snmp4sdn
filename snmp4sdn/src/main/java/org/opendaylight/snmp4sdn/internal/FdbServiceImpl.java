@@ -8,41 +8,25 @@
 
 package org.opendaylight.snmp4sdn.internal;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.concurrent.ExecutionException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.opendaylight.controller.sal.core.ConstructionException;
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.Node.NodeIDType;
-import org.opendaylight.controller.sal.core.NodeConnector;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.sal.utils.StatusCode;
-import org.opendaylight.controller.sal.utils.ServiceHelper;
-import org.opendaylight.snmp4sdn.core.internal.Controller;
-import org.opendaylight.snmp4sdn.core.IController;
-import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
-import org.opendaylight.snmp4sdn.protocol.util.HexString;
-
 import org.opendaylight.snmp4sdn.FDBEntry;
-
-//md-sal
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.types.rev150126.Result;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.FdbService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.FdbEntry;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.FdbEntryType;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.get.fdb.table.output.FdbTableEntry;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.get.fdb.table.output.FdbTableEntryBuilder;
+import org.opendaylight.snmp4sdn.core.IController;
+import org.opendaylight.snmp4sdn.core.internal.Controller;
+import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
+import org.opendaylight.snmp4sdn.internal.util.CommandInterpreter;
+import org.opendaylight.snmp4sdn.internal.util.CommandProvider;
+import org.opendaylight.snmp4sdn.protocol.util.HexString;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.DelFdbEntryInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.DelFdbEntryInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.DelFdbEntryOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.DelFdbEntryOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.SetFdbEntryInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.SetFdbEntryInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.SetFdbEntryOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.SetFdbEntryOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.FdbEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.FdbEntryType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.FdbService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.GetFdbEntryInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.GetFdbEntryInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.GetFdbEntryOutput;
@@ -51,21 +35,16 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.G
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.GetFdbTableInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.GetFdbTableOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.GetFdbTableOutputBuilder;
-
-//For md-sal RPC call
-import org.opendaylight.controller.sal.common.util.Rpcs;
-import java.util.Collections;
-import java.util.concurrent.Future;
-import com.google.common.util.concurrent.Futures;
-import org.opendaylight.yangtools.yang.common.RpcError;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.SetFdbEntryInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.SetFdbEntryInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.SetFdbEntryOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.SetFdbEntryOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.get.fdb.table.output.FdbTableEntry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.fdb.rev150126.get.fdb.table.output.FdbTableEntryBuilder;
+//md-sal
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.types.rev150126.Result;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-
-import org.opendaylight.snmp4sdn.internal.util.CommandInterpreter;
-import org.opendaylight.snmp4sdn.internal.util.CommandProvider;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,9 +92,9 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
         if(sw_ipAddr == null){
             logger.debug("ERROR: checkNodeIpValid(): IP address of switch (nodeId: " + nodeId + ") not in DB");
             return false;
-        }
-        else
+        } else {
             return true;
+        }
     }
 
     //md-sal
@@ -141,7 +120,7 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
             logger.debug("ERROR: delFdbEntry(): given destMac is null");
             return null;
         }
-        
+
         //parameters checking
         if(nodeId < 0){
             logger.debug("ERROR: delFdbEntry(): given invalid nodeId {}", nodeId);
@@ -164,30 +143,19 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
         Status status = new SNMPHandler(cmethUtil).delFdbEntry(nodeId, vlanId, destMac);
         if(status == null){
             logger.debug("ERROR: delFdbEntry(): call SNMPHandler.delFdbEntry() with nodeId {} fail", nodeId);
-            DelFdbEntryOutputBuilder ob = new DelFdbEntryOutputBuilder().setDelFdbEntryResult(Result.FAIL);
-            RpcResult<DelFdbEntryOutput> rpcResult =
-                    Rpcs.<DelFdbEntryOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<DelFdbEntryOutput>failed().buildFuture();
         }
         //TODO: for each case of returned status error code, give Result.XXX accordingly
         if(status.isSuccess()){
             DelFdbEntryOutputBuilder ob = new DelFdbEntryOutputBuilder().setDelFdbEntryResult(Result.SUCCESS);
-            RpcResult<DelFdbEntryOutput> rpcResult =
-                    Rpcs.<DelFdbEntryOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<DelFdbEntryOutput>success(ob.build()).buildFuture();
         }
         else{
             logger.debug("ERROR: delFdbEntry(): call SNMPHandler.delFdbEntry() with nodeId {} fail", nodeId);
-            DelFdbEntryOutputBuilder ob = new DelFdbEntryOutputBuilder().setDelFdbEntryResult(Result.FAIL);
-            RpcResult<DelFdbEntryOutput> rpcResult =
-                    Rpcs.<DelFdbEntryOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<DelFdbEntryOutput>failed().buildFuture();
         }
     }
-    
+
     //md-sal
     @Override
     public Future<RpcResult<GetFdbEntryOutput>> getFdbEntry(GetFdbEntryInput input){
@@ -212,7 +180,7 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
             logger.debug("ERROR: getFdbEntry(): given destMac is null");
             return null;
         }
-        
+
         //parameters checking
         if(nodeId < 0){
             logger.debug("ERROR: getFdbEntry(): given invalid nodeId {}", nodeId);
@@ -252,32 +220,29 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
 
         //convert entry type to FdbEntryType
         FdbEntryType type = null;
-        if(entry.type == FDBEntry.EntryType.OTHER)
+        if(entry.type == FDBEntry.EntryType.OTHER) {
             type = FdbEntryType.OTHER;
-        else if(entry.type == FDBEntry.EntryType.INVALID)
+        } else if(entry.type == FDBEntry.EntryType.INVALID) {
             type = FdbEntryType.INVALID;
-        else if(entry.type == FDBEntry.EntryType.LEARNED)
+        } else if(entry.type == FDBEntry.EntryType.LEARNED) {
             type = FdbEntryType.LEARNED;
-        else if(entry.type == FDBEntry.EntryType.SELF)
+        } else if(entry.type == FDBEntry.EntryType.SELF) {
             type = FdbEntryType.SELF;
-        else if(entry.type == FDBEntry.EntryType.MGMT)
+        } else if(entry.type == FDBEntry.EntryType.MGMT) {
             type = FdbEntryType.MGMT;
-        else{
+        } else{
             logger.debug("ERROR: getFdbEntry(): call SNMPHandler.readFdbTableEntry() with nodeId {} vlanId {} destMac {}, get port {} but invalid entry type {}", nodeId, vlanId, destMac, entry.port, entry.type);
         }
 
         //return the result
         GetFdbEntryOutputBuilder ob = new GetFdbEntryOutputBuilder().setNodeId(new Long(entry.nodeId)).setVlanId(new Integer(entry.vlanId)).setDestMacAddr(new Long(entry.destMacAddr)).setPort(new Short(entry.port)).setType(type);
-        RpcResult<GetFdbEntryOutput> rpcResult =
-                Rpcs.<GetFdbEntryOutput> getRpcResult(true, ob.build(),
-                Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);
+        return RpcResultBuilder.<GetFdbEntryOutput>success(ob.build()).buildFuture();
     }
-    
+
     //md-sal
     @Override
     public Future<RpcResult<GetFdbTableOutput>> getFdbTable(GetFdbTableInput input){
-        
+
         //check null input parameters
         if(input == null){
             logger.debug("ERROR: getFdbTable(): given null input");
@@ -288,7 +253,7 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
             logger.debug("ERROR: getFdbTable(): given nodeId is null");
             return null;
         }
-        
+
         //parameters checking
         if(nodeId < 0){
             logger.debug("ERROR: getFdbTable(): given invalid nodeId {}", nodeId);
@@ -307,7 +272,7 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
         }
 
         //prepare the fdb table to return
-        List<FdbTableEntry> retTable = new ArrayList<FdbTableEntry>();
+        List<FdbTableEntry> retTable = new ArrayList<>();
         for(FDBEntry entry:table){
             //check parameters
             if(entry == null){
@@ -329,34 +294,31 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
 
             //convert entry type to FdbEntryType
             FdbEntryType type = null;
-            if(entry.type == FDBEntry.EntryType.OTHER)
+            if(entry.type == FDBEntry.EntryType.OTHER) {
                 type = FdbEntryType.OTHER;
-            else if(entry.type == FDBEntry.EntryType.INVALID)
+            } else if(entry.type == FDBEntry.EntryType.INVALID) {
                 type = FdbEntryType.INVALID;
-            else if(entry.type == FDBEntry.EntryType.LEARNED)
+            } else if(entry.type == FDBEntry.EntryType.LEARNED) {
                 type = FdbEntryType.LEARNED;
-            else if(entry.type == FDBEntry.EntryType.SELF)
+            } else if(entry.type == FDBEntry.EntryType.SELF) {
                 type = FdbEntryType.SELF;
-            else if(entry.type == FDBEntry.EntryType.MGMT)
+            } else if(entry.type == FDBEntry.EntryType.MGMT) {
                 type = FdbEntryType.MGMT;
-            else{
+            } else{
                 logger.debug("ERROR: getFdbTable(): call SNMPHandler.readAllFdbTableEntry(), get nodeId {} vlanId {} destMac {} but invalid entry type", entry.nodeId, entry.vlanId, entry.destMacAddr, entry.type);
                 return null;
             }
-        
+
             FdbTableEntryBuilder entryBuilder = new FdbTableEntryBuilder().setNodeId(entry.nodeId).setVlanId(entry.vlanId).setDestMacAddr(entry.destMacAddr).setPort(entry.port).setType(type);
             FdbTableEntry retEntry = entryBuilder.build();
             retTable.add(retEntry);
         }
-        
+
         //return the result
         GetFdbTableOutputBuilder ob = new GetFdbTableOutputBuilder().setFdbTableEntry(retTable);
-        RpcResult<GetFdbTableOutput> rpcResult =
-                Rpcs.<GetFdbTableOutput> getRpcResult(true, ob.build(),
-                Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);
+        return RpcResultBuilder.<GetFdbTableOutput>success(ob.build()).buildFuture();
     }
-    
+
     //md-sal
     //input: SetFdbEntryInput, which including nodeId, vlanId, destMac, port
     //TODO: Currently the fdb entry's 'type' field is ignored, since it must be 'static'. Should we check it? (if need to check, it should be null or?)
@@ -387,7 +349,7 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
             logger.debug("ERROR: setFdbEntry(): given port is null");
             return null;
         }
-        
+
         //parameters checking
         if(nodeId < 0){
             logger.debug("ERROR: setFdbEntry(): given invalid nodeId {}", nodeId);
@@ -414,35 +376,25 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
         Status status = new SNMPHandler(cmethUtil).setFdbEntry(nodeId, vlanId, destMac, port);
         if(status == null){
             logger.debug("ERROR: setFdbEntry(): call SNMPHandler.setFdbEntry() with nodeId {} fail", nodeId);
-            SetFdbEntryOutputBuilder ob = new SetFdbEntryOutputBuilder().setSetFdbEntryResult(Result.FAIL);
-            RpcResult<SetFdbEntryOutput> rpcResult =
-                    Rpcs.<SetFdbEntryOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<SetFdbEntryOutput>failed().buildFuture();
         }
         //TODO: for each case of returned status error code, give Result.XXX accordingly
         if(status.isSuccess()){
             SetFdbEntryOutputBuilder ob = new SetFdbEntryOutputBuilder().setSetFdbEntryResult(Result.SUCCESS);
-            RpcResult<SetFdbEntryOutput> rpcResult =
-                    Rpcs.<SetFdbEntryOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<SetFdbEntryOutput>success(ob.build()).buildFuture();
         }
         else{
             logger.debug("ERROR: setFdbEntry(): call SNMPHandler.setFdbEntry() with nodeId {} fail", nodeId);
-            SetFdbEntryOutputBuilder ob = new SetFdbEntryOutputBuilder().setSetFdbEntryResult(Result.FAIL);
-            RpcResult<SetFdbEntryOutput> rpcResult =
-                    Rpcs.<SetFdbEntryOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<SetFdbEntryOutput>failed().buildFuture();
         }
     }
 
     private boolean isValidVlan(Integer vlanId){
-        if(vlanId < 1 || vlanId > 4095)//TODO: valid vlan range?
+        if(vlanId < 1 || vlanId > 4095) {
             return false;
-        else
+        } else {
             return true;
+        }
     }
 
 
@@ -507,10 +459,11 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
         //parse arg2: String switch to long value nodeId
         long nodeId = -1;
         try{
-            if(arg2.indexOf(":") < 0)
+            if(arg2.indexOf(":") < 0) {
                 nodeId = Long.parseLong(arg2);
-            else
+            } else {
                 nodeId = HexString.toLong(arg2);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg2 + " to long value error: " + e1);
             return;
@@ -528,10 +481,11 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
         //parse arg4: String dest_mac_addr to long value nodeId
         long destMac = -1;
         try{
-            if(arg4.indexOf(":") < 0)
+            if(arg4.indexOf(":") < 0) {
                 destMac = Long.parseLong(arg4);
-            else
+            } else {
                 destMac = HexString.toLong(arg4);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg4 + " to long value error: " + e1);
             return;
@@ -585,24 +539,26 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
         }
 
         String typeStr = "null";
-            if(entry.getType() == FdbEntryType.OTHER)
+            if(entry.getType() == FdbEntryType.OTHER) {
                 typeStr = "Other";
-            else if(entry.getType() == FdbEntryType.INVALID)
+            } else if(entry.getType() == FdbEntryType.INVALID) {
                 typeStr = "Invalid";
-            else if(entry.getType() == FdbEntryType.LEARNED)
+            } else if(entry.getType() == FdbEntryType.LEARNED) {
                 typeStr = "Dynamic";
-            else if(entry.getType() == FdbEntryType.SELF)
+            } else if(entry.getType() == FdbEntryType.SELF) {
                 typeStr = "Self";
-            else if(entry.getType() == FdbEntryType.MGMT)
+            } else if(entry.getType() == FdbEntryType.MGMT) {
                 typeStr = "Static";
-            else
+            } else {
                 typeStr = "NA";
+            }
 
         String portStr = "null";
-            if(entry.getPort() == 0)
+            if(entry.getPort() == 0) {
                 portStr = "CPU";
-            else
+            } else {
                 portStr = Short.toString(entry.getPort());
+            }
 
         ci.println();
         ci.println("Requested FDB entry on node " + entry.getNodeId() + ": <VLAN " + entry.getVlanId() + ", MAC " + HexString.toHexString(entry.getDestMacAddr()).toUpperCase() + ", Port " + portStr + ", Type " + typeStr + ">");
@@ -626,10 +582,11 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
         //parse arg2: String switch to long value nodeId
         long nodeId = -1;
         try{
-            if(arg2.indexOf(":") < 0)
+            if(arg2.indexOf(":") < 0) {
                 nodeId = Long.parseLong(arg2);
-            else
+            } else {
                 nodeId = HexString.toLong(arg2);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg2 + " to long value error: " + e1);
             return;
@@ -647,10 +604,11 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
         //parse arg4: String dest_mac_addr to long value nodeId
         long destMac = -1;
         try{
-            if(arg4.indexOf(":") < 0)
+            if(arg4.indexOf(":") < 0) {
                 destMac = Long.parseLong(arg4);
-            else
+            } else {
                 destMac = HexString.toLong(arg4);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg4 + " to long value error: " + e1);
             return;
@@ -736,10 +694,11 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
         //parse arg2: String switch to long value nodeId
         long nodeId = -1;
         try{
-            if(arg2.indexOf(":") < 0)
+            if(arg2.indexOf(":") < 0) {
                 nodeId = Long.parseLong(arg2);
-            else
+            } else {
                 nodeId = HexString.toLong(arg2);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg2 + " to long value error: " + e1);
             return;
@@ -757,10 +716,11 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
         //arg4: String dest_mac_addr to long value destMac
         long destMac = -1;
         try{
-            if(arg4.indexOf(":") < 0)
+            if(arg4.indexOf(":") < 0) {
                 destMac = Long.parseLong(arg4);
-            else
+            } else {
                 destMac = HexString.toLong(arg4);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg4 + " to long value error: " + e1);
             return;
@@ -854,10 +814,11 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
         //parse arg2: String switch to long value nodeId
         long nodeId = -1;
         try{
-            if(arg2.indexOf(":") < 0)
+            if(arg2.indexOf(":") < 0) {
                 nodeId = Long.parseLong(arg2);
-            else
+            } else {
                 nodeId = HexString.toLong(arg2);
+            }
         }catch(NumberFormatException e1){
             ci.println("Error: convert argument " + arg2 + " to long value error: " + e1);
             return;
@@ -917,24 +878,26 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
             FdbTableEntry entry = fdbTable.get(i);
 
             String typeStr = "null";
-            if(entry.getType() == FdbEntryType.OTHER)
+            if(entry.getType() == FdbEntryType.OTHER) {
                 typeStr = "Other";
-            else if(entry.getType() == FdbEntryType.INVALID)
+            } else if(entry.getType() == FdbEntryType.INVALID) {
                 typeStr = "Invalid";
-            else if(entry.getType() == FdbEntryType.LEARNED)
+            } else if(entry.getType() == FdbEntryType.LEARNED) {
                 typeStr = "Dynamic";
-            else if(entry.getType() == FdbEntryType.SELF)
+            } else if(entry.getType() == FdbEntryType.SELF) {
                 typeStr = "Self";
-            else if(entry.getType() == FdbEntryType.MGMT)
+            } else if(entry.getType() == FdbEntryType.MGMT) {
                 typeStr = "Static";
-            else
+            } else {
                 typeStr = "NA";
+            }
 
             String portStr = "null";
-            if(entry.getPort() == 0)
+            if(entry.getPort() == 0) {
                 portStr = "CPU";
-            else
+            } else {
                 portStr = Short.toString(entry.getPort());
+            }
 
             ci.println(entry.getVlanId() + "\t" + HexString.toHexString(entry.getDestMacAddr()).substring(6, 23).toUpperCase() + "\t" + portStr + "\t" + typeStr);
             //substring(6, 23) is to truncate redundant "00:00" from the string generated by HexString tool

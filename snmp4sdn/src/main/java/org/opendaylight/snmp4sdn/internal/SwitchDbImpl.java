@@ -8,48 +8,35 @@
 
 package org.opendaylight.snmp4sdn.internal;
 
-import org.opendaylight.snmp4sdn.internal.util.CommandInterpreter;
-import org.opendaylight.snmp4sdn.internal.util.CommandProvider;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-
-import org.opendaylight.controller.sal.core.ConstructionException;
-import org.opendaylight.controller.sal.core.Node;
-import org.opendaylight.controller.sal.core.Node.NodeIDType;
-import org.opendaylight.controller.sal.core.NodeConnector;
-import org.opendaylight.controller.sal.utils.Status;
-import org.opendaylight.controller.sal.utils.StatusCode;
-
-//md-sal
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.types.rev150126.Result;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.*;
-
-//For md-sal RPC call
-import org.opendaylight.controller.sal.common.util.Rpcs;
-import java.util.Collections;
 import java.util.concurrent.Future;
-import com.google.common.util.concurrent.Futures;
-import org.opendaylight.yangtools.yang.common.RpcError;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-//import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.opendaylight.snmp4sdn.core.IController;
 
 //TODO: com.google.common import error in karaf
 /*import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;*/
 
 import org.opendaylight.snmp4sdn.core.internal.Controller;
-import org.opendaylight.snmp4sdn.core.IController;
-import org.opendaylight.snmp4sdn.internal.CLIHandler;
-import org.opendaylight.snmp4sdn.internal.SNMPHandler;
 import org.opendaylight.snmp4sdn.internal.util.CmethUtil;
-import org.opendaylight.snmp4sdn.protocol.util.HexString;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.Vector;
-
+import org.opendaylight.snmp4sdn.internal.util.CommandProvider;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.AddSwitchEntryInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.AddSwitchEntryOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.AddSwitchEntryOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.ClearDbOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.ClearDbOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.DeleteSwitchEntryInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.DeleteSwitchEntryOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.DeleteSwitchEntryOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.ReloadDbOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.ReloadDbOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.SwitchDbService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.UpdateDbInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.UpdateDbOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.UpdateDbOutputBuilder;
+//md-sal
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.types.rev150126.Result;
+import org.opendaylight.yangtools.yang.common.RpcResult;
+//import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,11 +77,7 @@ public class SwitchDbImpl implements SwitchDbService, CommandProvider{
     }
 
     private Future<RpcResult<ReloadDbOutput>> createReloadDbRpcResult(){
-        ReloadDbOutputBuilder ob = new ReloadDbOutputBuilder().setReloadDbResult(Result.FAIL);
-        RpcResult<ReloadDbOutput> rpcResult =
-                    Rpcs.<ReloadDbOutput> getRpcResult(false, ob.build(),
-                            Collections.<RpcError> emptySet());
-        return Futures.immediateFuture(rpcResult);
+        return RpcResultBuilder.<ReloadDbOutput>failed().buildFuture();
     }
 
     @Override//md-sal
@@ -102,10 +85,7 @@ public class SwitchDbImpl implements SwitchDbService, CommandProvider{
         boolean isSuccess = cmethUtil.readDB();
         if(isSuccess){
             ReloadDbOutputBuilder ob = new ReloadDbOutputBuilder().setReloadDbResult(Result.SUCCESS);
-            RpcResult<ReloadDbOutput> rpcResult =
-                    Rpcs.<ReloadDbOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<ReloadDbOutput>success(ob.build()).buildFuture();
         }
         else{
             logger.debug("ERROR: reloadDb(): call cmethUtil.readDB() fail");
@@ -116,37 +96,25 @@ public class SwitchDbImpl implements SwitchDbService, CommandProvider{
     @Override//md-sal
     public Future<RpcResult<AddSwitchEntryOutput>> addSwitchEntry(AddSwitchEntryInput input){
             AddSwitchEntryOutputBuilder ob = new AddSwitchEntryOutputBuilder().setAddSwitchEntryResult(Result.SUCCESS);
-            RpcResult<AddSwitchEntryOutput> rpcResult =
-                    Rpcs.<AddSwitchEntryOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<AddSwitchEntryOutput>success(ob.build()).buildFuture();
     }
-    
+
     @Override//md-sal
     public Future<RpcResult<DeleteSwitchEntryOutput>> deleteSwitchEntry(DeleteSwitchEntryInput input){
             DeleteSwitchEntryOutputBuilder ob = new DeleteSwitchEntryOutputBuilder().setDeleteSwitchEntryResult(Result.SUCCESS);
-            RpcResult<DeleteSwitchEntryOutput> rpcResult =
-                    Rpcs.<DeleteSwitchEntryOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<DeleteSwitchEntryOutput>success(ob.build()).buildFuture();
     }
 
     @Override//md-sal
     public Future<RpcResult<ClearDbOutput>> clearDb(){
             ClearDbOutputBuilder ob = new ClearDbOutputBuilder().setClearDbResult(Result.SUCCESS);
-            RpcResult<ClearDbOutput> rpcResult =
-                    Rpcs.<ClearDbOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<ClearDbOutput>success(ob.build()).buildFuture();
     }
 
     @Override//md-sal
     public Future<RpcResult<UpdateDbOutput>> updateDb(UpdateDbInput input){
             UpdateDbOutputBuilder ob = new UpdateDbOutputBuilder().setUpdateDbResult(Result.SUCCESS);
-            RpcResult<UpdateDbOutput> rpcResult =
-                    Rpcs.<UpdateDbOutput> getRpcResult(true, ob.build(),
-                            Collections.<RpcError> emptySet());
-            return Futures.immediateFuture(rpcResult);
+            return RpcResultBuilder.<UpdateDbOutput>success(ob.build()).buildFuture();
     }
 
 
