@@ -1,0 +1,8 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+1: Stephen Kitt <skitt@redhat.com>
+Code-Review+2: Christine Hsieh <ylhsieh@itri.org.tw>
+Submitted-by: Christine Hsieh <ylhsieh@itri.org.tw>
+Submitted-at: Tue, 27 Mar 2018 09:26:34 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/69937
+Project: snmp4sdn
+Branch: refs/heads/master
