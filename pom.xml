@@ -16,14 +16,14 @@
   <name>snmp4sdn project</name>
   <description>SNMP4SDN project provide a southbound plugin to configure commodity Ethernet switch</description>
   <url>https://wiki.opendaylight.org/view/SNMP4SDN:Main</url>
-  
+
   <licenses>
     <license>
       <name>Eclipse Public License v1.0</name>
       <url>http://www.eclipse.org/legal/epl-v10.html</url>
     </license>
   </licenses>
-  
+
   <developers>
     <developer>
       <name>Yi-Ling Hsieh</name>
@@ -53,6 +53,18 @@
     <!--<module>integrationtest</module> //no need to add. run by eclipse junit test-->
     <module>plugin-shell</module>
     <module>features</module>
-    <!--<module>distribution-karaf</module>-->
   </modules>
+
+  <profiles>
+    <profile>
+      <id>karaf</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+
+      <modules>
+        <module>distribution-karaf</module>
+      </modules>
+    </profile>
+  </profiles>
 </project>
