@@ -14,13 +14,13 @@
     <parent>
        <groupId>org.opendaylight.odlparent</groupId>
        <artifactId>odlparent-lite</artifactId>
-       <version>1.8.4-SNAPSHOT</version>
+       <version>1.8.5-SNAPSHOT</version>
        <relativePath/>
     </parent>
  
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>features-aggregator</artifactId>
-    <version>0.5.4-SNAPSHOT</version>
+    <version>0.5.5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ODL :: snmp4sdn :: ${project.artifactId}</name>
