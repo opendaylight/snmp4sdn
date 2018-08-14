@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -124,24 +125,24 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
     /*
     *The following many createXxxxFilRpcResult() are for easy of return fail
     */
-    private Future<RpcResult<AddVlanAndSetPortsOutput>> createAddVlanAndSetPortsFailRpcResult(){
+    private ListenableFuture<RpcResult<AddVlanAndSetPortsOutput>> createAddVlanAndSetPortsFailRpcResult(){
         return RpcResultBuilder.<AddVlanAndSetPortsOutput>failed().buildFuture();
     }
 
-    private Future<RpcResult<SetVlanPortsOutput>> createSetVlanPortsFailRpcResult(){
+    private ListenableFuture<RpcResult<SetVlanPortsOutput>> createSetVlanPortsFailRpcResult(){
         return RpcResultBuilder.<SetVlanPortsOutput>failed().buildFuture();
     }
 
-    private Future<RpcResult<AddVlanOutput>> createAddVlanFailRpcResult(){
+    private ListenableFuture<RpcResult<AddVlanOutput>> createAddVlanFailRpcResult(){
         return RpcResultBuilder.<AddVlanOutput>failed().buildFuture();
     }
 
-    private Future<RpcResult<DeleteVlanOutput>> createDeleteVlanFailRpcResult(){
+    private ListenableFuture<RpcResult<DeleteVlanOutput>> createDeleteVlanFailRpcResult(){
         return RpcResultBuilder.<DeleteVlanOutput>failed().buildFuture();
     }
 
     @Override//md-sal
-    public Future<RpcResult<AddVlanAndSetPortsOutput>> addVlanAndSetPorts(AddVlanAndSetPortsInput input){
+    public ListenableFuture<RpcResult<AddVlanAndSetPortsOutput>> addVlanAndSetPorts(AddVlanAndSetPortsInput input){
         //error checking
         if(input == null){logger.debug("ERROR: addVlanAndSetPorts(): given AddVlanAndSetPortsInput input is null"); return createAddVlanAndSetPortsFailRpcResult();}
         Long nodeId = input.getNodeId();
@@ -178,7 +179,7 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
     }
 
     @Override//md-sal
-    public Future<RpcResult<AddVlanOutput>> addVlan(AddVlanInput input){
+    public ListenableFuture<RpcResult<AddVlanOutput>> addVlan(AddVlanInput input){
         //error checking
         if(input == null){logger.debug("ERROR: addVlan(): given AddVlanInput input is null"); return createAddVlanFailRpcResult();}
         Long nodeId = input.getNodeId();
@@ -207,7 +208,7 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
     }
 
     @Override//md-sal
-    public Future<RpcResult<DeleteVlanOutput>> deleteVlan(DeleteVlanInput input){
+    public ListenableFuture<RpcResult<DeleteVlanOutput>> deleteVlan(DeleteVlanInput input){
         //error checking
         if(input == null){logger.debug("ERROR: deleteVlan(): given DeleteVlanInput input is null"); return createDeleteVlanFailRpcResult();}
         Long nodeId = input.getNodeId();
@@ -233,7 +234,7 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
     }
 
     @Override//md-sal
-    public Future<RpcResult<GetVlanTableOutput>> getVlanTable(GetVlanTableInput input){
+    public ListenableFuture<RpcResult<GetVlanTableOutput>> getVlanTable(GetVlanTableInput input){
         //error checking
         if(input == null){logger.debug("ERROR: getVlanTable(): given GetVlanTableInput input is null"); return null;}
         Long nodeId = input.getNodeId();
@@ -268,7 +269,7 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
     }
 
     //@Override//md-sal
-    /*public Future<RpcResult<java.lang.Void>> printVlanTable(final PrintVlanTableInput input){System.out.println("HELLO");
+    /*public ListenableFuture<RpcResult<java.lang.Void>> printVlanTable(final PrintVlanTableInput input){System.out.println("HELLO");
         Long nodeId = input.getNodeId();
         Node node = createSNMPNode(nodeId.longValue());
         VLANTable vTable = getVLANTable(node);//argument value validation is checked in the following
@@ -280,7 +281,7 @@ public class VLANService implements /*IPluginInVLANService,//custom ad-sal*/ Vla
     }*/
 
     @Override//md-sal
-    public Future<RpcResult<SetVlanPortsOutput>> setVlanPorts(SetVlanPortsInput input){
+    public ListenableFuture<RpcResult<SetVlanPortsOutput>> setVlanPorts(SetVlanPortsInput input){
         //error checking
         if(input == null){logger.debug("ERROR: setVlanPorts(): given SetVlanPortsInput input is null"); return createSetVlanPortsFailRpcResult();}
         Long nodeId = input.getNodeId();

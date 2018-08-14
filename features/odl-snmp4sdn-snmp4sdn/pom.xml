@@ -28,8 +28,9 @@
 
   <properties>
     <restconf.version>1.8.0-SNAPSHOT</restconf.version>
-    <mdsal.model.version>0.13.0-SNAPSHOT</mdsal.model.version>
+    <mdsal.model.version>0.12.3-SNAPSHOT</mdsal.model.version>
     <openflowplugin.version>0.7.0-SNAPSHOT</openflowplugin.version>
+    <yang.version>0.13.0-SNAPSHOT</yang.version>
   </properties>
 
   <dependencyManagement>
@@ -60,6 +61,12 @@
       <version>${mdsal.model.version}</version>
       <type>xml</type>
       <classifier>features</classifier>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>yang-binding</artifactId>
+      <version>${yang.version}</version>
     </dependency>
 
     <dependency>

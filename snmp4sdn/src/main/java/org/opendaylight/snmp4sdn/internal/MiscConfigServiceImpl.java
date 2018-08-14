@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.sal.core.ConstructionException;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -723,7 +724,7 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
 
     //md-sal
     @Override
-    public Future<RpcResult<DisableStpOutput>> disableStp(DisableStpInput input){
+    public ListenableFuture<RpcResult<DisableStpOutput>> disableStp(DisableStpInput input){
 
         //check null input parameters
         if(input == null){
@@ -758,7 +759,7 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
 
     //md-sal
     @Override
-    public Future<RpcResult<EnableStpOutput>> enableStp(EnableStpInput input){
+    public ListenableFuture<RpcResult<EnableStpOutput>> enableStp(EnableStpInput input){
 
         //check null input parameters
         if(input == null){
@@ -793,7 +794,7 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
 
     //md-sal
     @Override
-    public Future<RpcResult<GetStpPortStateOutput>> getStpPortState(GetStpPortStateInput input){
+    public ListenableFuture<RpcResult<GetStpPortStateOutput>> getStpPortState(GetStpPortStateInput input){
 
         //check null input parameters
         if(input == null){
@@ -857,7 +858,7 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
 
     //md-sal
     @Override
-    public Future<RpcResult<SetStpPortStateOutput>> setStpPortState(SetStpPortStateInput input){
+    public ListenableFuture<RpcResult<SetStpPortStateOutput>> setStpPortState(SetStpPortStateInput input){
 
         //check null input parameters
         if(input == null){
@@ -894,7 +895,7 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
 
     //md-sal
     @Override
-    public Future<RpcResult<GetStpPortRootOutput>> getStpPortRoot(GetStpPortRootInput input){
+    public ListenableFuture<RpcResult<GetStpPortRootOutput>> getStpPortRoot(GetStpPortRootInput input){
         //check null input parameters
         if(input == null){
             logger.debug("ERROR: getStpPortRoot(): given null input");
@@ -928,7 +929,7 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
 
     //md-sal
     @Override
-    public Future<RpcResult<GetArpEntryOutput>> getArpEntry(GetArpEntryInput input){
+    public ListenableFuture<RpcResult<GetArpEntryOutput>> getArpEntry(GetArpEntryInput input){
 
         //check null input parameters
         if(input == null){
@@ -963,7 +964,7 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
 
     //md-sal
     @Override
-    public Future<RpcResult<SetArpEntryOutput>> setArpEntry(SetArpEntryInput input){
+    public ListenableFuture<RpcResult<SetArpEntryOutput>> setArpEntry(SetArpEntryInput input){
         //check null input parameters
         if(input == null){
             logger.debug("ERROR: setArpEntry(): given null input");
@@ -1002,7 +1003,7 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
 
     //md-sal
     @Override
-    public Future<RpcResult<DeleteArpEntryOutput>> deleteArpEntry(DeleteArpEntryInput input){
+    public ListenableFuture<RpcResult<DeleteArpEntryOutput>> deleteArpEntry(DeleteArpEntryInput input){
 
         //check null input parameters
         if(input == null){
@@ -1038,7 +1039,7 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
 
     //md-sal
     @Override
-    public Future<RpcResult<GetArpTableOutput>> getArpTable(GetArpTableInput input) {
+    public ListenableFuture<RpcResult<GetArpTableOutput>> getArpTable(GetArpTableInput input) {
         /*
         * Fix Bug 5438: Result of calling rpc get-arp-table defined in misc-config.yang is false.
         * */
@@ -1294,7 +1295,7 @@ public class MiscConfigServiceImpl implements /*IConfigService,*/MiscConfigServi
         //execute getStpPortRoot(), and check return null parameters?
         Long rootNodeId = null;
         try {
-            Future<RpcResult<GetStpPortRootOutput>> ret = this.getStpPortRoot(ib.build());
+            ListenableFuture<RpcResult<GetStpPortRootOutput>> ret = this.getStpPortRoot(ib.build());
             if(ret == null){
                 ci.println();
                 ci.println("Fail to get STP root of node " + nodeId + " port  " + port + " (null return)");
