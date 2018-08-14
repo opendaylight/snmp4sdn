@@ -178,11 +178,11 @@ public class TopologyServices implements ITopologyServiceShimListener,
             ;//logger.debug("ERROR: edgeUpdate(): IPluginOutTopologyService is null!");
 
         //to md-sal
-        logger.trace("report to md-sal...");
-        this.edgeUpdateToMdSal(topoedgeupdateList);
+        //logger.trace("report to md-sal...");
+        //this.edgeUpdateToMdSal(topoedgeupdateList);
     }
 
-    public void edgeUpdateToMdSal(List<TopoEdgeUpdate> topoedgeupdateList) {
+    /*public void edgeUpdateToMdSal(List<TopoEdgeUpdate> topoedgeupdateList) {
         if (this.notifService == null) {
             logger.debug("ERROR: edgeUpdateToMdSal(): NotificationProviderService is null!");
             return;
@@ -297,7 +297,7 @@ public class TopologyServices implements ITopologyServiceShimListener,
         ldb.setSource(remoteNodeConnectorRef);
         ldb.setDestination(localNodeConnectorRef);
         return((ldb.build()));
-    }
+    }*/
 
     @Override
     public void sollicitRefresh() {

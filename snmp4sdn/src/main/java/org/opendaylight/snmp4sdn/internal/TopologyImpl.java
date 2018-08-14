@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.sal.core.Edge;
 import org.opendaylight.controller.sal.core.Node;
 import org.opendaylight.controller.sal.core.NodeConnector;
@@ -23,18 +24,23 @@ import org.opendaylight.snmp4sdn.IInventoryProvider;
 import org.opendaylight.snmp4sdn.ITopologyServiceShim;
 import org.opendaylight.snmp4sdn.internal.util.CommandProvider;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.DeviceType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.GetEdgeListInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.GetEdgeListOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.GetEdgeListOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.GetNodeConnectorListInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.GetNodeConnectorListOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.GetNodeConnectorListOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.GetNodeListInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.GetNodeListOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.GetNodeListOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.RediscoverInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.RediscoverOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.RediscoverOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.SetDiscoveryIntervalInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.SetDiscoveryIntervalOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.SetDiscoveryIntervalOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.TopologyService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.GetEdgeListInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.edge.list.output.EdgeListEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.edge.list.output.EdgeListEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.node.connector.list.output.NodeConnectorListEntry;
@@ -118,29 +124,29 @@ public class TopologyImpl implements TopologyService, CommandProvider{
         }
     }
 
-    private Future<RpcResult<GetEdgeListOutput>> createGetEdgeListFailRpcResult(){
+    private ListenableFuture<RpcResult<GetEdgeListOutput>> createGetEdgeListFailRpcResult(){
         return RpcResultBuilder.<GetEdgeListOutput>failed().buildFuture();
     }
 
-    public Future<RpcResult<GetNodeListOutput>> createGetNodeListFailRpcResult(){
+    public ListenableFuture<RpcResult<GetNodeListOutput>> createGetNodeListFailRpcResult(){
         return RpcResultBuilder.<GetNodeListOutput>failed().buildFuture();
     }
 
-    public Future<RpcResult<GetNodeConnectorListOutput>> createGetNodeConnectorListFailRpcResult(){
+    public ListenableFuture<RpcResult<GetNodeConnectorListOutput>> createGetNodeConnectorListFailRpcResult(){
         return RpcResultBuilder.<GetNodeConnectorListOutput>failed().buildFuture();
     }
 
-    private Future<RpcResult<RediscoverOutput>> createRediscoverRpcFailResult(){
+    private ListenableFuture<RpcResult<RediscoverOutput>> createRediscoverRpcFailResult(){
         return RpcResultBuilder.<RediscoverOutput>failed().buildFuture();
     }
 
-    private Future<RpcResult<SetDiscoveryIntervalOutput>> createSetDiscoveryIntervalRpcFailResult(){
+    private ListenableFuture<RpcResult<SetDiscoveryIntervalOutput>> createSetDiscoveryIntervalRpcFailResult(){
         return RpcResultBuilder.<SetDiscoveryIntervalOutput>failed().buildFuture();
     }
 
     //md-sal
     @Override
-    public Future<RpcResult<GetEdgeListOutput>> getEdgeList(){
+    public ListenableFuture<RpcResult<GetEdgeListOutput>> getEdgeList(GetEdgeListInput input){
         if(topo == null){
             logger.debug("ERROR: getEdgeList(): ITopologyServiceShim is null, can't proceed");
             return createGetEdgeListFailRpcResult();
@@ -311,7 +317,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
 
     //md-sal
     @Override
-    public Future<RpcResult<GetNodeConnectorListOutput>> getNodeConnectorList(){
+    public ListenableFuture<RpcResult<GetNodeConnectorListOutput>> getNodeConnectorList(GetNodeConnectorListInput input){
         if(inv == null){
             logger.debug("ERROR: getNodeConnectorList(): IInventoryProvider is null, can't proceed");
             return createGetNodeConnectorListFailRpcResult();
@@ -423,7 +429,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
 
     //md-sal
     @Override
-    public Future<RpcResult<GetNodeListOutput>> getNodeList(){
+    public ListenableFuture<RpcResult<GetNodeListOutput>> getNodeList(GetNodeListInput input){
         if(inv == null){
             logger.debug("ERROR: getNodeList(): IInventoryProvider is null, can't proceed");
             return createGetNodeListFailRpcResult();
@@ -500,7 +506,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
     }
 
     @Override//md-sal
-    public Future<RpcResult<RediscoverOutput>> rediscover(){
+    public ListenableFuture<RpcResult<RediscoverOutput>> rediscover(RediscoverInput input){
 
         logger.info("SNMP4SDN: Receive the Topology Discovery request!");
 
@@ -516,7 +522,7 @@ public class TopologyImpl implements TopologyService, CommandProvider{
     }
 
     @Override//md-sal
-    public Future<RpcResult<SetDiscoveryIntervalOutput>> setDiscoveryInterval(SetDiscoveryIntervalInput input){
+    public ListenableFuture<RpcResult<SetDiscoveryIntervalOutput>> setDiscoveryInterval(SetDiscoveryIntervalInput input){
 
         //check null input parameters
         if(input == null){
