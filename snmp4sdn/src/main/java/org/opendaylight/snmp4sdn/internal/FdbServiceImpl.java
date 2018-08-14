@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.snmp4sdn.FDBEntry;
 import org.opendaylight.snmp4sdn.core.IController;
@@ -99,7 +100,7 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
 
     //md-sal
     @Override
-    public Future<RpcResult<DelFdbEntryOutput>> delFdbEntry(DelFdbEntryInput input){
+    public ListenableFuture<RpcResult<DelFdbEntryOutput>> delFdbEntry(DelFdbEntryInput input){
         //check null input parameters
         if(input == null){
             logger.debug("ERROR: delFdbEntry(): given null input");
@@ -158,7 +159,7 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
 
     //md-sal
     @Override
-    public Future<RpcResult<GetFdbEntryOutput>> getFdbEntry(GetFdbEntryInput input){
+    public ListenableFuture<RpcResult<GetFdbEntryOutput>> getFdbEntry(GetFdbEntryInput input){
 
         //check null input parameters
         if(input == null){
@@ -241,7 +242,7 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
 
     //md-sal
     @Override
-    public Future<RpcResult<GetFdbTableOutput>> getFdbTable(GetFdbTableInput input){
+    public ListenableFuture<RpcResult<GetFdbTableOutput>> getFdbTable(GetFdbTableInput input){
 
         //check null input parameters
         if(input == null){
@@ -323,7 +324,7 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
     //input: SetFdbEntryInput, which including nodeId, vlanId, destMac, port
     //TODO: Currently the fdb entry's 'type' field is ignored, since it must be 'static'. Should we check it? (if need to check, it should be null or?)
     @Override
-    public Future<RpcResult<SetFdbEntryOutput>> setFdbEntry(SetFdbEntryInput input){
+    public ListenableFuture<RpcResult<SetFdbEntryOutput>> setFdbEntry(SetFdbEntryInput input){
         //check null input parameters
         if(input == null){
             logger.debug("ERROR: setFdbEntry(): given null input");
@@ -498,7 +499,7 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
         FdbEntry entry;
         String destMacAddr = HexString.toHexString(destMac).toUpperCase();
         try {
-            Future<RpcResult<GetFdbEntryOutput>> ret = this.getFdbEntry(ib.build());
+            ListenableFuture<RpcResult<GetFdbEntryOutput>> ret = this.getFdbEntry(ib.build());
             if(ret == null){
                 ci.println();
                 ci.println("Fail to get FDB entry on node " + nodeId + " for VLAN ID " + vlanId + " dest MAC " + destMacAddr + " (null return)");
@@ -620,7 +621,7 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
         //execute getFdbEntry(), and check return null parameters?
         RpcResult<DelFdbEntryOutput> rpcResult;
         try {
-            Future<RpcResult<DelFdbEntryOutput>> ret = this.delFdbEntry(ib.build());
+            ListenableFuture<RpcResult<DelFdbEntryOutput>> ret = this.delFdbEntry(ib.build());
             if(ret == null){
                 ci.println();
                 ci.println("Fail to delete FDB Table on node " + nodeId + " (null return)");
@@ -742,7 +743,7 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
         //execute getFdbEntry(), and check return null parameters?
         RpcResult<SetFdbEntryOutput> rpcResult;
         try {
-            Future<RpcResult<SetFdbEntryOutput>> ret = this.setFdbEntry(ib.build());
+            ListenableFuture<RpcResult<SetFdbEntryOutput>> ret = this.setFdbEntry(ib.build());
             if(ret == null){
                 ci.println();
                 ci.println("Fail to set FDB Table on node " + nodeId + " (null return)");
@@ -830,7 +831,7 @@ public class FdbServiceImpl implements FdbService, CommandProvider{
         //execute getFdbEntry(), and check return null parameters?
         List<FdbTableEntry> fdbTable;
         try {
-            Future<RpcResult<GetFdbTableOutput>> ret = this.getFdbTable(ib.build());
+            ListenableFuture<RpcResult<GetFdbTableOutput>> ret = this.getFdbTable(ib.build());
             if(ret == null){
                 ci.println();
                 ci.println("Fail to get FDB Table on node " + nodeId + " (null return)");

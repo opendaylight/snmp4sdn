@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.sal.utils.Status;
 import org.opendaylight.snmp4sdn.core.IController;
 import org.opendaylight.snmp4sdn.core.internal.Controller;
@@ -100,25 +101,25 @@ public class AclServiceImpl implements AclService, CommandProvider{
     /*
     *The following many createXxxxFilRpcResult() are for easy of return fail
     */
-    private Future<RpcResult<SetAclRuleOutput>> createSetAclRuleFailRpcResult(){
+    private ListenableFuture<RpcResult<SetAclRuleOutput>> createSetAclRuleFailRpcResult(){
         return RpcResultBuilder.<SetAclRuleOutput>failed().buildFuture();
     }
-    private Future<RpcResult<CreateAclProfileOutput>> createCreateAclProfileFailRpcResult(){
+    private ListenableFuture<RpcResult<CreateAclProfileOutput>> createCreateAclProfileFailRpcResult(){
         return RpcResultBuilder.<CreateAclProfileOutput>failed().buildFuture();
     }
-    private Future<RpcResult<DelAclProfileOutput>> createDelAclProfileFailRpcResult(){
+    private ListenableFuture<RpcResult<DelAclProfileOutput>> createDelAclProfileFailRpcResult(){
         return RpcResultBuilder.<DelAclProfileOutput>failed().buildFuture();
     }
-    private Future<RpcResult<DelAclRuleOutput>> createDelAclRuleFailRpcResult(){
+    private ListenableFuture<RpcResult<DelAclRuleOutput>> createDelAclRuleFailRpcResult(){
         return RpcResultBuilder.<DelAclRuleOutput>failed().buildFuture();
     }
-    private Future<RpcResult<ClearAclTableOutput>> createClearAclTableFailRpcResult(){
+    private ListenableFuture<RpcResult<ClearAclTableOutput>> createClearAclTableFailRpcResult(){
         return RpcResultBuilder.<ClearAclTableOutput>failed().buildFuture();
     }
 
     //md-sal
     @Override//TODO: rename as setAclRule()
-    public Future<RpcResult<SetAclRuleOutput>> setAclRule(SetAclRuleInput input){
+    public ListenableFuture<RpcResult<SetAclRuleOutput>> setAclRule(SetAclRuleInput input){
 
         //check null parameters
         if(input == null){
@@ -234,7 +235,7 @@ public class AclServiceImpl implements AclService, CommandProvider{
 
     //md-sal
     @Override
-    public Future<RpcResult<CreateAclProfileOutput>> createAclProfile(CreateAclProfileInput input){
+    public ListenableFuture<RpcResult<CreateAclProfileOutput>> createAclProfile(CreateAclProfileInput input){
         //check null parameters
         if(input == null){
             logger.debug("ERROR: createAclProfile(): given null input");
@@ -324,7 +325,7 @@ public class AclServiceImpl implements AclService, CommandProvider{
 
     //md-sal
     @Override
-    public Future<RpcResult<DelAclProfileOutput>> delAclProfile(DelAclProfileInput input){
+    public ListenableFuture<RpcResult<DelAclProfileOutput>> delAclProfile(DelAclProfileInput input){
 
         //check null parameters
         if(input == null){
@@ -385,7 +386,7 @@ public class AclServiceImpl implements AclService, CommandProvider{
 
     //md-sal
     @Override
-    public Future<RpcResult<DelAclRuleOutput>> delAclRule(DelAclRuleInput input){
+    public ListenableFuture<RpcResult<DelAclRuleOutput>> delAclRule(DelAclRuleInput input){
 
         //check null parameters
         if(input == null){
@@ -456,7 +457,7 @@ public class AclServiceImpl implements AclService, CommandProvider{
 
     //md-sal
     @Override
-    public Future<RpcResult<ClearAclTableOutput>> clearAclTable(ClearAclTableInput input){
+    public ListenableFuture<RpcResult<ClearAclTableOutput>> clearAclTable(ClearAclTableInput input){
         //check null parameters
         if(input == null){
             logger.debug("ERROR: clearAclTable(): given null input");
@@ -500,7 +501,7 @@ public class AclServiceImpl implements AclService, CommandProvider{
     //Deprecated
     //md-sal
     //@Override
-    /*public Future<RpcResult<GetAclIndexListOutput>> getAclIndexList(GetAclIndexListInput input){
+    /*public ListenableFuture<RpcResult<GetAclIndexListOutput>> getAclIndexList(GetAclIndexListInput input){
         //TODO: so far only return profileId and ruleId, profileName and ruleName are null in the return object
 
         //check null parameters
@@ -827,7 +828,7 @@ public class AclServiceImpl implements AclService, CommandProvider{
         //execute setAclRule(), and check return null parameters?
         RpcResult<SetAclRuleOutput> rpcResult;
         try {
-            Future<RpcResult<SetAclRuleOutput>> ret = this.setAclRule(ib.build());
+            ListenableFuture<RpcResult<SetAclRuleOutput>> ret = this.setAclRule(ib.build());
             if(ret == null){
                 ci.println();
                 ci.println("Fail to set ACL Rule on node " + nodeId + " (null return)");
@@ -966,7 +967,7 @@ public class AclServiceImpl implements AclService, CommandProvider{
         //execute delAclRule(), and check return null parameters?
         RpcResult<DelAclRuleOutput> rpcResult;
         try {
-            Future<RpcResult<DelAclRuleOutput>> ret = this.delAclRule(ib.build());
+            ListenableFuture<RpcResult<DelAclRuleOutput>> ret = this.delAclRule(ib.build());
             if(ret == null){
                 ci.println();
                 ci.println("Fail to delete ACL Rule on node " + nodeId + " (null return)");
@@ -1184,7 +1185,7 @@ public class AclServiceImpl implements AclService, CommandProvider{
         //execute addAclProfile(), and check return null parameters?
         RpcResult<CreateAclProfileOutput> rpcResult;
         try {
-            Future<RpcResult<CreateAclProfileOutput>> ret = this.createAclProfile(ib.build());
+            ListenableFuture<RpcResult<CreateAclProfileOutput>> ret = this.createAclProfile(ib.build());
             if(ret == null){
                 ci.println();
                 ci.println("Fail to create ACL Profile on node " + nodeId + " (null return)");
@@ -1337,7 +1338,7 @@ public class AclServiceImpl implements AclService, CommandProvider{
         //execute delAclProfile(), and check return null parameters?
         RpcResult<DelAclProfileOutput> rpcResult;
         try {
-            Future<RpcResult<DelAclProfileOutput>> ret = this.delAclProfile(ib.build());
+            ListenableFuture<RpcResult<DelAclProfileOutput>> ret = this.delAclProfile(ib.build());
             if(ret == null){
                 ci.println();
                 ci.println("Fail to set ACL Profile on node " + nodeId + " (null return)");
@@ -1428,7 +1429,7 @@ public class AclServiceImpl implements AclService, CommandProvider{
         //execute clearAclTable(), and check return null parameters?
         RpcResult<ClearAclTableOutput> rpcResult;
         try {
-            Future<RpcResult<ClearAclTableOutput>> ret = this.clearAclTable(ib.build());
+            ListenableFuture<RpcResult<ClearAclTableOutput>> ret = this.clearAclTable(ib.build());
             if(ret == null){
                 ci.println();
                 ci.println("Fail to set ACL Profile on node " + nodeId + " (null return)");
@@ -1519,7 +1520,7 @@ public class AclServiceImpl implements AclService, CommandProvider{
         //execute delAclProfile(), and check return null parameters?
         RpcResult<GetAclIndexListOutput> rpcResult;
         try {
-            Future<RpcResult<GetAclIndexListOutput>> ret = this.getAclIndexList(ib.build());
+            ListenableFuture<RpcResult<GetAclIndexListOutput>> ret = this.getAclIndexList(ib.build());
             if(ret == null){
                 ci.println();
                 ci.println("Fail to get ACL Index List on node " + nodeId + " (null return)");

@@ -61,7 +61,6 @@
               org.opendaylight.controller.sal.match,
               org.opendaylight.controller.sal.utils,
               <!--org.opendaylight.controller.topologymanager,--><!--remove this because nsf.managers feature can't be installed successfully--><!--need this due to snmp4sdn's waitOtherNecessaryBundle()-->
-              <!--org.opendaylight.controller.sal.vlan,//ad-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.types.rev150126,<!--md-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev150515,<!--md-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.vlan.rev150515.get.vlan.table.output,<!--md-sal-->
@@ -156,6 +155,11 @@
       <optional>true</optional><!--must need this, otherwise seems this dependency has no effect in this pom-->
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>yang-common</artifactId>
+      <version>${yang.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
       <artifactId>model-inventory</artifactId>
       <version>${mdsal.version}</version>
@@ -173,7 +177,7 @@
    <dependency>
      <groupId>org.opendaylight.mdsal</groupId>
      <artifactId>yang-binding</artifactId>
-     <version>0.13.0-SNAPSHOT</version><!--yiling-->
+     <version>${mdsal.model.version}</version><!--yiling-->
    </dependency>
     <dependency>
       <groupId>org.opendaylight.openflowplugin.model</groupId>
