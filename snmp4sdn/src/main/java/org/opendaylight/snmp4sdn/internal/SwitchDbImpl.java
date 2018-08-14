@@ -9,6 +9,7 @@
 package org.opendaylight.snmp4sdn.internal;
 
 import java.util.concurrent.Future;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.snmp4sdn.core.IController;
 
 //TODO: com.google.common import error in karaf
@@ -21,11 +22,13 @@ import org.opendaylight.snmp4sdn.internal.util.CommandProvider;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.AddSwitchEntryInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.AddSwitchEntryOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.AddSwitchEntryOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.ClearDbInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.ClearDbOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.ClearDbOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.DeleteSwitchEntryInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.DeleteSwitchEntryOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.DeleteSwitchEntryOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.ReloadDbInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.ReloadDbOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.ReloadDbOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.switchdb.rev150901.SwitchDbService;
@@ -76,12 +79,12 @@ public class SwitchDbImpl implements SwitchDbService, CommandProvider{
         }
     }
 
-    private Future<RpcResult<ReloadDbOutput>> createReloadDbRpcResult(){
+    private ListenableFuture<RpcResult<ReloadDbOutput>> createReloadDbRpcResult(){
         return RpcResultBuilder.<ReloadDbOutput>failed().buildFuture();
     }
 
     @Override//md-sal
-    public Future<RpcResult<ReloadDbOutput>> reloadDb(){
+    public ListenableFuture<RpcResult<ReloadDbOutput>> reloadDb(ReloadDbInput input){
         boolean isSuccess = cmethUtil.readDB();
         if(isSuccess){
             ReloadDbOutputBuilder ob = new ReloadDbOutputBuilder().setReloadDbResult(Result.SUCCESS);
@@ -94,25 +97,25 @@ public class SwitchDbImpl implements SwitchDbService, CommandProvider{
     }
 
     @Override//md-sal
-    public Future<RpcResult<AddSwitchEntryOutput>> addSwitchEntry(AddSwitchEntryInput input){
+    public ListenableFuture<RpcResult<AddSwitchEntryOutput>> addSwitchEntry(AddSwitchEntryInput input){
             AddSwitchEntryOutputBuilder ob = new AddSwitchEntryOutputBuilder().setAddSwitchEntryResult(Result.SUCCESS);
             return RpcResultBuilder.<AddSwitchEntryOutput>success(ob.build()).buildFuture();
     }
 
     @Override//md-sal
-    public Future<RpcResult<DeleteSwitchEntryOutput>> deleteSwitchEntry(DeleteSwitchEntryInput input){
+    public ListenableFuture<RpcResult<DeleteSwitchEntryOutput>> deleteSwitchEntry(DeleteSwitchEntryInput input){
             DeleteSwitchEntryOutputBuilder ob = new DeleteSwitchEntryOutputBuilder().setDeleteSwitchEntryResult(Result.SUCCESS);
             return RpcResultBuilder.<DeleteSwitchEntryOutput>success(ob.build()).buildFuture();
     }
 
     @Override//md-sal
-    public Future<RpcResult<ClearDbOutput>> clearDb(){
+    public ListenableFuture<RpcResult<ClearDbOutput>> clearDb(ClearDbInput input){
             ClearDbOutputBuilder ob = new ClearDbOutputBuilder().setClearDbResult(Result.SUCCESS);
             return RpcResultBuilder.<ClearDbOutput>success(ob.build()).buildFuture();
     }
 
     @Override//md-sal
-    public Future<RpcResult<UpdateDbOutput>> updateDb(UpdateDbInput input){
+    public ListenableFuture<RpcResult<UpdateDbOutput>> updateDb(UpdateDbInput input){
             UpdateDbOutputBuilder ob = new UpdateDbOutputBuilder().setUpdateDbResult(Result.SUCCESS);
             return RpcResultBuilder.<UpdateDbOutput>success(ob.build()).buildFuture();
     }
