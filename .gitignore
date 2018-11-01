@@ -13,3 +13,7 @@ target
 target/
 target-ide/
 .checkstyle
+
+# Sphinx documentation
+.tox/
+docs/_build/
