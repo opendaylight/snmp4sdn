@@ -4,13 +4,13 @@
     <parent>
       <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>binding-parent</artifactId>
-      <version>0.13.0-SNAPSHOT</version>
+      <version>3.0.6</version>
       <relativePath/>
     </parent>
 
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>md-model</artifactId>
-    <version>0.8.0-SNAPSHOT</version>
+    <version>0.9.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <name>MD-SAL models</name>
@@ -39,4 +39,22 @@
         <tag>HEAD</tag>
         <url>https://git.opendaylight.org/gerrit/gitweb?p=snmp4sdn.git;a=summary</url>
     </scm>
+
+    <properties>
+      <mdsal.model.version>1.0.6</mdsal.model.version>
+    </properties>
+
+    <dependencies>
+      <dependency>
+        <groupId>org.opendaylight.mdsal</groupId>
+        <artifactId>yang-binding</artifactId>
+        <version>${mdsal.model.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.mdsal</groupId>
+        <artifactId>mdsal-binding-generator-api</artifactId>
+        <version>${mdsal.model.version}</version>
+      </dependency>
+    </dependencies>
+
 </project>
