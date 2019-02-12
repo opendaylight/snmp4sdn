@@ -123,6 +123,11 @@
       <artifactId>org.osgi.core</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <version>5.0.0</version>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal</artifactId>
       <version>0.7.0</version><!--0.7.0-withVLAN--><!--//prg. custom ad-sal-->
@@ -202,6 +207,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
+      <version>3.8</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
