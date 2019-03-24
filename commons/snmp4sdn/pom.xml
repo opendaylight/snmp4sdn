@@ -7,12 +7,12 @@
   </prerequisites>
   <groupId>org.opendaylight.snmp4sdn</groupId>
   <artifactId>commons.snmp4sdn</artifactId>
-  <version>0.9.0-SNAPSHOT</version>
+  <version>0.9.0</version>
   <packaging>pom</packaging>
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.parent</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
+    <version>0.9.0</version>
     <relativePath>../parent</relativePath>
   </parent>
 
@@ -55,10 +55,10 @@
 
     <ietf-inet-types.version>2010.09.24.3</ietf-inet-types.version>
     <ietf-yang-types.version>2013.07.15.13.2</ietf-yang-types.version>
-    <sal.version>0.15.0-SNAPSHOT</sal.version>
-    <mdsal.version>1.9.0-SNAPSHOT</mdsal.version><!--1.8.2-SNAPSHOT-->
-    <nsf.version>0.11.0-SNAPSHOT</nsf.version>
-    <mdsal.model.version>1.0.6</mdsal.model.version><!---0.13.2-SNAPSHOT-->
+    <sal.version>0.15.0</sal.version>
+    <mdsal.version>1.9.0</mdsal.version><!--1.8.2-->
+    <nsf.version>0.11.0</nsf.version>
+    <mdsal.model.version>1.0.6</mdsal.model.version><!---0.13.2-->
     <yang.version>2.1.8</yang.version>
   </properties>
 
@@ -312,7 +312,7 @@
             <dependency>
               <groupId>org.opendaylight.snmp4sdn</groupId>
               <artifactId>commons.checkstyle</artifactId>
-              <version>0.8.0-SNAPSHOT</version>//TODO: version need to up to date
+              <version>0.8.0</version>//TODO: version need to up to date
             </dependency>
           </dependencies>
         <executions>
