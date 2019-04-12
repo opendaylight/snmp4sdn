@@ -20,7 +20,7 @@
  
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>features-aggregator</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
+    <version>0.9.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ODL :: snmp4sdn :: ${project.artifactId}</name>

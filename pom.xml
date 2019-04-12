@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.parent</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
+    <version>0.9.1-SNAPSHOT</version>
     <relativePath>commons/parent</relativePath>
   </parent>
 
   <artifactId>snmp4sdn_distribution</artifactId>
-  <version>0.9.0-SNAPSHOT</version>
+  <version>0.9.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>snmp4sdn project</name>

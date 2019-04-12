@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.snmp4sdn</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
+    <version>0.9.1-SNAPSHOT</version>
     <relativePath>../commons/snmp4sdn</relativePath>
   </parent>
 
   <artifactId>plugin-shell</artifactId>
-  <version>0.9.0-SNAPSHOT</version>
+  <version>0.9.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>snmp4sdn plugin shell</name>
@@ -57,7 +57,7 @@
     <dependency><!--add by s4s-->
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>snmp4sdn</artifactId>
-      <version>0.9.0-SNAPSHOT</version>
+      <version>0.9.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
 

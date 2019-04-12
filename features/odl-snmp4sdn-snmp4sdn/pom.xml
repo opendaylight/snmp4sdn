@@ -21,7 +21,7 @@
 
   <groupId>org.opendaylight.snmp4sdn</groupId>
   <artifactId>odl-snmp4sdn-snmp4sdn</artifactId>
-  <version>0.9.0-SNAPSHOT</version>
+  <version>0.9.1-SNAPSHOT</version>
   <packaging>feature</packaging>
 
   <name>OpenDaylight :: SNMP4SDN :: SNMP4SDN Plugin</name>

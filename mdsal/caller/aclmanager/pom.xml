@@ -8,12 +8,12 @@
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.snmp4sdn</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
+    <version>0.9.1-SNAPSHOT</version>
     <relativePath>../../../commons/snmp4sdn</relativePath>
   </parent>
   <artifactId>aclmanager</artifactId>
   <packaging>bundle</packaging>
-  <version>0.9.0-SNAPSHOT</version>
+  <version>0.9.1-SNAPSHOT</version>
 
   <name>acl manager</name>
   <description>acl manager, as a consumer of snmp4sdn, for demo snmp4sdn acl service</description>
