@@ -10,7 +10,7 @@
 
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>md-model</artifactId>
-    <version>0.8.0-SNAPSHOT</version>
+    <version>0.9.1-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <name>MD-SAL models</name>
