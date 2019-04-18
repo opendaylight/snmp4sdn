@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.opendaylight.snmp4sdn</groupId>
     <artifactId>commons.snmp4sdn</artifactId>
-    <version>0.8.0-SNAPSHOT</version>
+    <version>0.9.1-SNAPSHOT</version>
     <relativePath>../commons/snmp4sdn</relativePath>
   </parent>
 
   <artifactId>snmp4sdn</artifactId>
-  <version>0.8.0-SNAPSHOT</version>
+  <version>0.9.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>snmp4sdn plugin</name>
@@ -74,10 +74,10 @@
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.edge.list.output,<!--md-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.node.list.output,<!--md-sal-->
               org.opendaylight.yang.gen.v1.urn.opendaylight.snmp4sdn.md.topology.rev150901.get.node.connector.list.output,<!--md-sal-->
-              org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819,<!--md-sal-->
-              org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node,<!--md-sal-->
-              org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes,<!--md-sal-->
-              org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819,<!--md-sal-->
+              <!--org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819,
+              org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.node,
+              org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes,
+              org.opendaylight.yang.gen.v1.urn.opendaylight.flow.topology.discovery.rev130819,--><!--currently snmp4sdn disable topology change reporting via mdsal, so we disable these-->
               <!--com.google.common.collect,//md-sal-->
               org.opendaylight.yangtools.yang.common,<!--md-sal copy from ping example-->
               org.opendaylight.yangtools.yang.binding,<!--md-sal copy from ping example-->
@@ -135,7 +135,7 @@
     <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>org.snmpj</artifactId>
-      <version>1.11.0-SNAPSHOT</version>
+      <version>1.11.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.github.cverges</groupId>
@@ -179,16 +179,16 @@
      <artifactId>yang-binding</artifactId>
      <version>${mdsal.model.version}</version><!--yiling-->
    </dependency>
-    <dependency>
+    <!--<dependency>
       <groupId>org.opendaylight.openflowplugin.model</groupId>
       <artifactId>model-flow-service</artifactId>
-      <version>0.7.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
+      <version>0.7.2-SNAPSHOT</version>
+    </dependency>--><!--openflowplugin is not at all used in snmp4sdn-->
+    <!--<dependency>
       <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>ietf-topology</artifactId>
-      <version>2013.10.21.13.0-SNAPSHOT</version>
-    </dependency>
+      <version>2013.10.21.13.3-SNAPSHOT</version>
+    </dependency>--><!--currently snmp4sdn disable topology change reporting via mdsal, so we disable this dep-->
     <dependency>
       <groupId>org.opendaylight.snmp4sdn</groupId>
       <artifactId>md-model</artifactId>
@@ -202,6 +202,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
+      <version>3.8</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>

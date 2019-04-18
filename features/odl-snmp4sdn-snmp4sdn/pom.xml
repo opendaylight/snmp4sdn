@@ -15,51 +15,36 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>single-feature-parent</artifactId>
-    <version>3.1.0</version>
+    <version>4.0.9</version>
     <relativePath/>
   </parent>
 
   <groupId>org.opendaylight.snmp4sdn</groupId>
   <artifactId>odl-snmp4sdn-snmp4sdn</artifactId>
-  <version>0.8.0-SNAPSHOT</version>
+  <version>0.9.1-SNAPSHOT</version>
   <packaging>feature</packaging>
 
   <name>OpenDaylight :: SNMP4SDN :: SNMP4SDN Plugin</name>
 
   <properties>
-    <restconf.version>1.8.0-SNAPSHOT</restconf.version>
-    <openflowplugin.version>0.7.0-SNAPSHOT</openflowplugin.version>
-    <yang.version>2.0.3</yang.version>
-    <mdsal.version>1.8.0-SNAPSHOT</mdsal.version>
-    <mdsal.model.version>0.14.0-SNAPSHOT</mdsal.model.version>
+    <restconf.version>1.9.1-SNAPSHOT</restconf.version><!--1.8.2-SNAPSHOT-->
+    <openflowplugin.version>0.7.2-SNAPSHOT</openflowplugin.version>
+    <mdsal.version>1.9.1-SNAPSHOT</mdsal.version><!--1.8.2-SNAPSHOT-->
+    <mdsal.model.version>1.0.6</mdsal.model.version><!--0.13.2-SNAPSHOT-->
+    <yang.version>2.1.8</yang.version>
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>org.opendaylight.controller.model</groupId>
-      <artifactId>model-inventory</artifactId>
-      <version>1.8.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-binding-api</artifactId>
-      <version>1.8.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-common-util</artifactId>
-      <version>1.8.0-SNAPSHOT</version>
-    </dependency>
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>yang-binding</artifactId>
       <version>${mdsal.model.version}</version>
     </dependency>
-    <dependency>
+    <!--<dependency>
         <groupId>org.opendaylight.mdsal.model</groupId>
         <artifactId>ietf-topology</artifactId>
-        <version>2013.10.21.13.0-SNAPSHOT</version>
-    </dependency>
+        <version>2013.10.21.13.2-SNAPSHOT</version>
+    </dependency>--><!--currently snmp4sdn disable topology change reporting via mdsal, so we disable this dep-->
 
     <dependency>
       <groupId>org.opendaylight.netconf</groupId>
@@ -77,13 +62,13 @@
       <classifier>features</classifier>
     </dependency>
 
-    <dependency>
+    <!--<dependency>
       <groupId>org.opendaylight.openflowplugin</groupId>
       <artifactId>odl-openflowplugin-nsf-model</artifactId>
       <version>${openflowplugin.version}</version>
       <type>xml</type>
       <classifier>features</classifier>
-    </dependency>
+    </dependency>--><!--currently snmp4sdn disable topology change reporting via mdsal, so we disable this dep-->
 
     <dependency>
       <groupId>org.dom4j</groupId>
@@ -114,7 +99,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.4</version>
+      <version>3.8</version><!-- in ancestor pom, odlparent v4.0.9, has been given the value 3.8.1 -->
     </dependency>
 
     <dependency>
@@ -149,11 +134,6 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-common-util</artifactId>
       <version>${mdsal.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
     </dependency>
 
     <dependency>
