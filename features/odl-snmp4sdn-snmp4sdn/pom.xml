@@ -27,9 +27,9 @@
   <name>OpenDaylight :: SNMP4SDN :: SNMP4SDN Plugin</name>
 
   <properties>
-    <restconf.version>1.9.0-SNAPSHOT</restconf.version><!--1.8.2-SNAPSHOT-->
+    <restconf.version>1.9.1-SNAPSHOT</restconf.version><!--1.8.2-SNAPSHOT-->
     <openflowplugin.version>0.7.2-SNAPSHOT</openflowplugin.version>
-    <mdsal.version>1.9.0-SNAPSHOT</mdsal.version><!--1.8.2-SNAPSHOT-->
+    <mdsal.version>1.9.1-SNAPSHOT</mdsal.version><!--1.8.2-SNAPSHOT-->
     <mdsal.model.version>1.0.6</mdsal.model.version><!--0.13.2-SNAPSHOT-->
     <yang.version>2.1.8</yang.version>
   </properties>
