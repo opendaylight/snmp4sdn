@@ -71,7 +71,7 @@
           <dependency>
             <groupId>org.opendaylight.snmp4sdn</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>0.9.0-SNAPSHOT</version>
+            <version>0.9.1-SNAPSHOT</version>
           </dependency>
          </dependencies>
         <configuration>
